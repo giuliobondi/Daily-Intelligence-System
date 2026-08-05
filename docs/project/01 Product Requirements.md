@@ -923,23 +923,181 @@ It should not optimise for the maximum number of articles.
 
 ## Initial Report Structure
 
-```text
-Report title and date
+    Report title and date
 
-Run summary
-- monitored period
-- generation time
-- source success
-- items collected
-- items displayed
-- warnings
+    Run summary
+    - monitored period
+    - generation time
+    - source success
+    - items collected
+    - items displayed
+    - warnings
 
-Domain 1
-- ranked story entries
+    Domain 1
+    - ranked story entries
 
-Domain 2
-- ranked story entries
+    Domain 2
+    - ranked story entries
 
-...
+    ...
 
-Source or workflow warnings
+    Source or workflow warnings
+
+The final formatting will be refined after sample reports are generated.
+
+---
+
+# MVP Acceptance Criteria
+
+The MVP is accepted only when the following end-to-end scenario works.
+
+## Scenario
+
+Given:
+
+- a configured set of valid public feeds;
+- at least one feed containing new eligible items;
+- at least one pair of duplicate or near-duplicate items;
+- at least one item matching a monitored domain;
+- at least one failed or malformed source fixture;
+
+When the pipeline runs:
+
+- valid sources are collected;
+- failed sources are recorded;
+- records are normalised;
+- malformed records are handled;
+- obvious duplicates are reduced;
+- items are classified;
+- relevance scores are calculated;
+- a Markdown report is generated;
+- structured records are persisted;
+- outputs are stored;
+- the run status is visible.
+
+Then:
+
+- the report is readable;
+- source links work;
+- failed sources are visible;
+- no paid AI or API service was called;
+- no daily manual step was required;
+- the same unchanged inputs produce consistent output;
+- the report remains within configured length limits.
+
+---
+
+# MVP Exclusions
+
+The MVP will not require:
+
+- AI-generated summaries;
+- ChatGPT integration;
+- private-repository connectors;
+- email ingestion;
+- newsletter parsing;
+- full-article extraction;
+- browser automation;
+- a web application;
+- user accounts;
+- personalisation for multiple users;
+- push notifications outside standard GitHub mechanisms;
+- semantic embeddings;
+- vector search;
+- autonomous agents;
+- machine-learning classification;
+- investment or political recommendations.
+
+---
+
+# Quality Evaluation After Launch
+
+After approximately two weeks of stable use, review:
+
+## Usage
+
+- Was the report opened consistently?
+- Was it scanned within the intended time?
+- Were article links followed selectively?
+
+## Coverage
+
+- Were major relevant developments missed?
+- Were any domains consistently empty?
+- Were some domains overrepresented?
+
+## Noise
+
+- Were low-value stories frequently included?
+- Was promotional content overrepresented?
+- Did duplicate reduction work adequately?
+
+## Classification
+
+- Were items placed in useful domains?
+- Were too many items unclassified?
+- Were cross-domain items repeated unnecessarily?
+
+## Ranking
+
+- Did high-value developments appear near the top?
+- Did source prestige overwhelm actual relevance?
+- Did repeated coverage distort ranking?
+
+## Operations
+
+- Did scheduled runs complete reliably?
+- Were failures visible?
+- Was maintenance acceptably low?
+- Did the system remain at zero recurring cost?
+
+Further product development should be based on this review rather than assumed needs.
+
+---
+
+# Requirements Traceability
+
+Each material implementation component should later be traceable to one or more requirements in this document.
+
+The System Architecture should explain how the requirements are satisfied.
+
+The Testing and Evaluation document should define how critical requirements are verified.
+
+The Development Roadmap should identify which requirements belong to each milestone.
+
+---
+
+# Open Product Decisions
+
+The following decisions should be resolved in later documents or during prototype evaluation:
+
+- exact daily execution time;
+- exact collection-window tolerance;
+- maximum items per domain;
+- maximum total report length;
+- whether relevance scores should be displayed publicly;
+- whether unclassified items should appear in the daily report;
+- whether multi-domain items appear once or in several sections;
+- whether daily GitHub issues belong in the MVP or a later phase;
+- how much feed-provided description text should be shown;
+- the threshold for similar-title clustering;
+- the minimum initial source count;
+- the balance between global, European, Italian and local sources.
+
+These are unresolved by design and should not be silently decided during implementation.
+
+---
+
+# Current Status
+
+**Status:** 
+
+**Dependencies:**
+
+- `00 Project Brief.md`
+- `03 Information Taxonomy and Source Policy.md`
+- `02 System Architecture.md`
+
+**Next drafting step:**
+
+- 

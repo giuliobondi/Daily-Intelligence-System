@@ -1,3 +1,6 @@
+
+
+
 # Daily Intelligence System — Project Brief
 
 > **Purpose**
@@ -307,23 +310,302 @@ The public repository must not contain:
 
 The MVP must support one complete end-to-end workflow:
 
-```text
-Public structured sources
-        ↓
-Collection
-        ↓
-Metadata normalisation
-        ↓
-Duplicate reduction
-        ↓
-Domain classification
-        ↓
-Relevance ranking
-        ↓
-Structured storage
-        ↓
-Daily Markdown report
-        ↓
-Automated GitHub execution
-        ↓
-Visible success or failure
+    Public structured sources
+            ↓
+    Collection
+            ↓
+    Metadata normalisation
+            ↓
+    Duplicate reduction
+            ↓
+    Domain classification
+            ↓
+    Relevance ranking
+            ↓
+    Structured storage
+            ↓
+    Daily Markdown report
+            ↓
+    Automated GitHub execution
+            ↓
+    Visible success or failure
+
+The MVP should be built using a limited initial source universe.
+
+The first version should prioritise proof that the full loop works reliably over broad source coverage.
+
+---
+
+# MVP Outputs
+
+The MVP should produce:
+
+## Structured Article Records
+
+Each record should preserve the available core metadata required for filtering, ranking and later inspection.
+
+The final schema will be defined in the Information Taxonomy and Source Policy document.
+
+## Daily Markdown Report
+
+The report should contain:
+
+- report date;
+- monitored period;
+- grouped domains;
+- ranked headlines;
+- source name;
+- publication time;
+- short available description where permitted;
+- direct source link;
+- indication of duplicate or multi-source coverage where available;
+- visible warnings about failed sources or incomplete runs.
+
+## Historical Archive
+
+Daily reports and processed records should remain accessible for later review.
+
+## Execution Logs
+
+The system should make it possible to understand:
+
+- whether the workflow completed;
+- which sources failed;
+- how many items were collected;
+- how many items remained after filtering and deduplication;
+- whether the report was successfully generated.
+
+---
+
+# Non-Goals
+
+The initial project is not intended to:
+
+- replace professional news analysis;
+- provide exhaustive global coverage;
+- reproduce complete articles;
+- bypass paywalls;
+- scrape websites against their terms;
+- generate investment, legal or political recommendations;
+- predict markets;
+- verify every factual claim independently;
+- eliminate human judgment;
+- create a personalised social-media feed;
+- support multiple users;
+- build a mobile application;
+- build a complex dashboard;
+- create a sophisticated public frontend;
+- use paid AI summarisation;
+- use autonomous agents;
+- implement RAG;
+- use embeddings or vector databases;
+- ingest private newsletters or email during the MVP;
+- automatically edit the Career OS;
+- automatically transfer GitHub reports into ChatGPT.
+
+These may be reconsidered only if later evidence shows a clear need and the core constraints remain satisfied.
+
+---
+
+# Success Criteria
+
+The MVP will be considered successful when all of the following are true.
+
+## Functional Success
+
+- The system collects items from a small but diverse initial source universe.
+- Metadata is normalised consistently.
+- Obvious duplicate items are reduced.
+- Items are assigned to useful domains.
+- A transparent ranking process is applied.
+- A readable Markdown report is generated.
+- Reports are stored historically.
+- The workflow runs automatically through GitHub Actions.
+- Failed sources or workflow problems are visible.
+
+## Cost Success
+
+- Recurring monetary cost is zero.
+- Production runs do not consume GitHub AI or Copilot credits.
+- No paid API is required.
+
+## User-Experience Success
+
+- Daily manual work is negligible.
+- The report can be scanned quickly.
+- Source links are easy to access.
+- The report is not dominated by duplicates or low-value content.
+- The output is concise enough to be used consistently.
+
+## Quality Success
+
+- Important items are not systematically buried by low-value stories.
+- Source quality and source type are visible.
+- Classification is adequate for practical use.
+- Ranking logic is understandable.
+- The system does not fabricate analytical summaries.
+- Missing data and source failures are not hidden.
+
+## Maintainability Success
+
+- A future contributor can understand the repository from its documentation.
+- Configuration is separated from application logic where appropriate.
+- The source universe can be updated without rewriting the core pipeline.
+- Dependencies remain limited.
+- The architecture remains proportional to the actual value created.
+
+---
+
+# Evaluation Period
+
+The MVP should not be judged only from technical tests.
+
+After the automated workflow is stable, it should be used for an initial evaluation period of approximately two weeks.
+
+During this period, evaluate:
+
+- whether the report is actually read;
+- whether it is too long or too short;
+- whether important stories are missed;
+- whether low-value stories are overrepresented;
+- whether duplicate reduction is effective;
+- whether domain classification is useful;
+- whether source diversity is adequate;
+- whether maintenance remains minimal;
+- whether the system improves knowledge or merely increases content volume.
+
+Further development should depend on evidence from this evaluation.
+
+---
+
+# Risks
+
+## Overengineering
+
+The project may become focused on architecture rather than useful output.
+
+**Response:** build the smallest complete vertical slice before adding secondary components.
+
+## Excessive Source Volume
+
+Adding too many sources may increase noise and failure rates.
+
+**Response:** begin with a small curated source universe and expand only when coverage gaps are demonstrated.
+
+## Weak Ranking
+
+Simple deterministic scoring may fail to reflect real importance.
+
+**Response:** keep the scoring transparent, review real outputs and improve it iteratively.
+
+## Poor Duplicate Detection
+
+Different headlines may describe the same event.
+
+**Response:** begin with simple URL and title-based methods, then improve only if real reports show a material problem.
+
+## Source Instability
+
+Feeds may change, fail or disappear.
+
+**Response:** isolate source failures, record source health and avoid depending on a single source.
+
+## Public-Repository Exposure
+
+Generated content may accidentally include restricted or personal material.
+
+**Response:** use only public structured sources during the MVP and maintain explicit repository boundaries.
+
+## Passive Consumption
+
+The system may increase reading without improving understanding.
+
+**Response:** keep reports concise and maintain the separate ChatGPT interpretation layer.
+
+## Maintenance Burden
+
+A complex pipeline may require more effort than the value it provides.
+
+**Response:** prefer simple components, minimal dependencies and occasional controlled maintenance.
+
+---
+
+# Long-Term Possibilities
+
+The following may be considered after the MVP has been validated:
+
+- a larger source universe;
+- improved story clustering;
+- tracked companies, institutions and topics;
+- source-health dashboards;
+- GitHub issue delivery;
+- GitHub Pages;
+- weekly archive analytics;
+- trend detection;
+- selected public-newsletter support;
+- improved opportunity monitoring for Milan and Bocconi;
+- better integration with weekly knowledge-review workflows.
+
+These are possibilities, not commitments.
+
+They should be evaluated against:
+
+- recurring cost;
+- reliability;
+- manual work;
+- information quality;
+- maintenance;
+- privacy;
+- demonstrated user need.
+
+---
+
+# Public Repository Boundary
+
+This repository is intended to remain public and may later function as proof of work.
+
+It may contain:
+
+- public project documentation;
+- source code;
+- public-source configuration;
+- structured public metadata;
+- generated headlines and links;
+- tests;
+- sample outputs;
+- GitHub Actions workflows.
+
+Private Career OS sources are contextual inputs used inside the dedicated GPT project and must not be copied into this repository.
+
+---
+
+# Current Project Status
+
+**Phase:** Project definition
+
+**Completed:**
+
+- Selected the hybrid operating model.
+- Confirmed zero recurring monetary cost as a hard constraint.
+- Confirmed negligible daily manual work as a hard constraint.
+- Confirmed that production must not consume AI credits.
+- Created the public GitHub repository.
+- Created the initial project-document structure.
+
+**Current task:**
+
+- 
+
+**Next document:**
+
+- 
+
+---
+
+# Decision Rule
+
+Every future project decision should answer:
+
+> Does this change materially improve reliability, information quality or user value without violating the constraints on cost, manual work, maintainability and scope?
+
+If the answer is unclear, the change should be deferred until evidence is available.
