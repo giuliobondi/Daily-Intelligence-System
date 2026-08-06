@@ -1,0 +1,12 @@
+sources:
+  - id: sample_source
+    name: Sample Source
+    feed_url: tests/fixtures/sample_feed.xml
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - technology
+    language: en
+    geographic_scope:
+      - Global
+    active: true
