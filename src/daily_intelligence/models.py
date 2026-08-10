@@ -18,4 +18,5 @@ class ArticleRecord:
     description: str | None
     domains: tuple[str, ...] = ()
     matched_keywords: tuple[str, ...] = ()
-    
+    relevance_score: int = 0
+    score_components: tuple[tuple[str, int], ...] = ()
