@@ -26,7 +26,7 @@ class SourceConfig:
     active: bool
 
 
-_REQUIRED_FIELDS = {
+_SOURCE_REQUIRED_FIELDS = {
     "id",
     "name",
     "feed_url",
@@ -38,6 +38,21 @@ _REQUIRED_FIELDS = {
     "active",
 }
 
+_DOMAIN_REQUIRED_FIELDS = {
+    "id",
+    "name",
+    "keywords",
+    "active",
+}
+
+@dataclass(frozen=True)
+class DomainConfig:
+    """Validated configuration for one information domain."""
+
+    id: str
+    name: str
+    keywords: tuple[str, ...]
+    active: bool
 
 def load_sources(path: str | Path) -> list[SourceConfig]:
     """Load and validate all source entries from a YAML file."""
@@ -75,6 +90,41 @@ def load_sources(path: str | Path) -> list[SourceConfig]:
 
     return sources
 
+def load_domains(path: str | Path) -> list[DomainConfig]:
+    """Load and validate all domain entries from a YAML file."""
+
+    config_path = Path(path)
+
+    try:
+        with config_path.open("r", encoding="utf-8") as file:
+            data = yaml.safe_load(file)
+    except FileNotFoundError as error:
+        raise ConfigurationError(
+            f"Domain configuration file not found: {config_path}"
+        ) from error
+    except yaml.YAMLError as error:
+        raise ConfigurationError(
+            f"Domain configuration contains invalid YAML: {config_path}"
+        ) from error
+
+    if not isinstance(data, dict):
+        raise ConfigurationError(
+            "Domain configuration must contain a top-level mapping."
+        )
+
+    raw_domains = data.get("domains")
+
+    if not isinstance(raw_domains, list):
+        raise ConfigurationError(
+            "Domain configuration must contain a 'domains' list."
+        )
+
+    domains = [
+        _validate_domain(raw_domain, index)
+        for index, raw_domain in enumerate(raw_domains)
+    ]
+
+    return domains
 
 def _validate_source(raw_source: Any, index: int) -> SourceConfig:
     """Validate one source entry and return a SourceConfig object."""
@@ -84,7 +134,7 @@ def _validate_source(raw_source: Any, index: int) -> SourceConfig:
             f"Source entry {index} must be a mapping."
         )
 
-    missing_fields = _REQUIRED_FIELDS - raw_source.keys()
+    missing_fields = _SOURCE_REQUIRED_FIELDS - raw_source.keys()
 
     if missing_fields:
         missing = ", ".join(sorted(missing_fields))
@@ -143,6 +193,44 @@ def _validate_source(raw_source: Any, index: int) -> SourceConfig:
         active=active,
     )
 
+def _validate_domain(raw_domain: Any, index: int) -> DomainConfig:
+    """Validate one domain entry and return a DomainConfig object."""
+
+    if not isinstance(raw_domain, dict):
+        raise ConfigurationError(
+            f"Domain entry {index} must be a mapping."
+        )
+
+    missing_fields = _DOMAIN_REQUIRED_FIELDS - raw_domain.keys()
+
+    if missing_fields:
+        missing = ", ".join(sorted(missing_fields))
+        raise ConfigurationError(
+            f"Domain entry {index} is missing required fields: {missing}"
+        )
+
+    _require_non_empty_string(raw_domain, "id", index)
+    _require_non_empty_string(raw_domain, "name", index)
+
+    keywords = _require_string_list(
+        raw_domain,
+        "keywords",
+        index,
+    )
+
+    active = raw_domain["active"]
+
+    if not isinstance(active, bool):
+        raise ConfigurationError(
+            f"Domain entry {index} field 'active' must be true or false."
+        )
+
+    return DomainConfig(
+        id=raw_domain["id"].strip(),
+        name=raw_domain["name"].strip(),
+        keywords=tuple(keywords),
+        active=active,
+    )
 
 def _require_non_empty_string(
     raw_source: dict[str, Any],

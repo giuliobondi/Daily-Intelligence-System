@@ -1,0 +1,22 @@
+domains:
+  - id: technology
+    name: Technology and Software
+    keywords:
+      - software
+      - cloud
+      - cybersecurity
+      - developer
+      - open source
+      - api
+    active: true
+
+  - id: artificial_intelligence
+    name: Artificial Intelligence
+    keywords:
+      - artificial intelligence
+      - ai
+      - machine learning
+      - large language model
+      - foundation model
+      - model release
+    active: true
