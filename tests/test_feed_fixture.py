@@ -164,6 +164,7 @@ def test_fixture_normalises_into_article_record() -> None:
         "A sample feed-provided description "
         "for the first article record."
     )
+    assert len(record.record_id) == 64
 
 
 def test_url_normalisation_preserves_meaningful_query_parameters() -> None:

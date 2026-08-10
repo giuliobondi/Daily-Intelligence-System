@@ -20,3 +20,4 @@ class ArticleRecord:
     matched_keywords: tuple[str, ...] = ()
     relevance_score: int = 0
     score_components: tuple[tuple[str, int], ...] = ()
+    record_id: str = ""

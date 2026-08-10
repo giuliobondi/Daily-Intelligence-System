@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from time import struct_time
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from hashlib import sha256
 
 from daily_intelligence.config import SourceConfig
 from daily_intelligence.models import ArticleRecord
@@ -39,6 +40,7 @@ def normalize_entry(
 
     clean_title = _collapse_whitespace(title)
     description = _optional_text(entry, "description")
+    normalized_url = normalize_url(article_url)
 
     return ArticleRecord(
         source_id=source.id,
@@ -46,6 +48,10 @@ def normalize_entry(
         normalized_title=clean_title.casefold(),
         article_url=article_url.strip(),
         normalized_url=normalize_url(article_url),
+        record_id=build_record_id(
+            source.id,
+            normalized_url,
+            ),
         published_at=_parse_publication_time(entry),
         retrieved_at=retrieved_at_utc,
         description=(
@@ -81,6 +87,17 @@ def normalize_url(url: str) -> str:
         )
     )
 
+def build_record_id(
+    source_id: str,
+    normalized_url: str,
+) -> str:
+    """Build a deterministic identifier from source and normalised URL."""
+
+    identity = f"{source_id}\n{normalized_url}"
+
+    return sha256(
+        identity.encode("utf-8")
+    ).hexdigest()
 
 def _parse_publication_time(entry: Any) -> datetime | None:
     """Convert feedparser publication time into a UTC datetime."""
