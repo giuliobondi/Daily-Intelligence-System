@@ -16,3 +16,6 @@ class ArticleRecord:
     published_at: datetime | None
     retrieved_at: datetime
     description: str | None
+    domains: tuple[str, ...] = ()
+    matched_keywords: tuple[str, ...] = ()
+    
