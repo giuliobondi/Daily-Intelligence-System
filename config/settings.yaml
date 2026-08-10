@@ -7,3 +7,8 @@ ranking:
 
   domain_match_score: 2
   keyword_match_score: 1
+
+report:
+  max_items_per_domain: 5
+  max_total_items: 30
+  max_description_length: 300

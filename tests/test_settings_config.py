@@ -7,6 +7,7 @@ import pytest
 from daily_intelligence.config import (
     ConfigurationError,
     load_ranking,
+    load_report,
 )
 
 
@@ -139,3 +140,75 @@ def test_boolean_ranking_score_is_rejected(tmp_path: Path) -> None:
         match="must be a non-negative integer",
     ):
         load_ranking(invalid_config)
+
+def test_load_valid_report_configuration() -> None:
+    """Valid settings become typed report configuration."""
+
+    report = load_report(CONFIG_PATH)
+
+    assert report.max_items_per_domain == 5
+    assert report.max_total_items == 30
+    assert report.max_description_length == 300
+
+
+def test_report_mapping_is_required(tmp_path: Path) -> None:
+    """Settings without report configuration fail visibly."""
+
+    invalid_config = tmp_path / "invalid-settings.yaml"
+    invalid_config.write_text(
+        "ranking:\n"
+        "  source_tier_scores:\n"
+        "    1: 4\n"
+        "    2: 3\n"
+        "    3: 2\n"
+        "    4: 1\n"
+        "  domain_match_score: 2\n"
+        "  keyword_match_score: 1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ConfigurationError,
+        match="must contain a 'report' mapping",
+    ):
+        load_report(invalid_config)
+
+
+def test_missing_report_fields_are_rejected(
+    tmp_path: Path,
+) -> None:
+    """Incomplete report configuration fails visibly."""
+
+    invalid_config = tmp_path / "invalid-settings.yaml"
+    invalid_config.write_text(
+        "report:\n"
+        "  max_items_per_domain: 5\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ConfigurationError,
+        match="missing required fields",
+    ):
+        load_report(invalid_config)
+
+
+def test_non_positive_report_limit_is_rejected(
+    tmp_path: Path,
+) -> None:
+    """Report limits must be positive integers."""
+
+    invalid_config = tmp_path / "invalid-settings.yaml"
+    invalid_config.write_text(
+        "report:\n"
+        "  max_items_per_domain: 0\n"
+        "  max_total_items: 30\n"
+        "  max_description_length: 300\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ConfigurationError,
+        match="must be a positive integer",
+    ):
+        load_report(invalid_config)

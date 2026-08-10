@@ -51,6 +51,12 @@ _RANKING_REQUIRED_FIELDS = {
     "keyword_match_score",
 }
 
+_REPORT_REQUIRED_FIELDS = {
+    "max_items_per_domain",
+    "max_total_items",
+    "max_description_length",
+}
+
 @dataclass(frozen=True)
 class DomainConfig:
     """Validated configuration for one information domain."""
@@ -67,6 +73,14 @@ class RankingConfig:
     source_tier_scores: tuple[tuple[int, int], ...]
     domain_match_score: int
     keyword_match_score: int
+
+@dataclass(frozen=True)
+class ReportConfig:
+    """Validated configuration for Markdown report generation."""
+
+    max_items_per_domain: int
+    max_total_items: int
+    max_description_length: int
 
 def load_sources(path: str | Path) -> list[SourceConfig]:
     """Load and validate all source entries from a YAML file."""
@@ -385,6 +399,75 @@ def _require_non_negative_integer(
     ):
         raise ConfigurationError(
             f"Ranking field {field!r} must be a non-negative integer."
+        )
+
+    return value
+
+def load_report(path: str | Path) -> ReportConfig:
+    """Load and validate report configuration."""
+
+    config_path = Path(path)
+
+    try:
+        with config_path.open("r", encoding="utf-8") as file:
+            data = yaml.safe_load(file)
+    except FileNotFoundError as error:
+        raise ConfigurationError(
+            f"Settings configuration file not found: {config_path}"
+        ) from error
+    except yaml.YAMLError as error:
+        raise ConfigurationError(
+            f"Settings configuration contains invalid YAML: {config_path}"
+        ) from error
+
+    if not isinstance(data, dict):
+        raise ConfigurationError(
+            "Settings configuration must contain a top-level mapping."
+        )
+
+    raw_report = data.get("report")
+
+    if not isinstance(raw_report, dict):
+        raise ConfigurationError(
+            "Settings configuration must contain a 'report' mapping."
+        )
+
+    missing_fields = _REPORT_REQUIRED_FIELDS - raw_report.keys()
+
+    if missing_fields:
+        missing = ", ".join(sorted(missing_fields))
+        raise ConfigurationError(
+            f"Report configuration is missing required fields: {missing}"
+        )
+
+    return ReportConfig(
+        max_items_per_domain=_require_positive_integer(
+            raw_report["max_items_per_domain"],
+            "max_items_per_domain",
+        ),
+        max_total_items=_require_positive_integer(
+            raw_report["max_total_items"],
+            "max_total_items",
+        ),
+        max_description_length=_require_positive_integer(
+            raw_report["max_description_length"],
+            "max_description_length",
+        ),
+    )
+
+def _require_positive_integer(
+    value: Any,
+    field: str,
+) -> int:
+    """Require a configuration value to be a positive integer."""
+
+    if (
+        not isinstance(value, int)
+        or isinstance(value, bool)
+        or value <= 0
+    ):
+        raise ConfigurationError(
+            f"Report field {field!r} must be a positive integer."
         )
 
     return value
