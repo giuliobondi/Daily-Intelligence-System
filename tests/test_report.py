@@ -9,7 +9,10 @@ from daily_intelligence.config import (
     SourceConfig,
 )
 from daily_intelligence.models import ArticleRecord
-from daily_intelligence.report import render_report
+from daily_intelligence.report import (
+    render_report,
+    select_report_records,
+)
 
 
 GENERATED_AT = datetime(
@@ -316,3 +319,27 @@ def test_secondary_domains_are_shown_without_repeating_story() -> None:
 
     assert report.count("Sample Technology Story") == 1
     assert "**Also:** Artificial Intelligence" in report
+
+def test_select_report_records_matches_report_limits() -> None:
+    """Public report selection exposes the exact displayed records."""
+
+    first = _record(
+        record_id="first",
+        title="First Story",
+        relevance_score=10,
+    )
+
+    second = _record(
+        record_id="second",
+        title="Second Story",
+        relevance_score=9,
+    )
+
+    selected = select_report_records(
+        records=[first, second],
+        sources=[_source()],
+        domains=_domains(),
+        config=_config(max_items_per_domain=1),
+    )
+
+    assert selected == (first,)

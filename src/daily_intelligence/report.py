@@ -21,26 +21,27 @@ def render_report(
 ) -> str:
     """Render processed article records as a deterministic Markdown report."""
 
-    source_lookup = {
-        source.id: source
-        for source in sources
-    }
-
-    domain_list = [
+    source_list = tuple(sources)
+    domain_list = tuple(
         domain
         for domain in domains
         if domain.active
-    ]
+    )
+
+    source_lookup = {
+        source.id: source
+        for source in source_list
+    }
 
     domain_lookup = {
         domain.id: domain
         for domain in domain_list
     }
 
-    selected = _select_records(
+    selected = select_report_records(
         records=records,
-        source_lookup=source_lookup,
-        domain_lookup=domain_lookup,
+        sources=source_list,
+        domains=domain_list,
         config=config,
     )
 
@@ -98,13 +99,24 @@ def render_report(
     return "\n".join(lines)
 
 
-def _select_records(
+def select_report_records(
     records: Iterable[ArticleRecord],
-    source_lookup: dict[str, SourceConfig],
-    domain_lookup: dict[str, DomainConfig],
+    sources: Iterable[SourceConfig],
+    domains: Iterable[DomainConfig],
     config: ReportConfig,
 ) -> tuple[ArticleRecord, ...]:
-    """Select the highest-ranked eligible records within report limits."""
+    """Return the processed records that should appear in the report."""
+
+    source_lookup = {
+        source.id: source
+        for source in sources
+    }
+
+    domain_lookup = {
+        domain.id: domain
+        for domain in domains
+        if domain.active
+    }
 
     eligible = [
         record
