@@ -1,0 +1,9 @@
+ranking:
+  source_tier_scores:
+    1: 4
+    2: 3
+    3: 2
+    4: 1
+
+  domain_match_score: 2
+  keyword_match_score: 1

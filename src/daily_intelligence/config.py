@@ -1,4 +1,4 @@
-"""Load and validate source configuration."""
+"""Load and validate project configuration."""
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -45,6 +45,12 @@ _DOMAIN_REQUIRED_FIELDS = {
     "active",
 }
 
+_RANKING_REQUIRED_FIELDS = {
+    "source_tier_scores",
+    "domain_match_score",
+    "keyword_match_score",
+}
+
 @dataclass(frozen=True)
 class DomainConfig:
     """Validated configuration for one information domain."""
@@ -53,6 +59,14 @@ class DomainConfig:
     name: str
     keywords: tuple[str, ...]
     active: bool
+
+@dataclass(frozen=True)
+class RankingConfig:
+    """Validated configuration for provisional relevance scoring."""
+
+    source_tier_scores: tuple[tuple[int, int], ...]
+    domain_match_score: int
+    keyword_match_score: int
 
 def load_sources(path: str | Path) -> list[SourceConfig]:
     """Load and validate all source entries from a YAML file."""
@@ -125,6 +139,63 @@ def load_domains(path: str | Path) -> list[DomainConfig]:
     ]
 
     return domains
+
+def load_ranking(path: str | Path) -> RankingConfig:
+    """Load and validate provisional ranking configuration."""
+
+    config_path = Path(path)
+
+    try:
+        with config_path.open("r", encoding="utf-8") as file:
+            data = yaml.safe_load(file)
+    except FileNotFoundError as error:
+        raise ConfigurationError(
+            f"Settings configuration file not found: {config_path}"
+        ) from error
+    except yaml.YAMLError as error:
+        raise ConfigurationError(
+            f"Settings configuration contains invalid YAML: {config_path}"
+        ) from error
+
+    if not isinstance(data, dict):
+        raise ConfigurationError(
+            "Settings configuration must contain a top-level mapping."
+        )
+
+    raw_ranking = data.get("ranking")
+
+    if not isinstance(raw_ranking, dict):
+        raise ConfigurationError(
+            "Settings configuration must contain a 'ranking' mapping."
+        )
+
+    missing_fields = _RANKING_REQUIRED_FIELDS - raw_ranking.keys()
+
+    if missing_fields:
+        missing = ", ".join(sorted(missing_fields))
+        raise ConfigurationError(
+            f"Ranking configuration is missing required fields: {missing}"
+        )
+
+    source_tier_scores = _validate_source_tier_scores(
+        raw_ranking["source_tier_scores"]
+    )
+
+    domain_match_score = _require_non_negative_integer(
+        raw_ranking["domain_match_score"],
+        "domain_match_score",
+    )
+
+    keyword_match_score = _require_non_negative_integer(
+        raw_ranking["keyword_match_score"],
+        "keyword_match_score",
+    )
+
+    return RankingConfig(
+        source_tier_scores=source_tier_scores,
+        domain_match_score=domain_match_score,
+        keyword_match_score=keyword_match_score,
+    )
 
 def _validate_source(raw_source: Any, index: int) -> SourceConfig:
     """Validate one source entry and return a SourceConfig object."""
@@ -270,3 +341,50 @@ def _require_string_list(
         )
 
     return [item.strip() for item in value]
+
+def _validate_source_tier_scores(
+    value: Any,
+) -> tuple[tuple[int, int], ...]:
+    """Validate configured scores for source tiers 1 through 4."""
+
+    if not isinstance(value, dict):
+        raise ConfigurationError(
+            "Ranking field 'source_tier_scores' must be a mapping."
+        )
+
+    expected_tiers = {1, 2, 3, 4}
+
+    if set(value.keys()) != expected_tiers:
+        raise ConfigurationError(
+            "Ranking field 'source_tier_scores' "
+            "must define exactly source tiers 1, 2, 3 and 4."
+        )
+
+    scores: list[tuple[int, int]] = []
+
+    for tier in sorted(expected_tiers):
+        score = _require_non_negative_integer(
+            value[tier],
+            f"source_tier_scores[{tier}]",
+        )
+        scores.append((tier, score))
+
+    return tuple(scores)
+
+
+def _require_non_negative_integer(
+    value: Any,
+    field: str,
+) -> int:
+    """Require a ranking value to be a non-negative integer."""
+
+    if (
+        not isinstance(value, int)
+        or isinstance(value, bool)
+        or value < 0
+    ):
+        raise ConfigurationError(
+            f"Ranking field {field!r} must be a non-negative integer."
+        )
+
+    return value
