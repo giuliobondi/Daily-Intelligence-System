@@ -1,6 +1,5 @@
 """Tests for deterministic Markdown report generation."""
 
-from dataclasses import replace
 from datetime import datetime, timezone
 
 from daily_intelligence.config import (
@@ -13,6 +12,7 @@ from daily_intelligence.report import (
     render_report,
     select_report_records,
 )
+from daily_intelligence.run_summary import RunSummary
 
 
 GENERATED_AT = datetime(
@@ -120,6 +120,48 @@ def _record(
         relevance_score=relevance_score,
         score_components=(("source_tier", 4),),
         record_id=record_id,
+    )
+
+
+def _run_summary(
+    *,
+    status: str = "success",
+    active_sources: int = 1,
+    successful_sources: int = 1,
+    empty_sources: int = 0,
+    failed_sources: int = 0,
+    raw_items: int = 1,
+    displayed_items: int = 1,
+    warnings: tuple[str, ...] = (),
+) -> RunSummary:
+    """Return controlled operational metadata for report tests."""
+
+    return RunSummary(
+        run_id="20260810T070000Z",
+        started_at=GENERATED_AT,
+        completed_at=GENERATED_AT,
+        status=status,
+        collection_window=(
+            datetime(
+                2026,
+                8,
+                9,
+                7,
+                0,
+                tzinfo=timezone.utc,
+            ),
+            GENERATED_AT,
+        ),
+        active_sources=active_sources,
+        successful_sources=successful_sources,
+        empty_sources=empty_sources,
+        failed_sources=failed_sources,
+        raw_items=raw_items,
+        valid_items=1,
+        invalid_items=0,
+        duplicate_items=0,
+        displayed_items=displayed_items,
+        warnings=warnings,
     )
 
 
@@ -320,6 +362,7 @@ def test_secondary_domains_are_shown_without_repeating_story() -> None:
     assert report.count("Sample Technology Story") == 1
     assert "**Also:** Artificial Intelligence" in report
 
+
 def test_select_report_records_matches_report_limits() -> None:
     """Public report selection exposes the exact displayed records."""
 
@@ -343,3 +386,43 @@ def test_select_report_records_matches_report_limits() -> None:
     )
 
     assert selected == (first,)
+
+
+def test_report_exposes_degraded_run_status_and_warning() -> None:
+    """Operational degradation is visible in the Markdown report."""
+
+    report = render_report(
+        records=[_record()],
+        sources=[_source()],
+        domains=_domains(),
+        config=_config(),
+        report_date="2026-08-10",
+        generated_at=GENERATED_AT,
+        run_summary=_run_summary(
+            status="degraded",
+            active_sources=2,
+            successful_sources=1,
+            failed_sources=1,
+            raw_items=1,
+            warnings=(
+                "Source source_b failed: Feed unavailable",
+            ),
+        ),
+    )
+
+    assert "Run status: degraded" in report
+    assert (
+        "Monitored window: "
+        "2026-08-09T07:00:00+00:00 "
+        "to 2026-08-10T07:00:00+00:00"
+    ) in report
+    assert (
+        "Sources: 2 active, 1 successful, "
+        "0 empty, 1 failed"
+    ) in report
+    assert "Items collected: 1" in report
+    assert "## Run Warnings" in report
+    assert (
+        "- Source source_b failed: Feed unavailable"
+        in report
+    )

@@ -9,6 +9,7 @@ from daily_intelligence.config import (
     SourceConfig,
 )
 from daily_intelligence.models import ArticleRecord
+from daily_intelligence.run_summary import RunSummary
 
 
 def render_report(
@@ -18,6 +19,7 @@ def render_report(
     config: ReportConfig,
     report_date: str,
     generated_at: datetime,
+    run_summary: RunSummary | None = None,
 ) -> str:
     """Render processed article records as a deterministic Markdown report."""
 
@@ -58,9 +60,51 @@ def render_report(
         f"# Daily Intelligence — {report_date}",
         "",
         f"Generated: {_format_datetime(generated_at)}",
-        f"Displayed items: {len(selected)}",
-        "",
     ]
+
+    if run_summary is not None:
+        window_start, window_end = run_summary.collection_window
+
+        lines.extend(
+            [
+                f"Run status: {run_summary.status}",
+                (
+                    "Monitored window: "
+                    f"{_format_datetime(window_start)} "
+                    f"to {_format_datetime(window_end)}"
+                ),
+                (
+                    "Sources: "
+                    f"{run_summary.active_sources} active, "
+                    f"{run_summary.successful_sources} successful, "
+                    f"{run_summary.empty_sources} empty, "
+                    f"{run_summary.failed_sources} failed"
+                ),
+                f"Items collected: {run_summary.raw_items}",
+                f"Displayed items: {len(selected)}",
+                "",
+            ]
+        )
+
+        if run_summary.warnings:
+            lines.extend(
+                [
+                    "## Run Warnings",
+                    "",
+                    *[
+                        f"- {warning}"
+                        for warning in run_summary.warnings
+                    ],
+                    "",
+                ]
+            )
+    else:
+        lines.extend(
+            [
+                f"Displayed items: {len(selected)}",
+                "",
+            ]
+        )
 
     if not selected:
         lines.extend(
