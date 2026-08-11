@@ -1,13 +1,12 @@
-
-
-
 # Daily Intelligence System — Project Brief
 
 > **Purpose**
 >
 > This document defines why the Daily Intelligence System exists, what problem it solves, what the project is intended to achieve, and what is deliberately outside its scope.
 >
-> It is the strategic reference for all later product, architecture and implementation decisions.
+> It is the strategic reference for product, architecture and implementation decisions.
+>
+> It should remain relatively stable and should not become a detailed implementation-status document.
 >
 > ---
 >
@@ -50,8 +49,13 @@ Its objective is to create a reliable process for:
 - ranking items transparently;
 - preserving source links and metadata;
 - generating a concise daily report;
-- building a searchable historical archive;
-- supporting better interpretation through a separate ChatGPT briefing workflow.
+- building a historical archive;
+- exposing failures clearly;
+- supporting deeper interpretation through a separate ChatGPT briefing workflow.
+
+The deterministic local processing core is now implemented and validated.
+
+The next objective is to validate the same system with a deliberately small real-source set before introducing scheduled GitHub automation.
 
 ---
 
@@ -65,7 +69,7 @@ Important information is distributed across:
 - research organisations;
 - technical blogs;
 - startup and venture-capital sources;
-- public newsletters;
+- public newsletters and feeds;
 - university and local ecosystem channels.
 
 Following these sources manually creates several problems.
@@ -88,7 +92,7 @@ Primary evidence, high-quality reporting, commentary, promotion and low-quality 
 
 ## Weak Prioritisation
 
-Most news products optimise for broad engagement rather than the specific combination of economics, politics, markets, AI, technology, startups and career relevance required by this project.
+Most news products optimise for broad engagement rather than the specific combination of economics, politics, markets, AI, technology, startups and professional relevance required by this project.
 
 ## Limited Historical Memory
 
@@ -100,23 +104,27 @@ Reading more news does not necessarily produce better understanding.
 
 The system should support informed judgment, professional conversations and durable learning rather than encourage endless content consumption.
 
+## Maintenance Friction
+
+A useful information system can become counterproductive if it requires daily copying, manual source checking or constant technical intervention.
+
+The system should therefore automate repetitive collection and organisation while keeping source maintenance occasional and deliberate.
+
 ---
 
 # Target User
 
-The primary user is a university student building knowledge and professional awareness across economics, politics, finance, AI, technology, startups and business strategy.
+The initial system is designed for one user.
 
 The user:
 
+- wants structured awareness across economics, politics, finance, AI, technology, startups and business strategy;
 - values source quality over content volume;
-- wants broad but structured awareness;
 - has limited time for daily manual research;
 - wants to avoid recurring monetary costs;
 - is willing to invest time in initial setup and occasional maintenance;
 - has working exposure to Python, GitHub, data analysis and software-system concepts;
-- does not want the system to become an unnecessarily complex engineering project.
-
-The initial version is designed for one user.
+- wants the system to remain understandable rather than become an unnecessarily complex engineering project.
 
 Multi-user features are outside the MVP.
 
@@ -128,7 +136,7 @@ The project has value across several dimensions.
 
 ## Knowledge
 
-It should improve understanding of:
+It should improve awareness of:
 
 - current economic conditions;
 - political and geopolitical developments;
@@ -149,7 +157,8 @@ It should make it easier to participate intelligently in conversations with:
 - investors;
 - founders;
 - technology professionals;
-- managers and recruiters.
+- managers;
+- recruiters.
 
 ## Career Exploration
 
@@ -180,15 +189,42 @@ The repository may demonstrate:
 
 - Python development;
 - Git and GitHub use;
-- automation;
+- deterministic data-pipeline design;
 - information architecture;
-- data-pipeline design;
-- deterministic classification and ranking;
-- documentation;
 - testing;
-- workflow-oriented problem solving.
+- configuration-driven software;
+- workflow automation;
+- failure handling;
+- transparent ranking and classification;
+- technical documentation;
+- incremental software development.
 
-The project should preserve optionality across data, consulting, AI strategy, finance, venture capital, startups, economic research and technology-oriented roles.
+The project should preserve optionality across:
+
+- data analytics;
+- consulting;
+- AI strategy;
+- finance;
+- venture capital;
+- startups;
+- economic research;
+- technology-oriented roles.
+
+## Systems Thinking
+
+The project is also a practical exercise in building a small business system rather than simply writing isolated scripts.
+
+Its value includes understanding:
+
+- workflows;
+- inputs;
+- processing rules;
+- failure modes;
+- output quality;
+- automation;
+- observability;
+- maintenance;
+- opportunity cost.
 
 ---
 
@@ -198,7 +234,7 @@ The complete information workflow contains two independent layers.
 
 ## Layer 1 — ChatGPT Intelligence Briefing
 
-A scheduled ChatGPT workflow independently researches and synthesises current developments.
+A separate ChatGPT workflow may independently research and synthesise current developments.
 
 Its role is to provide:
 
@@ -209,9 +245,15 @@ Its role is to provide:
 - uncertainty;
 - career-relevant implications.
 
-This layer is outside the GitHub repository.
+This layer remains outside the GitHub repository.
 
-The repository does not depend on automatic access to ChatGPT, plugins, connectors or paid model APIs.
+The repository does not depend on automatic access to:
+
+- ChatGPT;
+- connectors;
+- plugins;
+- OpenAI API credits;
+- paid model APIs.
 
 ## Layer 2 — GitHub Intelligence Pipeline
 
@@ -221,43 +263,45 @@ Its role is to:
 
 1. collect items from permitted public structured sources;
 2. normalise metadata;
-3. clean URLs and timestamps;
-4. detect likely duplicate stories;
-5. classify items by domain;
-6. calculate transparent relevance scores;
-7. store structured records;
-8. generate daily Markdown reports;
-9. preserve historical outputs;
-10. expose source or workflow failures.
+3. validate records;
+4. enforce the reporting window;
+5. reduce obvious duplicates;
+6. classify items by domain;
+7. calculate transparent relevance scores;
+8. store structured records;
+9. generate daily Markdown reports;
+10. preserve historical outputs;
+11. expose source and workflow failures.
 
 The two layers may cover overlapping stories, but they serve different purposes.
 
-The ChatGPT layer provides interpretation.
+The ChatGPT layer provides optional interpretation.
 
-The GitHub layer provides controlled coverage, transparency and historical memory.
+The GitHub layer provides controlled collection, transparency, reproducibility and historical memory.
 
-The MVP does not require an automated connection between them.
+The core system does not require an automated connection between them.
 
 ---
 
 # Project Objectives
 
-The system should:
+The completed system should:
 
 - run automatically every day;
 - require negligible daily manual work;
 - operate with zero recurring monetary cost;
 - avoid recurring consumption of AI or Copilot credits;
-- collect from a curated universe of public sources;
+- collect from a curated universe of public structured sources;
 - preserve direct source links;
+- enforce a clear publication window;
 - reduce obvious duplication;
 - organise content into configurable domains;
-- rank stories using understandable rules;
+- rank stories using understandable deterministic rules;
 - generate a concise and readable daily report;
-- store enough metadata for later analysis;
-- make failures visible;
+- store enough metadata for later inspection and analysis;
+- make degraded and failed runs visible;
 - remain simple enough to understand and maintain;
-- create a foundation that can be improved without rebuilding the entire system.
+- create a foundation that can be improved without rebuilding the complete system.
 
 ---
 
@@ -273,7 +317,7 @@ The system should:
 
 ## Automation
 
-- Daily manual work should be close to zero.
+- Normal production operation should require no daily manual execution.
 - Daily copying between GitHub, ChatGPT, email or other systems should not be required.
 - Occasional source maintenance and quality review are acceptable.
 
@@ -281,15 +325,22 @@ The system should:
 
 - Ordinary Python and GitHub Actions should handle recurring production work.
 - Deterministic logic should be preferred before machine learning or LLM calls.
-- RSS feeds, official APIs and structured public sources should be preferred before scraping.
-- The MVP should avoid complex infrastructure.
+- RSS, Atom, official APIs and other structured public sources should be preferred before scraping.
+- The system should avoid infrastructure without a demonstrated requirement.
 
 ## Reliability
 
-- Individual source failures should not necessarily stop the entire workflow.
+- Individual source failures should not necessarily stop the complete workflow.
 - Failures should be logged and visible.
-- Generated reports should be reproducible from stored inputs where practical.
+- Degraded output should be distinguishable from complete output.
+- Processing should be deterministic where inputs are controlled.
 - The system should fail clearly rather than silently produce misleading output.
+
+## Information Quality
+
+- Technical success alone is insufficient.
+- A report that is noisy, repetitive, misleading or too long should be treated as a product-quality failure even if the pipeline executed correctly.
+- Source quality should generally be improved before adding increasingly complex filtering logic.
 
 ## Privacy and Copyright
 
@@ -299,81 +350,192 @@ The public repository must not contain:
 - private account information;
 - personal Career OS documents;
 - private emails;
-- full paid articles;
-- restricted newsletter content;
-- unauthorised copies of copyrighted material;
-- sensitive personal reading data.
+- private newsletter text;
+- complete paid articles;
+- restricted copyrighted content;
+- authentication tokens;
+- sensitive private datasets.
 
 ---
 
 # MVP Scope
 
-The MVP must support one complete end-to-end workflow:
+The production MVP must support one complete end-to-end workflow:
 
-    Public structured sources
-            ↓
-    Collection
-            ↓
-    Metadata normalisation
-            ↓
-    Duplicate reduction
-            ↓
-    Domain classification
-            ↓
-    Relevance ranking
-            ↓
-    Structured storage
-            ↓
-    Daily Markdown report
-            ↓
-    Automated GitHub execution
-            ↓
-    Visible success or failure
+```text
+Public structured sources
+        ↓
+Collection
+        ↓
+Metadata normalisation
+        ↓
+Validation
+        ↓
+Publication-window filtering
+        ↓
+Exact duplicate reduction
+        ↓
+Domain classification
+        ↓
+Relevance ranking
+        ↓
+Structured storage
+        ↓
+Daily Markdown report
+        ↓
+Run summary and visible status
+        ↓
+Automated GitHub execution
+        ↓
+Automated persistence
+```
 
-The MVP should be built using a limited initial source universe.
+The MVP should use a limited source universe.
 
-The first version should prioritise proof that the full loop works reliably over broad source coverage.
+The priority is proof that the complete workflow produces useful output reliably, not maximum coverage.
+
+---
+
+# Current Delivery State
+
+The project has completed the local deterministic vertical slice.
+
+Implemented and validated locally:
+
+- configuration loading;
+- controlled RSS/Atom collection;
+- structured source-level outcomes;
+- record normalisation;
+- record validation;
+- publication-window filtering;
+- exact duplicate reduction;
+- deterministic multi-domain classification;
+- deterministic relevance scoring;
+- JSON Lines persistence;
+- Markdown report selection and rendering;
+- JSON run summaries;
+- degraded-source handling;
+- operational report warnings;
+- lightweight run-level logging;
+- local end-to-end orchestration;
+- one-command CLI execution.
+
+The current local command is:
+
+```text
+python -m daily_intelligence.cli run
+```
+
+At Phase 1 closeout:
+
+> **104 automated tests pass.**
+
+The current controlled configuration intentionally contains:
+
+- one sample source;
+- Technology and Software;
+- Artificial Intelligence.
+
+This configuration proves system behaviour.
+
+It does not represent the intended final production coverage.
+
+---
+
+# Production Work Still Required
+
+The system should not yet be described as production-complete.
+
+Remaining production MVP work includes:
+
+- select a small credible real-source set;
+- validate live RSS/Atom behaviour;
+- confirm network timeout and error-handling requirements;
+- add minimal network hardening where justified;
+- inspect real publication timestamps and metadata quality;
+- inspect report usefulness with real information;
+- implement GitHub Actions;
+- validate manual GitHub workflow execution;
+- automate output persistence;
+- enable scheduled execution;
+- evaluate real reports over time.
+
+Potential quality features such as near-duplicate clustering, entities, geographic classification and content types are not prerequisites unless real usage demonstrates that they solve meaningful problems.
 
 ---
 
 # MVP Outputs
 
-The MVP should produce:
+The production MVP should produce three main persistent outputs.
 
 ## Structured Article Records
 
-Each record should preserve the available core metadata required for filtering, ranking and later inspection.
+Processed records should preserve enough metadata to:
 
-The final schema will be defined in the Information Taxonomy and Source Policy document.
+- identify the source;
+- inspect original and normalised fields;
+- understand classifications;
+- understand relevance scores;
+- reconstruct report-selection behaviour where practical.
+
+Current storage format:
+
+```text
+JSON Lines
+```
 
 ## Daily Markdown Report
 
-The report should contain:
+The current report structure already supports:
 
 - report date;
 - monitored period;
-- grouped domains;
+- generation timestamp;
+- run status;
+- active source count;
+- source success/failure counts;
+- collected-item count;
+- displayed-item count;
+- domain sections;
 - ranked headlines;
 - source name;
 - publication time;
-- short available description where permitted;
+- relevance score;
+- secondary domains;
+- short feed-provided description;
 - direct source link;
-- indication of duplicate or multi-source coverage where available;
-- visible warnings about failed sources or incomplete runs.
+- visible warnings for degraded runs.
+
+The report does not fabricate article summaries.
+
+## Run Summary
+
+Each run should create a structured JSON operational summary containing:
+
+- run identifier;
+- timestamps;
+- run status;
+- monitored window;
+- source counts;
+- item counts;
+- warnings.
 
 ## Historical Archive
 
-Daily reports and processed records should remain accessible for later review.
+Production daily reports, processed records and run summaries should remain accessible for later review.
 
 ## Execution Logs
 
 The system should make it possible to understand:
 
 - whether the workflow completed;
-- which sources failed;
-- how many items were collected;
-- how many items remained after filtering and deduplication;
-- whether the report was successfully generated.
+- which sources succeeded or failed;
+- how many records were validated;
+- how many remained inside the publication window;
+- how many duplicates were removed;
+- how many items were processed;
+- which output paths were written;
+- whether the run completed successfully or in degraded state.
 
 ---
 
@@ -399,82 +561,139 @@ The initial project is not intended to:
 - use autonomous agents;
 - implement RAG;
 - use embeddings or vector databases;
+- use machine-learning classification without evidence that deterministic logic is insufficient;
 - ingest private newsletters or email during the MVP;
 - automatically edit the Career OS;
-- automatically transfer GitHub reports into ChatGPT.
+- automatically transfer GitHub reports into ChatGPT;
+- build infrastructure merely because it is technically interesting.
 
-These may be reconsidered only if later evidence shows a clear need and the core constraints remain satisfied.
+These possibilities should be reconsidered only if later evidence demonstrates a clear workflow need and the core constraints remain satisfied.
 
 ---
 
 # Success Criteria
 
-The MVP will be considered successful when all of the following are true.
+The MVP will be considered successful when the following conditions are satisfied.
 
 ## Functional Success
 
-- The system collects items from a small but diverse initial source universe.
+- The system collects items from a small but credible real-source universe.
 - Metadata is normalised consistently.
-- Obvious duplicate items are reduced.
+- The publication window is enforced correctly.
+- Malformed records are handled visibly.
+- Obvious exact duplicates are reduced.
 - Items are assigned to useful domains.
 - A transparent ranking process is applied.
 - A readable Markdown report is generated.
-- Reports are stored historically.
+- Structured records and run summaries are stored historically.
 - The workflow runs automatically through GitHub Actions.
 - Failed sources or workflow problems are visible.
 
 ## Cost Success
 
-- Recurring monetary cost is zero.
+- Recurring monetary cost remains zero.
 - Production runs do not consume GitHub AI or Copilot credits.
 - No paid API is required.
 
 ## User-Experience Success
 
-- Daily manual work is negligible.
+- Normal daily manual work is negligible.
 - The report can be scanned quickly.
 - Source links are easy to access.
 - The report is not dominated by duplicates or low-value content.
 - The output is concise enough to be used consistently.
+- A degraded report is visibly degraded.
 
 ## Quality Success
 
 - Important items are not systematically buried by low-value stories.
-- Source quality and source type are visible.
+- Source quality remains transparent.
 - Classification is adequate for practical use.
 - Ranking logic is understandable.
 - The system does not fabricate analytical summaries.
 - Missing data and source failures are not hidden.
+- Technical sophistication is added only when it improves real report quality.
+
+## Reliability Success
+
+- Individual source failures are isolated where appropriate.
+- Critical failures do not create falsely successful output.
+- Repeated runs do not create uncontrolled duplication.
+- No-news runs behave predictably.
+- Network requests cannot hang indefinitely in production.
 
 ## Maintainability Success
 
 - A future contributor can understand the repository from its documentation.
 - Configuration is separated from application logic where appropriate.
-- The source universe can be updated without rewriting the core pipeline.
+- Sources can be added or disabled without rewriting the pipeline.
 - Dependencies remain limited.
-- The architecture remains proportional to the actual value created.
+- Modules have clear responsibilities.
+- The architecture remains proportional to the value created.
 
 ---
 
 # Evaluation Period
 
-The MVP should not be judged only from technical tests.
+The production MVP should not be judged only from automated technical tests.
 
-After the automated workflow is stable, it should be used for an initial evaluation period of approximately two weeks.
+After scheduled automation is stable, the system should be used for an initial evaluation period of approximately two weeks.
 
 During this period, evaluate:
 
-- whether the report is actually read;
-- whether it is too long or too short;
+- whether the report is actually opened;
+- whether it can be scanned in approximately 10–15 minutes;
 - whether important stories are missed;
 - whether low-value stories are overrepresented;
-- whether duplicate reduction is effective;
+- whether exact duplicate reduction is sufficient;
+- whether near-duplicate logic is actually needed;
 - whether domain classification is useful;
+- whether relevant items remain unclassified;
 - whether source diversity is adequate;
-- whether maintenance remains minimal;
+- whether the ranking formula produces sensible ordering;
+- whether source maintenance remains low;
 - whether the system improves knowledge or merely increases content volume.
 
-Further development should depend on evidence from this evaluation.
+Further quality development should depend on evidence from this evaluation.
+
+---
+
+# Development Philosophy
+
+The project should evolve through evidence rather than speculative architecture.
+
+The preferred development loop is:
+
+```text
+Build smallest useful behaviour
+→ validate
+→ inspect real output
+→ identify actual limitation
+→ make smallest justified correction
+→ validate again
+```
+
+A technically possible feature is not automatically a useful feature.
+
+Before adding complexity, ask:
+
+1. What problem does this solve?
+2. Has that problem occurred in real use?
+3. Can a simpler change solve it?
+4. What maintenance does it add?
+5. What new failure modes does it introduce?
+6. How will success be measured?
+
+This applies especially to:
+
+- near-duplicate clustering;
+- entity extraction;
+- geography;
+- content types;
+- advanced ranking;
+- source-health systems;
+- dashboards;
+- AI integration.
 
 ---
 
@@ -484,43 +703,49 @@ Further development should depend on evidence from this evaluation.
 
 The project may become focused on architecture rather than useful output.
 
-**Response:** build the smallest complete vertical slice before adding secondary components.
+**Response:** build and evaluate the smallest complete workflow before adding secondary components.
 
 ## Excessive Source Volume
 
 Adding too many sources may increase noise and failure rates.
 
-**Response:** begin with a small curated source universe and expand only when coverage gaps are demonstrated.
+**Response:** begin with a small real-source set and expand only when coverage gaps are demonstrated.
 
 ## Weak Ranking
 
-Simple deterministic scoring may fail to reflect real importance.
+Simple deterministic scoring may fail to reflect practical importance.
 
-**Response:** keep the scoring transparent, review real outputs and improve it iteratively.
+**Response:** keep scoring transparent, review real outputs and modify only observed weaknesses.
 
 ## Poor Duplicate Detection
 
 Different headlines may describe the same event.
 
-**Response:** begin with simple URL and title-based methods, then improve only if real reports show a material problem.
+**Response:** exact URL/title deduplication is already implemented. Add near-duplicate logic only if real reports show material remaining repetition.
 
 ## Source Instability
 
 Feeds may change, fail or disappear.
 
-**Response:** isolate source failures, record source health and avoid depending on a single source.
+**Response:** isolate source failures, expose run health and remove disproportionately expensive sources.
+
+## Missing or Weak Timestamps
+
+Some useful feeds may provide poor publication metadata.
+
+**Response:** current policy excludes missing publication timestamps from the reporting window. Reconsider only if real-source evidence shows the rule creates material coverage loss.
 
 ## Public-Repository Exposure
 
-Generated content may accidentally include restricted or personal material.
+Generated content may accidentally include restricted or private material.
 
-**Response:** use only public structured sources during the MVP and maintain explicit repository boundaries.
+**Response:** use only approved public structured sources and maintain explicit repository boundaries.
 
 ## Passive Consumption
 
 The system may increase reading without improving understanding.
 
-**Response:** keep reports concise and maintain the separate ChatGPT interpretation layer.
+**Response:** keep reports concise and preserve the separate optional ChatGPT interpretation layer.
 
 ## Maintenance Burden
 
@@ -528,77 +753,113 @@ A complex pipeline may require more effort than the value it provides.
 
 **Response:** prefer simple components, minimal dependencies and occasional controlled maintenance.
 
+## Misleading Success
+
+A technically completed run may hide failed sources.
+
+**Response:** keep run status, report warnings, structured summaries and logs aligned.
+
 ---
 
 # Long-Term Possibilities
 
-The following may be considered after the MVP has been validated:
+The following may be considered after the production MVP has been validated:
 
-- a larger source universe;
-- improved story clustering;
-- tracked companies, institutions and topics;
-- source-health dashboards;
-- GitHub issue delivery;
-- GitHub Pages;
+- broader source coverage;
+- conservative near-duplicate clustering;
+- multi-source story grouping;
+- tracked companies and institutions;
+- geographic classification;
+- content-type classification;
+- source-health history;
 - weekly archive analytics;
 - trend detection;
-- selected public-newsletter support;
-- improved opportunity monitoring for Milan and Bocconi;
-- better integration with weekly knowledge-review workflows.
+- GitHub Issue delivery;
+- GitHub Pages;
+- selected public-newsletter feeds;
+- improved Milan and Bocconi opportunity monitoring.
 
 These are possibilities, not commitments.
 
-They should be evaluated against:
+Each should be evaluated against:
 
-- recurring cost;
+- demonstrated user need;
+- zero recurring monetary cost;
 - reliability;
-- manual work;
+- daily manual work;
 - information quality;
-- maintenance;
+- maintainability;
+- transparency;
 - privacy;
-- demonstrated user need.
+- opportunity cost.
 
 ---
 
 # Public Repository Boundary
 
-This repository is intended to remain public and may later function as proof of work.
+This repository is intended to remain public and may function as proof of work.
 
 It may contain:
 
 - public project documentation;
 - source code;
 - public-source configuration;
-- structured public metadata;
+- structured permitted metadata;
 - generated headlines and links;
+- deterministic classifications and scores;
+- run summaries;
 - tests;
-- sample outputs;
-- GitHub Actions workflows.
+- controlled fixtures;
+- GitHub Actions workflows;
+- public-safe generated reports.
 
-Private Career OS sources are contextual inputs used inside the dedicated GPT project and must not be copied into this repository.
+It must not contain:
+
+- private Career OS sources;
+- proprietary internship data;
+- private email;
+- private newsletter text;
+- credentials;
+- tokens;
+- restricted copyrighted material.
+
+Private contextual materials may inform development reasoning but must remain outside the public repository.
 
 ---
 
 # Current Project Status
 
-**Phase:** Project definition
+**Current development state:** Phase 1 local vertical slice complete.
 
-**Completed:**
+**Validated locally:**
 
-- Selected the hybrid operating model.
-- Confirmed zero recurring monetary cost as a hard constraint.
-- Confirmed negligible daily manual work as a hard constraint.
-- Confirmed that production must not consume AI credits.
-- Created the public GitHub repository.
-- Created the initial project-document structure.
+- deterministic processing pipeline;
+- one-command execution;
+- publication-window enforcement;
+- exact deduplication;
+- classification;
+- ranking;
+- structured storage;
+- Markdown reporting;
+- run summaries;
+- degraded-source handling;
+- logging;
+- 104 automated tests.
 
-**Current task:**
+**Not yet production-complete:**
 
-- 
+- real-source universe;
+- network production readiness;
+- GitHub Actions;
+- automated repository persistence;
+- scheduled daily execution;
+- production-use evaluation.
 
-**Next document:**
+**Current milestone:**
 
-- 
+> Validate a minimal real-source run before automation.
+
+The detailed implementation status and development sequence belong in `04 Development Roadmap and Status.md`.
 
 ---
 
@@ -609,3 +870,26 @@ Every future project decision should answer:
 > Does this change materially improve reliability, information quality or user value without violating the constraints on cost, manual work, maintainability and scope?
 
 If the answer is unclear, the change should be deferred until evidence is available.
+
+---
+
+# Changelog
+
+## 2026-08-11 — Phase 1 Project Brief Reconciliation
+
+- Updated the brief from project-definition status to the validated Phase 1 delivery state.
+- Preserved the original project purpose, target user, strategic rationale and hybrid operating model.
+- Added publication-window enforcement and operational visibility to the core workflow.
+- Recorded the completed deterministic local vertical slice.
+- Recorded 104 passing automated tests at Phase 1 closeout.
+- Distinguished the controlled two-domain/sample-source implementation from the intended broader information scope.
+- Clarified the remaining production MVP work: real-source validation, network readiness, GitHub Actions, automated persistence and scheduled execution.
+- Reframed advanced quality features as evidence-driven possibilities rather than automatic prerequisites.
+- Reinforced the workflow-first, minimal-complexity development philosophy.
+
+## Initial Project Brief Baseline
+
+- Defined the Daily Intelligence System problem and strategic rationale.
+- Defined the two-layer ChatGPT and GitHub operating model.
+- Established zero recurring cost and negligible daily manual work as hard constraints.
+- Defined MVP scope, outputs, non-goals, risks and success criteria.

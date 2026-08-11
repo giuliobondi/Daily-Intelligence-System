@@ -2,7 +2,7 @@
 
 > **Purpose**
 >
-> This document defines what information the Daily Intelligence System should collect, how it should classify that information, which sources are acceptable, and which rules govern source selection, storage and public presentation.
+> This document defines what information the Daily Intelligence System should collect, how that information should be classified, which sources are acceptable, and which rules govern source selection, storage and public presentation.
 >
 > It is the quality-control framework for the information entering the system.
 >
@@ -50,13 +50,48 @@ Information quality should be evaluated through:
 7. accessibility;
 8. suitability for automated collection.
 
+The system should prefer a smaller set of high-quality sources and useful items over broad but noisy coverage.
+
+---
+
+# Current Implementation Status
+
+The full taxonomy and source policy in this document defines the intended information model.
+
+The current Phase 1 implementation is deliberately narrower.
+
+At Phase 1 closeout, the implemented configuration contains:
+
+- one controlled sample source;
+- two active domains:
+  - Technology and Software;
+  - Artificial Intelligence;
+- simple deterministic keyword rules;
+- source-default domains;
+- deterministic source-tier scoring;
+- no tracked-entity configuration;
+- no geographic classification;
+- no content-type classification;
+- no near-duplicate clustering;
+- no production source universe.
+
+This narrow configuration was used to validate the processing pipeline.
+
+It should not be interpreted as the final intended information coverage.
+
+The next development phase will introduce only a small real-source set before broader taxonomy or source expansion.
+
 ---
 
 # Taxonomy Principles
 
 ## Configurable
 
-Domains, keywords, entities, source tiers and geographic priorities should be maintained through configuration rather than embedded throughout the codebase.
+Domains, keywords, source tiers and other future classification signals should be maintained through configuration rather than embedded throughout core processing code.
+
+Configuration should expand only when the corresponding processing behaviour is actually needed.
+
+---
 
 ## Multi-Domain
 
@@ -68,43 +103,92 @@ For example:
 - a central-bank rate decision may belong to Economics, Financial Markets and Europe;
 - a startup acquisition may belong to Startups, Corporate Strategy and Technology.
 
-## Explainable
-
-The system should be able to show why an item received a domain classification.
-
-Classification should depend on visible factors such as:
-
-- source defaults;
-- title keywords;
-- description keywords;
-- tracked entities;
-- geographic references;
-- explicitly configured rules.
-
-## Conservative
-
-The system should prefer an unclassified or uncertain result over a misleading classification.
-
-## Broad but Bounded
-
-The taxonomy should preserve awareness across several domains without becoming an attempt to categorise every possible news topic.
-
-## Independent Dimensions
-
-Topic, geography, source tier and content type should be stored as separate dimensions.
-
-An item can therefore be described as:
-
-- topic: Artificial Intelligence;
-- geography: United States and Global;
-- source tier: Tier 1;
-- content type: Company Announcement.
+The current implementation already supports multiple domains.
 
 ---
 
-# Initial Topic Domains
+## One Primary Report Placement
 
-The following domains form the initial taxonomy.
+A multi-domain record should appear once in the main report.
+
+Current policy:
+
+- the first assigned eligible domain becomes the primary report section;
+- additional domains are displayed as secondary metadata.
+
+This avoids unnecessary repetition while preserving cross-domain information.
+
+The primary-domain selection method may later become more sophisticated if real usage demonstrates a need.
+
+---
+
+## Explainable
+
+The system should be able to show why an item received a classification.
+
+Current classification evidence includes:
+
+- source defaults;
+- matched configured keywords.
+
+Future classification evidence may include:
+
+- entities;
+- geography;
+- content type;
+- exclusions;
+- stronger rule groups.
+
+Any future classification mechanism should remain inspectable.
+
+---
+
+## Conservative
+
+The system should prefer an unclassified result over a misleading classification.
+
+Unclassified records:
+
+- remain valid processed records;
+- remain available for evaluation;
+- are omitted from the main report by default.
+
+A high relevant-unclassified rate during production evaluation should trigger taxonomy review.
+
+---
+
+## Broad but Bounded
+
+The target taxonomy should preserve awareness across several strategically useful domains without trying to classify every possible news topic.
+
+The system should not become a generic global news taxonomy.
+
+---
+
+## Independent Dimensions
+
+Topic, geography, source tier and content type are conceptually separate dimensions.
+
+For example, an item might eventually be described as:
+
+```text
+topic: Artificial Intelligence
+geography: European Union
+source tier: Tier 1
+content type: Official Announcement
+```
+
+Only topic classification and source tier are currently implemented.
+
+Geography and content type remain future optional dimensions.
+
+---
+
+# Target Topic Taxonomy
+
+The following ten domains define the intended strategic coverage.
+
+They are target information categories, not all currently implemented production domains.
 
 ---
 
@@ -121,7 +205,7 @@ Major political, diplomatic, security and geopolitical developments with interna
 - sanctions;
 - trade disputes;
 - diplomatic agreements;
-- changes in government;
+- major changes in government;
 - major foreign-policy decisions;
 - defence and security developments;
 - political instability;
@@ -133,7 +217,7 @@ Major political, diplomatic, security and geopolitical developments with interna
 - minor party disputes;
 - personality-driven political coverage without broader implications;
 - local political stories with no material connection to monitored priorities;
-- opinion content that introduces no new evidence.
+- opinion content that introduces no meaningful evidence.
 
 ### Example Indicators
 
@@ -316,21 +400,20 @@ Developments concerning AI models, products, research, infrastructure, regulatio
 - unsupported claims about artificial general intelligence;
 - repetitive commentary with no technical or commercial evidence.
 
-### Example Indicators
+### Current Phase 1 Status
+
+**Implemented**
+
+Current configured keywords include concepts such as:
 
 - artificial intelligence;
+- AI;
 - machine learning;
 - large language model;
 - foundation model;
-- inference;
-- training;
-- agent;
-- AI regulation;
-- model evaluation;
-- AI safety;
-- compute;
-- GPU;
-- semiconductor.
+- model release.
+
+The current list is intentionally small and provisional.
 
 ---
 
@@ -361,20 +444,20 @@ Major developments in software, cloud infrastructure, cybersecurity, data system
 - promotional technology content;
 - minor feature releases with no broader importance.
 
-### Example Indicators
+### Current Phase 1 Status
 
-- cloud;
+**Implemented**
+
+Current configured keywords include concepts such as:
+
 - software;
+- cloud;
 - cybersecurity;
-- data platform;
-- database;
-- API;
-- developer tools;
+- developer;
 - open source;
-- enterprise software;
-- infrastructure;
-- privacy;
-- digital platform.
+- API.
+
+The current list is intentionally small and provisional.
 
 ---
 
@@ -546,9 +629,9 @@ High-value opportunities, events and developments connected to Milan, Bocconi Un
 
 # Geographic Classification
 
-Geography should be stored separately from topic domains.
+Geography remains a target information dimension but is not currently implemented in the processing pipeline.
 
-Initial geographic tags may include:
+Potential geographic tags include:
 
 - Global;
 - European Union;
@@ -558,25 +641,27 @@ Initial geographic tags may include:
 - United States;
 - China;
 - United Kingdom;
-- Other named country or region.
+- other named country or region.
 
-An item may have more than one geographic tag.
+An item may eventually receive multiple geographic tags.
 
-For example:
+Examples:
 
 - a trade dispute between the United States and China may receive both country tags and Global;
 - an Italian implementation of an EU regulation may receive Italy and European Union;
 - a Milan startup funding round may receive Milan and Italy.
 
-Geographic priority should affect ranking only through explicit configuration.
+Geographic classification should be introduced only if real use shows that topic domains alone are insufficient for prioritisation or browsing.
+
+Geography should remain conceptually independent from topic domains.
 
 ---
 
 # Content Types
 
-Where practical, each item should receive one content-type label.
+Content-type classification is not currently implemented.
 
-Initial content types:
+Potential future types include:
 
 | Content Type | Meaning |
 |---|---|
@@ -590,15 +675,21 @@ Initial content types:
 | Funding or Transaction | Funding, acquisition, merger or exit |
 | Event or Opportunity | Programme, event, competition or application |
 | Technical Release | Model, software, platform or infrastructure release |
-| Other | Content not fitting the configured categories |
+| Other | Content not fitting configured categories |
 
-Opinion should normally receive a lower default ranking than original reporting or primary evidence unless there is a specific reason otherwise.
+This dimension should not be implemented merely because it appears in the target information model.
+
+Add it only if production report quality or ranking materially benefits from it.
 
 ---
 
 # Source Hierarchy
 
-Source tier represents evidentiary role and expected reliability. It does not guarantee that every item from the source is important or correct.
+Source tier represents evidentiary role and expected reliability.
+
+It does not guarantee that every item from the source is important or correct.
+
+The current ranking system already uses source tier as one deterministic input.
 
 ---
 
@@ -608,7 +699,7 @@ Source tier represents evidentiary role and expected reliability. It does not gu
 
 Sources that directly produce the underlying decision, data, research, product or announcement.
 
-### Examples of Source Types
+### Examples
 
 - governments;
 - regulators;
@@ -624,7 +715,7 @@ Sources that directly produce the underlying decision, data, research, product o
 
 ### Strengths
 
-- closest to the original evidence;
+- close to original evidence;
 - authoritative for official decisions and data;
 - lower risk of reporting distortion.
 
@@ -637,9 +728,9 @@ Sources that directly produce the underlying decision, data, research, product o
 
 ### Policy
 
-Tier 1 sources should be prioritised for confirmation and factual grounding.
+Tier 1 sources should be prioritised for factual grounding.
 
-They should not automatically receive the highest relevance score for every item.
+They should not automatically outrank every other item regardless of relevance.
 
 ---
 
@@ -659,13 +750,12 @@ Established journalistic organisations that produce original reporting, verifica
 ### Limitations
 
 - some content may be paywalled;
-- headlines may still optimise for attention;
-- access to full content may vary;
+- metadata availability varies;
 - different publications have different geographic and editorial biases.
 
 ### Policy
 
-Tier 2 sources should form a major part of the daily source universe.
+Tier 2 sources are likely to form an important part of the future production source universe.
 
 The system should store only permitted metadata and short feed-provided descriptions.
 
@@ -693,9 +783,7 @@ Specialist organisations, newsletters, venture funds, research groups, industry 
 
 ### Policy
 
-Tier 3 sources should be selected individually based on demonstrated quality.
-
-Their analysis should be distinguishable from primary evidence.
+Tier 3 sources should be approved individually based on demonstrated quality.
 
 ---
 
@@ -703,7 +791,7 @@ Their analysis should be distinguishable from primary evidence.
 
 ### Definition
 
-Aggregators, community platforms, social-media accounts, forums and other sources useful primarily for discovering possible stories.
+Aggregators, community platforms, social-media accounts, forums and similar discovery-oriented sources.
 
 ### Strengths
 
@@ -717,19 +805,41 @@ Aggregators, community platforms, social-media accounts, forums and other source
 - duplication;
 - manipulation risk;
 - unclear authorship;
-- unstable access.
+- unstable structured access.
 
 ### Policy
 
-Tier 4 sources are outside the initial MVP unless a specific structured source proves unusually valuable.
+Tier 4 sources are outside the initial production scope unless a specific structured source proves unusually valuable.
 
 A Tier 4 source should not be the sole evidence supporting an important item.
 
 ---
 
+# Current Source-Tier Scoring
+
+The current provisional ranking configuration assigns:
+
+```text
+Tier 1 = 4 points
+Tier 2 = 3 points
+Tier 3 = 2 points
+Tier 4 = 1 point
+```
+
+Source tier is only one score component.
+
+Current scoring also includes:
+
+- 2 points per assigned domain;
+- 1 point per matched keyword.
+
+These weights are Phase 1 defaults and should be evaluated using real reports before being treated as final.
+
+---
+
 # Source Inclusion Criteria
 
-A source should normally satisfy most of the following conditions.
+A production source should normally satisfy most of the following conditions.
 
 ## Relevance
 
@@ -745,11 +855,18 @@ The source provides primary information, original reporting or meaningful specia
 
 ## Structured Access
 
-The source provides a stable RSS feed, Atom feed, official API or other approved structured endpoint.
+The source provides:
+
+- stable RSS;
+- Atom;
+- official API;
+- another explicitly approved structured endpoint.
 
 ## Timeliness
 
 Publication timestamps are available and reasonably reliable.
+
+Because the current system filters using `published_at`, timestamp quality is particularly important.
 
 ## Metadata Quality
 
@@ -757,240 +874,308 @@ Titles, URLs and descriptions are sufficiently complete for automated processing
 
 ## Public Accessibility
 
-The system can legally and technically access the relevant metadata without private credentials.
+The relevant metadata can be accessed without private credentials.
 
 ## Stability
 
-The endpoint is not excessively unstable or dependent on fragile browser behaviour.
+The endpoint is sufficiently stable for low-maintenance automated collection.
 
 ## Value-to-Noise Ratio
 
-A meaningful proportion of the source’s output is relevant to the project.
+A meaningful proportion of output is relevant to the project.
 
 ## Diversity Contribution
 
-The source adds geographic, institutional, ideological, industry or technical diversity.
+The source adds useful:
+
+- geographic;
+- institutional;
+- industry;
+- technical;
+- evidentiary;
+- perspective diversity.
 
 ## Public Repository Compatibility
 
-Storing its permitted metadata and links does not create an obvious copyright or privacy problem.
+Permitted metadata and links can be stored safely in a public repository.
 
 ---
 
 # Source Exclusion Criteria
 
-A source should be rejected or disabled when one or more of the following materially apply.
+A source should be rejected, disabled or removed when one or more of the following materially apply:
 
-- It requires prohibited scraping.
-- It requires paid API access.
-- It requires private account access for core collection.
-- It republishes content without meaningful added value.
-- It produces excessive promotional material.
-- Its publication timestamps are unusable.
-- It repeatedly generates malformed or misleading records.
-- It has weak or unclear ownership.
-- It primarily publishes rumours or unsupported claims.
-- It systematically duplicates higher-quality sources.
-- Its content is outside monitored domains.
-- Its endpoint is too unstable for the value it provides.
-- It creates copyright or privacy risks for the public repository.
-- It consistently produces low-value items during evaluation.
+- it requires prohibited scraping;
+- it requires paid API access for core operation;
+- it requires private account access;
+- it republishes content without meaningful added value;
+- it produces excessive promotional material;
+- its publication timestamps are unusable for the collection-window policy;
+- it repeatedly generates malformed or misleading records;
+- it has weak or unclear ownership;
+- it primarily publishes unsupported rumours;
+- it systematically duplicates better sources;
+- its content falls outside monitored priorities;
+- its endpoint is too unstable for the value provided;
+- it creates copyright or privacy risk;
+- maintaining it requires disproportionate manual intervention.
+
+A low-quality source should normally be removed rather than supported through increasingly complex code.
 
 ---
 
-# Initial Source-Universe Strategy
+# Production Source-Universe Strategy
 
-The MVP should begin with a deliberately limited source universe.
+The previous planning range of approximately 20–30 sources should not be treated as an implementation target.
 
-## Target Size
+The next source-selection step should be deliberately smaller.
 
-Initial target:
+## Phase 2 Strategy
 
-- approximately 20–30 active sources;
-- enough to test every monitored domain;
-- small enough to inspect manually during development.
+Start with the smallest credible real-source set sufficient to validate:
 
-This is a planning range, not a fixed requirement.
+- live HTTP collection;
+- source diversity;
+- publication timestamps;
+- real metadata;
+- source-level failures;
+- report usefulness.
 
-## Balance
+The first production-like set should remain small enough for manual review.
 
-The initial universe should include a mix of:
+A likely initial real-source set may include examples from several of these categories:
 
-- primary institutions;
-- high-quality general reporting;
-- specialist AI and technology sources;
-- startup and venture-capital sources;
-- European institutions;
-- Italian sources;
-- Milan or Bocconi opportunity sources.
+- one primary institutional source;
+- one high-quality reporting source;
+- one AI or technology source;
+- one European or Italian source;
+- optionally one startup, VC or opportunity source.
 
-## Principle
+The exact number should be determined by coverage needs rather than by a predefined quota.
+
+## Expansion Rule
+
+Add a source only when it solves a demonstrated coverage or quality gap.
 
 A smaller high-quality source universe is preferable to a large unreviewed list.
 
-Source expansion should follow demonstrated coverage gaps.
-
 ---
 
-# Source Registry Requirements
+# Source Registry
 
-The final source registry should support fields such as:
+## Current Implemented Fields
+
+The current source configuration supports:
 
 ```text
 id
 name
 feed_url
-homepage_url
 source_type
 source_tier
 default_domains
 language
-country
 geographic_scope
 active
-notes
 ```
 
-Additional operational fields may later include:
+These fields are sufficient for the current deterministic pipeline.
+
+## Potential Future Metadata
+
+Fields such as the following may be added only if required:
 
 ```text
-last_successful_run
-failure_count
+homepage_url
+country
+notes
 date_added
 date_reviewed
 ```
 
-Operational fields should not be manually maintained when they can be generated by the system.
+Operational data such as:
 
-The exact registry format will be decided in System Architecture.
+```text
+last_successful_run
+failure_count
+```
+
+should generally be generated by the system rather than manually maintained.
 
 ---
 
-# Article Metadata Schema
+# Article Metadata Policy
 
-The processed record should preserve, where available:
+The current canonical article record preserves important source-provided and derived fields including:
 
 ```text
 record_id
 source_id
-source_name
-source_tier
-source_type
 title
 normalized_title
 article_url
 normalized_url
-author
 published_at
 retrieved_at
 description
-language
 domains
+matched_keywords
+relevance_score
+score_components
+```
+
+The exact Python model remains the implementation source of truth.
+
+Potential future fields such as:
+
+```text
+author
 geographies
 content_type
-matched_keywords
 matched_entities
 duplicate_cluster_id
 related_source_count
-relevance_score
-score_components
-processing_status
 ```
 
-## Required Core Fields
+should not be documented as implemented until the corresponding behaviour exists.
 
-A valid reportable record should normally require:
+---
+
+# Required Core Metadata
+
+A structurally valid current record normally requires:
 
 - source identifier;
 - title;
-- usable URL;
-- retrieval timestamp.
+- usable HTTP or HTTPS article URL;
+- timezone-aware retrieval timestamp.
 
-Publication timestamp is strongly preferred but may be missing from some sources.
+Publication timestamp is not required for structural validity.
 
-Rules for missing publication timestamps will be defined in System Architecture and testing.
+However, current reporting-window policy requires a usable `published_at` value for inclusion in the reporting window.
 
-## Description Policy
+This distinction is intentional.
+
+A record may therefore be:
+
+- valid;
+- stored in validation results;
+- excluded from current report processing because publication time is unavailable.
+
+---
+
+# Publication Timestamp Policy
+
+Current Phase 1 behaviour is conservative.
+
+If `published_at` is missing:
+
+- the record may remain structurally valid;
+- the system does not invent a publication time;
+- retrieval time is not treated as confirmed publication time;
+- the record is excluded from collection-window eligibility.
+
+This policy should be revisited only if useful real sources frequently omit publication timestamps.
+
+---
+
+# Description Policy
 
 Only short descriptions already provided through permitted feeds or public metadata should be stored and displayed.
 
 The system should not extract full article bodies during the MVP.
 
-## Explainability Fields
+Current report configuration truncates descriptions to:
 
-Where practical, the system should preserve:
+```text
+300 characters
+```
 
-- matched domain rules;
-- matched entities;
-- score components;
-- duplicate-cluster membership.
+The value is configurable and should be evaluated during real use.
 
-These fields make classification and ranking auditable.
+The system must not fabricate article summaries.
 
 ---
 
 # Classification Policy
 
-## Classification Inputs
+## Current Classification Inputs
 
-The MVP may use:
+The implemented classifier currently uses:
 
 1. source default domains;
 2. title keywords;
-3. description keywords;
-4. configured entities;
-5. geographic references;
-6. content-type rules.
+3. description keywords.
 
-## Classification Priority
+Keyword matching is deterministic, case-insensitive and protected by word-boundary behaviour.
 
-A possible rule order is:
+## Current Multi-Domain Behaviour
 
-1. explicit source-level default;
-2. strong entity or institutional match;
-3. title match;
-4. description match;
-5. geographic rule;
-6. unclassified.
+A record may receive multiple domains.
 
-The final logic belongs in System Architecture.
+For report display:
 
-## Multiple Matches
+- one domain becomes primary;
+- additional domains are displayed as secondary metadata.
 
-Items may receive multiple domains when several strong rules match.
+## Current Unclassified Behaviour
 
-## Weak Matches
+Unclassified records:
 
-Weak or isolated keywords should not automatically force classification when they are ambiguous.
+- remain valid processed records;
+- are not shown in the main report by default.
 
-For example:
+## Potential Future Inputs
 
-- “Apple” may refer to a company or a fruit;
-- “model” may refer to AI, economics or a physical product;
-- “market” may refer to finance, consumer markets or labour markets.
+Future deterministic classification may use:
+
+- configured entities;
+- geography;
+- content types;
+- exclusions;
+- keyword groups;
+- stronger context rules.
+
+These should be introduced only when real classification errors demonstrate a need.
+
+---
+
+# Keyword Policy
+
+Keyword lists should be:
+
+- explicit;
+- human-readable;
+- small enough to review;
+- conservative;
+- tested against real examples.
+
+Avoid overly broad terms that create large numbers of false positives.
 
 Ambiguous terms may require:
 
-- entity lists;
-- combinations of keywords;
+- multiple-word phrases;
 - source context;
-- exclusion rules.
+- exclusions;
+- combinations of terms.
 
-## Unclassified Items
+Examples of ambiguous terms include:
 
-Unclassified items should remain available for evaluation.
+- model;
+- market;
+- Apple;
+- cloud;
+- bank.
 
-They should not automatically appear in the main daily report unless configured.
-
-A consistently high number of unclassified relevant items indicates that the taxonomy or rules need improvement.
+Keyword complexity should grow from observed errors, not from speculative taxonomy design.
 
 ---
 
 # Tracked Entities
 
-The system may use configured entities to improve classification and ranking.
+Tracked entities are not currently implemented.
 
-Entity groups may include:
+Potential entity groups include:
 
 - institutions;
 - central banks;
@@ -1002,9 +1187,9 @@ Entity groups may include:
 - universities;
 - accelerators;
 - Bocconi organisations;
-- relevant Milan ecosystem organisations.
+- Milan ecosystem organisations.
 
-Each entity may support:
+If introduced later, an entity configuration might support:
 
 ```text
 canonical_name
@@ -1016,109 +1201,131 @@ priority
 active
 ```
 
-Tracked entities should be introduced gradually.
+An entity registry should remain small and purpose-driven.
 
-The MVP should not begin with an excessively large entity database.
+The system should not build a large entity database without a validated ranking or classification need.
 
 ---
 
 # Ranking Policy
 
-This document defines ranking principles, not the final formula.
+The ranking system should prioritise practical relevance to the user.
 
-## Possible Positive Factors
+It should remain:
 
-- higher source tier;
-- direct primary evidence;
-- strong domain relevance;
+- deterministic;
+- configurable;
+- inspectable;
+- reproducible.
+
+## Current Implemented Factors
+
+Current Phase 1 ranking uses:
+
+- source tier;
+- number of assigned domains;
+- number of matched keywords.
+
+Current conceptual formula:
+
+```text
+relevance_score
+=
+source_tier_score
++ 2 × domain_matches
++ 1 × keyword_matches
+```
+
+Score components are stored.
+
+## Potential Future Positive Factors
+
+Only if justified by real reports:
+
+- domain priority;
+- geography priority;
+- tracked entities;
+- content type;
 - recency;
-- high-priority geography;
-- tracked high-priority entity;
-- multi-source coverage;
-- major transaction or policy decision;
-- significant data release;
-- novelty relative to recent reports.
+- independent multi-source coverage.
 
-## Possible Negative Factors
+## Potential Future Negative Factors
 
-- promotional language;
-- weak domain match;
-- duplicate status;
-- opinion without new evidence;
-- old publication date;
-- missing critical metadata;
-- repeated syndicated content;
-- low-value routine announcements.
+Only if justified by observed quality problems:
+
+- promotional content;
+- missing metadata;
+- repeated syndicated coverage;
+- source-specific quality penalties.
 
 ## Source Tier Is Not Importance
 
-A Tier 1 source may publish routine low-value updates.
+A Tier 1 source may publish a routine low-value update.
 
 A Tier 3 source may publish highly relevant specialist analysis.
 
-The ranking system should combine source quality with item-level relevance.
-
-## Multi-Source Coverage
-
-Multiple independent sources covering the same event may increase confidence or importance.
-
-Repeated publication by syndicated copies should not create the same benefit.
-
-## Transparency
-
-Score components should be inspectable.
-
-The ranking system should not produce a number that cannot be explained.
+Source quality should therefore remain only one component of relevance.
 
 ---
 
-# Duplicate and Story-Clustering Policy
+# Duplicate Policy
 
-Duplicate reduction should preserve information while reducing repetition.
+Duplicate reduction should reduce repetition without discarding genuinely distinct information.
 
-## Exact Duplicates
+## Current Exact Duplicate Rules
 
-Likely exact duplicates include:
+Implemented exact duplicate checks use:
 
-- identical normalised URLs;
-- identical normalised titles;
-- repeated records from the same source.
+1. normalised URL;
+2. normalised title.
 
-These may be automatically suppressed or merged.
+The first deterministic occurrence is retained.
 
 ## Near Duplicates
 
-Near duplicates may include:
+Near-duplicate detection is not currently implemented.
+
+Examples of potential future near duplicates include:
 
 - minor headline variations;
 - syndicated copies;
-- several publications reporting the same announcement;
-- updated versions of the same item.
+- multiple outlets reporting the same announcement;
+- slightly updated versions of the same story.
 
-These should initially be clustered conservatively.
+Near-duplicate clustering should be added only if real reports demonstrate material repeated coverage.
 
 ## Related but Distinct Items
 
-Items should not be merged merely because they discuss the same company or topic.
+Items should remain separate when they represent materially different information.
 
-Examples that may remain separate:
+Examples:
 
 - a company earnings release;
-- a later analyst interpretation;
+- later independent analysis of those earnings;
 - a regulatory investigation;
-- a related acquisition announcement.
+- a separate acquisition announcement.
 
-## Primary Cluster Item
+## Conservative Principle
 
-When several records belong to one cluster, the displayed primary item may be selected using:
+False merging is more harmful than modest repeated coverage during early production.
 
-- source tier;
-- relevance score;
-- metadata completeness;
-- publication time;
-- directness of evidence.
+When uncertain, preserve separate records.
 
-Related records should remain recoverable.
+---
+
+# Multi-Source Coverage
+
+The current system does not create story clusters or related-source counts.
+
+If real usage demonstrates that the same important event frequently appears across multiple independent sources, future clustering may preserve:
+
+- primary record;
+- related record IDs;
+- unique source count;
+- source diversity;
+- publication range.
+
+Multi-source coverage should not automatically increase relevance unless the system can distinguish independent reporting from syndicated duplication.
 
 ---
 
@@ -1126,26 +1333,26 @@ Related records should remain recoverable.
 
 ## Initial Languages
 
-The initial system should support:
+The target system should support:
 
 - English;
 - Italian.
 
-Other languages may be introduced later if a source provides exceptional value and can be processed reliably.
+The current controlled fixture and configuration do not yet constitute full bilingual validation.
 
 ## Translation
 
-The MVP should not depend on automated translation.
+The core MVP should not depend on automated translation.
 
 Original titles and descriptions should be preserved.
 
 ## Classification
 
-Keyword and entity configuration should support both English and Italian where relevant.
+Keyword configuration may include both English and Italian where needed.
 
 ## Report Presentation
 
-The initial report may contain English and Italian source titles in their original language.
+Original source language should be preserved.
 
 The system should not fabricate translations.
 
@@ -1153,34 +1360,34 @@ The system should not fabricate translations.
 
 # Source Diversity Policy
 
-A useful report should not be dominated by one publisher, country or source type.
+A useful production report should not be unnecessarily dominated by one publisher, source tier, geography or source type.
 
-Diversity should be evaluated across:
+Diversity should be reviewable across:
 
 - publishers;
 - source tiers;
 - geographies;
-- content types;
-- political and institutional perspectives;
-- primary versus secondary sources;
+- primary versus secondary evidence;
 - general versus specialist coverage.
 
-The system does not need to enforce artificial equality between sources.
+The system does not need artificial quotas.
 
-However, concentration should remain visible and reviewable.
+A highly relevant publisher may legitimately appear several times.
 
-Possible future metrics include:
+Potential future evaluation metrics include:
 
-- share of displayed items by publisher;
-- share by source tier;
-- share by geography;
-- share by domain.
+- displayed share by publisher;
+- displayed share by source tier;
+- displayed share by geography;
+- displayed share by domain.
+
+These metrics should be added only if concentration becomes a practical quality issue.
 
 ---
 
 # Opportunity-Source Policy
 
-Milan and Bocconi opportunity monitoring requires additional selectivity.
+Milan and Bocconi opportunity monitoring requires particularly strong selectivity.
 
 An opportunity should be considered relevant when it offers meaningful:
 
@@ -1192,7 +1399,7 @@ An opportunity should be considered relevant when it offers meaningful:
 - competition exposure;
 - startup or innovation access.
 
-Relevant opportunity metadata may include:
+Potential opportunity metadata may include:
 
 ```text
 opportunity_name
@@ -1207,7 +1414,9 @@ source_url
 
 The MVP does not require a separate opportunity database.
 
-Opportunities may initially be represented as normal article records with the content type `Event or Opportunity`.
+Opportunity records may later use the normal article-record model if the relevant source metadata fits the pipeline.
+
+A dedicated report section should be added only if real usage demonstrates value.
 
 ---
 
@@ -1219,11 +1428,10 @@ The repository may store and display:
 - source names;
 - direct links;
 - timestamps;
-- authorship metadata;
 - short feed-provided descriptions;
 - system-generated classifications;
 - system-generated scores;
-- source-health information.
+- run and source-health metadata.
 
 The repository must not store or display:
 
@@ -1233,56 +1441,67 @@ The repository must not store or display:
 - private newsletter text;
 - private email content;
 - unauthorised copyrighted material;
-- credentials or access tokens.
+- credentials;
+- authentication tokens.
 
-When uncertainty exists, store less content and preserve the source link.
+When uncertainty exists:
+
+> store less content and preserve the original source link.
 
 ---
 
-# Source Review Process
+# Source Lifecycle
 
-A source should move through the following lifecycle.
+A source may move through the following states conceptually.
 
 ## Candidate
 
-The source has been identified but not yet evaluated.
+Identified but not yet evaluated.
 
 ## Approved
 
-The source meets the inclusion criteria and is ready for testing.
+Passes source-policy review and is ready for testing.
 
 ## Active
 
-The source is enabled in the production registry.
+Enabled in the production source configuration.
 
 ## Monitoring
 
-The source has quality, reliability or duplication concerns.
+Remains active or temporarily disabled while reliability or quality concerns are reviewed.
 
 ## Disabled
 
-The source remains documented but is not collected.
+Retained in configuration history but not collected.
 
 ## Removed
 
-The source is no longer retained in the registry because it is unsuitable or irrelevant.
+No longer retained because it is clearly unsuitable or obsolete.
+
+Not every lifecycle state needs to become a field in `sources.yaml`.
+
+Use configuration complexity only when it creates operational value.
 
 ---
 
 # Adding a Source
 
-Before adding a source, review:
+Before adding a production source, ask:
 
-1. Which domain gap does it fill?
-2. Is the source primary, journalistic or specialist?
-3. Is its structured endpoint permitted and stable?
-4. Does it provide usable timestamps and URLs?
-5. Does it duplicate existing coverage?
-6. Is the expected signal-to-noise ratio acceptable?
-7. Does it add geographic or perspective diversity?
-8. Can its metadata be stored safely in a public repository?
+1. Which real coverage gap does it fill?
+2. Is it primary, journalistic or specialist?
+3. Is the endpoint public and permitted?
+4. Is the endpoint stable?
+5. Does it provide usable timestamps?
+6. Does it provide usable URLs?
+7. Is the metadata sufficient for the current pipeline?
+8. Does it significantly duplicate existing sources?
+9. Is its signal-to-noise ratio acceptable?
+10. Does it add meaningful diversity?
+11. Can its metadata be stored safely in a public repository?
+12. Will supporting it create disproportionate maintenance?
 
-A source should not be added merely because it is well known.
+A source should not be added merely because it is prestigious or well known.
 
 ---
 
@@ -1293,110 +1512,346 @@ A source should be reviewed when it:
 - fails repeatedly;
 - changes endpoint format;
 - becomes mostly promotional;
-- produces excessive duplicates;
-- no longer publishes relevant content;
+- creates excessive repetition;
+- stops publishing relevant information;
 - becomes inaccessible without private credentials;
 - creates copyright concerns;
+- requires excessive special-case handling;
 - adds little value relative to maintenance cost.
 
-Disabling should generally be preferred before permanent removal because it preserves decision history.
+Disabling should often be preferred before permanent removal because it preserves decision history.
 
 ---
 
 # Source Evaluation Metrics
 
-During the two-week MVP evaluation, review each source using:
+During initial production evaluation, review sources using:
 
 | Metric | Question |
 |---|---|
-| Availability | How often did the source collect successfully? |
-| Relevance | What share of collected items matched monitored domains? |
-| Display Rate | How often did its items appear in the report? |
+| Availability | How often did collection succeed? |
+| Relevance | How much collected material matched monitored needs? |
+| Display Rate | How often did the source contribute displayed items? |
 | Originality | Did it add information not already available elsewhere? |
 | Duplication | How often did it repeat other sources? |
-| Metadata Quality | Were title, URL and timestamp reliable? |
-| Strategic Value | Did it improve understanding or opportunity detection? |
-| Maintenance Cost | Did it frequently require manual intervention? |
+| Metadata Quality | Were titles, URLs and timestamps reliable? |
+| Strategic Value | Did it improve awareness or opportunity detection? |
+| Maintenance Cost | Did it require recurring manual intervention? |
 
 No single metric should determine source quality.
 
+A source can be reliable but low-value.
+
+A source can also be strategically valuable but operationally expensive.
+
+Both dimensions matter.
+
 ---
 
-# Initial Taxonomy Validation
+# Taxonomy Validation Strategy
 
-Before implementation is considered stable, use a manually reviewed sample containing:
+Technical pipeline stability and information-quality stability are separate.
 
-- items from each topic domain;
+The local Phase 1 pipeline is technically validated.
+
+The full target taxonomy is not yet quality-validated.
+
+Before the production taxonomy is considered stable, use a manually reviewed real sample containing examples such as:
+
+- multiple topic domains;
 - English and Italian items;
 - primary and secondary sources;
 - multi-domain stories;
 - ambiguous keywords;
 - unclassified items;
 - exact duplicates;
-- near duplicates;
+- possible near duplicates;
 - opportunity announcements;
 - promotional content;
-- malformed records.
+- malformed or incomplete metadata.
 
-The sample should be used to evaluate:
+Evaluate:
 
 - classification accuracy;
 - false-positive classifications;
-- missed domains;
+- relevant unclassified records;
 - duplicate behaviour;
-- source-tier handling;
-- metadata completeness;
-- report usefulness.
+- source-tier usefulness;
+- timestamp quality;
+- report usefulness;
+- report concentration.
+
+Do not build a large artificial validation dataset before enough real-source examples exist.
+
+---
+
+# Current Resolved Information Decisions
+
+The following decisions are now implemented for the current MVP core.
+
+## Current Implemented Domains
+
+- Technology and Software;
+- Artificial Intelligence.
+
+The full ten-domain taxonomy remains the target.
+
+---
+
+## Multi-Domain Records
+
+**Decision:** supported.
+
+Records may receive multiple domains.
+
+---
+
+## Primary Report Placement
+
+**Decision:** each story appears once.
+
+The first assigned eligible domain becomes the primary report section.
+
+Additional domains are shown as secondary metadata.
+
+---
+
+## Unclassified Records
+
+**Decision:** preserved in processed data but omitted from the main report by default.
+
+---
+
+## Relevance Score
+
+**Decision:** stored and displayed.
+
+---
+
+## Score Components
+
+**Decision:** stored for transparency.
+
+They are not currently shown in full in the Markdown report.
+
+---
+
+## Maximum Items Per Domain
+
+**Current configured value:** 5.
+
+---
+
+## Maximum Total Items
+
+**Current configured value:** 30.
+
+---
+
+## Description Length
+
+**Current configured maximum:** 300 characters.
+
+---
+
+## Exact Duplicate Policy
+
+**Decision:**
+
+1. normalised URL;
+2. normalised title.
+
+---
+
+## Collection Window
+
+**Current CLI default:** previous 24 hours.
+
+Boundaries are inclusive.
+
+---
+
+## Missing Publication Timestamp
+
+**Current policy:** exclude from collection-window eligibility.
+
+Do not replace missing publication time with retrieval time.
 
 ---
 
 # Open Information Decisions
 
-The following remain unresolved:
+The following remain intentionally unresolved.
 
-- exact initial sources;
-- exact source count;
-- exact domain-priority weights;
-- whether every item must receive one primary domain;
-- how unclassified items appear in reports;
-- whether source tier should be displayed;
-- whether score components should be shown in the public report;
-- exact tracked-entity list;
-- exact keyword lists;
-- exact near-duplicate threshold;
-- treatment of items without publication timestamps;
-- maximum description length;
-- whether opportunity items receive a dedicated report section;
-- how publisher concentration should affect ranking.
+## Production Source Universe
 
-These decisions should be resolved through architecture design and sample-output evaluation.
+Determine during minimal real-source validation.
+
+## Exact Source Count
+
+No fixed target.
+
+Choose the smallest source universe that produces useful coverage.
+
+## Full Keyword Lists
+
+Expand gradually from real classification errors.
+
+## Domain Priority Weights
+
+Not currently implemented.
+
+Add only if report ordering needs them.
+
+## Tracked Entities
+
+Not currently implemented.
+
+## Geographic Classification
+
+Not currently implemented.
+
+## Content-Type Classification
+
+Not currently implemented.
+
+## Near-Duplicate Threshold
+
+No threshold exists because near-duplicate detection is not implemented.
+
+## Multi-Source Story Clustering
+
+Deferred pending real repetition.
+
+## Publisher Concentration Controls
+
+Evaluate only after real reports show concentration problems.
+
+## Missing Publication Timestamp Fallback
+
+Reconsider only if valuable real sources systematically omit timestamps.
+
+## Opportunity-Specific Report Behaviour
+
+Evaluate after the broader production source universe exists.
+
+## Source-Health History
+
+Current run summaries provide per-run status.
+
+Long-term history should be added only if source maintenance requires it.
+
+---
+
+# Information Quality Decision Rules
+
+Before adding a taxonomy rule, source field or classification dimension, ask:
+
+1. What observed information-quality problem does it solve?
+2. How often does the problem occur?
+3. Does the problem materially reduce report usefulness?
+4. Can a source change solve it instead?
+5. Can a simpler keyword/configuration adjustment solve it?
+6. What false positives or false negatives could the change create?
+7. How will the improvement be evaluated?
+8. Does the change increase recurring maintenance?
+9. Does the change preserve explainability?
+10. Is the change necessary before the system can be used?
+
+The default should be to preserve the simpler current rule until evidence justifies more complexity.
+
+---
+
+# Current Information-Policy Limitations
+
+The following limitations are known and accepted at the current stage:
+
+- only two target domains are implemented;
+- only one controlled sample source is active;
+- bilingual taxonomy behaviour is not yet validated;
+- full ten-domain coverage is not implemented;
+- geography is not implemented;
+- content type is not implemented;
+- entity tracking is not implemented;
+- near-duplicate detection is not implemented;
+- multi-source story clustering is not implemented;
+- source diversity has not yet been evaluated with production data;
+- ranking weights are provisional;
+- real-source timestamp quality remains unvalidated;
+- current keyword lists are intentionally minimal.
+
+These limitations define the current maturity level.
+
+They do not imply that all corresponding features should be implemented next.
 
 ---
 
 # Current Status
 
-**Status:** Initial taxonomy and policy defined
+**Status:** Target information taxonomy retained; Phase 1 implementation state reconciled
 
-**Completed:**
+**Implemented and validated:**
 
-- Established initial topic domains.
+- configurable domains;
+- source-default domains;
+- deterministic title/description keyword classification;
+- multiple domains;
+- primary report placement;
+- secondary-domain metadata;
+- explicit unclassified handling;
+- deterministic source-tier scoring;
+- exact URL/title deduplication;
+- 24-hour publication-window filtering;
+- feed-description truncation;
+- public-safe metadata policy.
+
+**Currently controlled / provisional:**
+
+- two-domain taxonomy;
+- one sample source;
+- keyword lists;
+- ranking weights;
+- report limits.
+
+**Not yet implemented:**
+
+- production source universe;
+- broad ten-domain coverage;
+- tracked entities;
+- geography;
+- content type;
+- near-duplicate clustering;
+- multi-source coverage;
+- long-term source-health history.
+
+**Next information-quality milestone:**
+
+> Select and validate the smallest credible set of real public RSS/Atom sources before expanding taxonomy complexity.
+
+---
+
+# Changelog
+
+## 2026-08-11 — Phase 1 Taxonomy and Source-Policy Reconciliation
+
+- Distinguished the target ten-domain taxonomy from the implemented two-domain Phase 1 configuration.
+- Recorded current implemented classification behaviour.
+- Recorded current exact duplicate policy.
+- Recorded current ranking weights and source-tier scoring.
+- Recorded current report limits and description length.
+- Recorded current collection-window and missing-publication-time policy.
+- Replaced the previous 20–30 source planning target with a smallest-credible-source strategy.
+- Moved geography, entities, content type and near-duplicate clustering behind evidence from real reports.
+- Clarified that technical Phase 1 stability does not imply full taxonomy quality stability.
+- Updated the article metadata section to distinguish implemented fields from future possibilities.
+- Preserved the original source hierarchy, inclusion/exclusion policy, copyright boundaries and broader ten-domain strategic scope.
+
+## Initial Information Taxonomy and Source Policy Baseline
+
+- Established the ten target topic domains.
 - Defined geographic and content-type dimensions.
 - Defined source tiers.
 - Defined source inclusion and exclusion criteria.
-- Defined initial metadata expectations.
-- Defined classification, ranking and duplicate-reduction principles.
+- Defined source lifecycle and evaluation principles.
+- Defined classification, ranking and duplicate-reduction policy.
 - Defined copyright and public-repository boundaries.
-- Defined source lifecycle and evaluation process.
-
-**Not yet completed:**
-
-- Initial source registry.
-- Keyword configuration.
-- Entity configuration.
-- Ranking weights.
-- Duplicate thresholds.
-- Taxonomy validation sample.
-
-**Next document:**
-
-- 

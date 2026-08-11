@@ -27,15 +27,20 @@
 Development should follow these rules:
 
 - Build one complete vertical slice before expanding scope.
-- Prefer working output over additional planning.
+- Start from the user need and workflow, not from a preferred technology.
+- Prefer working output over additional infrastructure.
 - Do not create features without a validated need.
-- Do not add recurring cost.
+- Prefer the simplest solution that satisfies the requirement.
+- Do not add recurring monetary cost.
 - Do not introduce production AI calls.
 - Keep daily manual work negligible.
+- Prefer RSS, official APIs and other structured public sources before scraping.
+- Prefer deterministic rules before machine learning or LLM-based logic.
 - Validate locally before enabling automation.
-- Use Git and tests to verify each material change.
+- Use Git and tests as the verification layer for every material change.
 - Keep the repository public-safe.
 - Stop at stable checkpoints.
+- Treat technically successful execution as insufficient if the report is noisy, repetitive, misleading or too long.
 
 The project should not move to the next phase until the current phase has a clear completion condition.
 
@@ -45,15 +50,16 @@ The project should not move to the next phase until the current phase has a clea
 
 | Field | Current Status |
 |---|---|
-| Project Phase | Phase 0 — Definition and Repository Setup - Completed| 
-| Current Milestone | Complete and validate the initial project-control documents |
-| Repository Status | Public repository created and opened locally in VS Code |
-| Implementation Status | No production code yet |
-| Automation Status | Not started |
-| Source Registry | Not started |
-| Testing Status | Not started |
-| Current Blockers | Documentation restoration and final consistency review |
-| Current Priority | Restore complete project documents, validate them, and then begin the smallest local vertical slice |
+| Project Phase | Phase 1 complete — transition to Phase 2 production-readiness validation |
+| Current Milestone | Milestone 2 — Validate a minimal real-source run before automation |
+| Repository Status | Public Python repository with a working local deterministic pipeline |
+| Implementation Status | Local collection-to-report vertical slice complete and validated |
+| Automation Status | GitHub Actions not yet implemented |
+| Source Registry | One controlled fixture/sample source; production source set not yet selected |
+| Taxonomy Status | Two implemented domains: Technology and Software; Artificial Intelligence |
+| Testing Status | 104 tests passing at Phase 1 closeout |
+| Current Blockers | No Phase 1 implementation blocker; production network/source behaviour still unvalidated |
+| Current Priority | Refresh canonical project documents, then validate the smallest real-source run before GitHub Actions |
 
 ---
 
@@ -61,48 +67,69 @@ The project should not move to the next phase until the current phase has a clea
 
 ## Project Decisions
 
-- Selected a hybrid information model:
-  - ChatGPT provides independent interpretation and synthesis.
-  - GitHub provides deterministic collection, organisation, ranking and archiving.
-- Confirmed zero recurring monetary cost as a hard constraint.
-- Confirmed negligible daily manual work as a hard constraint.
-- Confirmed that production must not consume GitHub AI or Copilot credits.
-- Confirmed that the MVP will use public structured sources.
-- Confirmed that RSS and Atom are the first supported source types.
-- Confirmed that production will run through Python and GitHub Actions.
-- Confirmed that the system will not use LLM calls, agents, RAG, embeddings or vector databases during the MVP.
-- Confirmed that the repository will remain public.
-- Confirmed that private Career OS materials will remain outside the repository.
-- Confirmed JSON Lines for processed article records.
-- Confirmed JSON for run summaries.
-- Confirmed Markdown for daily reports.
-- Confirmed UTC for internal timestamps.
-- Confirmed that the system will generate one primary report placement per item.
-- Confirmed automated repository persistence as the initial delivery model.
-- Deferred GitHub Issues, GitHub Pages and newsletter ingestion.
+The following decisions are established unless explicitly changed later:
 
-## Repository Setup
+- Use a hybrid information model:
+  - ChatGPT provides independent interpretation and synthesis outside the production pipeline.
+  - GitHub and Python provide deterministic collection, organisation, ranking, reporting and archiving.
+- Zero recurring monetary cost is a hard constraint.
+- Daily manual work should be negligible.
+- Production must not consume GitHub AI, Copilot or other recurring AI credits.
+- Public structured sources are the default input class.
+- RSS and Atom are the first supported source types.
+- Production automation will use ordinary Python and GitHub Actions.
+- The core system will not depend on LLM calls, agents, RAG, embeddings, vector databases or paid APIs.
+- The repository remains public.
+- Private Career OS materials remain outside the repository.
+- Processed records use JSON Lines.
+- Run summaries use JSON.
+- Daily reports use Markdown.
+- Internal timestamps use timezone-aware UTC datetimes.
+- Reports use one primary placement per item, with secondary domains shown as metadata.
+- Relevance scoring is deterministic and explainable.
+- Automated repository persistence remains the intended initial delivery model once GitHub Actions is implemented.
+- GitHub Issues, GitHub Pages and newsletter ingestion remain deferred.
 
-- Created the public GitHub repository.
-- Added:
-  - `README.md`
-  - `.gitignore`
-  - `LICENSE`
-- Opened the repository locally in VS Code.
-- Created:
-  - `docs/project/`
-  - `src/`
-- Created the initial project-control files.
+## Repository and Package Setup
 
-## Project Documentation
+Completed repository foundations include:
 
-Drafted and restored:
+- public GitHub repository;
+- `README.md`;
+- `.gitignore`;
+- `LICENSE`;
+- `pyproject.toml`;
+- `config/`;
+- `src/daily_intelligence/`;
+- `tests/` and controlled fixtures;
+- `docs/project/` for canonical project documentation.
 
-- `00 Project Brief.md`
-- `01 Product Requirements.md`
-- `02 System Architecture.md`
-- `03 Information Taxonomy and Source Policy.md`
-- `04 Development Roadmap and Status.md`
+The Python package uses a `src/` layout and requires Python 3.12 or later.
+
+## Implemented Phase 1 Modules
+
+The local processing core now includes:
+
+```text
+src/daily_intelligence/
+├── __init__.py
+├── cli.py
+├── classify.py
+├── collect.py
+├── config.py
+├── deduplicate.py
+├── filter_window.py
+├── models.py
+├── normalize.py
+├── pipeline.py
+├── rank.py
+├── report.py
+├── run_summary.py
+├── storage.py
+└── validate.py
+```
+
+The exact repository tree remains the source of truth if file names later change.
 
 ---
 
@@ -123,34 +150,28 @@ Create the minimum project definition required to begin implementation without m
 - define information taxonomy and source policy;
 - define system architecture;
 - define implementation roadmap;
-- review consistency across documents;
-- establish the initial repository structure.
+- establish repository structure;
+- make hard constraints explicit;
+- separate current requirements from deferred ideas.
 
 ## Completion Criteria
 
 Phase 0 is complete when:
 
-- documents `00` through `04` are internally consistent;
-- no major contradiction remains between requirements and architecture;
-- unresolved decisions are explicitly listed;
+- documents `00` through `04` are internally consistent enough to guide implementation;
+- no major contradiction blocks the local vertical slice;
+- unresolved decisions are explicitly visible;
 - the MVP boundary is clear;
 - the next implementation milestone is defined;
-- the initial documentation changes are committed and pushed.
+- repository foundations exist.
 
-## Current Status
+## Status
 
-**In progress**
+**Complete**
 
-## Remaining Actions
+## Completion Notes
 
-- verify that documents `00` through `04` are complete and have intact endings;
-- review documents `00` through `04` as one system;
-- remove any duplication or contradiction that materially affects implementation;
-- verify all hard constraints are consistently represented;
-- confirm that open decisions do not block the first local vertical slice;
-- inspect the documentation-only diff;
-- commit and push the restored documentation set;
-- replace the truncated copies in the dedicated GPT project with the canonical versions.
+Phase 0 established the initial product, architecture, information policy and implementation sequence. The original documents later became stale as implementation progressed, so they are being refreshed after Phase 1 rather than treated as immutable historical snapshots.
 
 ---
 
@@ -158,159 +179,286 @@ Phase 0 is complete when:
 
 ## Objective
 
-Build the smallest complete local pipeline that proves the core workflow.
+Build the smallest complete local pipeline that proves the core workflow from collection to readable output.
 
-## Initial Scope
+## Implemented Scope
 
-Use a very small controlled source set and implement:
+Phase 1 implemented and validated:
 
 1. configuration loading;
-2. RSS or Atom parsing;
-3. basic record normalisation;
-4. required-field validation;
-5. exact duplicate reduction;
-6. simple domain classification;
-7. provisional relevance scoring;
-8. JSON Lines persistence;
-9. Markdown report generation;
-10. structured run summary.
+2. RSS/Atom collection from controlled inputs;
+3. structured source-level collection results;
+4. record normalisation;
+5. required-field validation;
+6. deterministic collection-window filtering;
+7. exact duplicate reduction;
+8. simple deterministic domain classification;
+9. provisional deterministic relevance scoring;
+10. JSON Lines persistence;
+11. deterministic Markdown report selection and rendering;
+12. structured JSON run summaries;
+13. end-to-end local orchestration;
+14. one-command CLI execution;
+15. source-level failure isolation and degraded-run behaviour;
+16. user-facing operational report metadata and warnings;
+17. minimal standard-library run-level logging;
+18. automated tests for critical deterministic logic and integration paths.
 
-## Deliberately Excluded
+## Local Execution
 
-- near-duplicate clustering;
-- broad source coverage;
-- advanced ranking;
-- GitHub Actions;
-- daily schedule;
-- automated commits;
-- GitHub Issues;
-- GitHub Pages;
-- newsletter ingestion;
-- AI-generated summaries.
-
-## Initial Source Scope
-
-Use approximately three to five sources selected to test different cases:
-
-- one primary institutional source;
-- one high-quality reporting source;
-- one AI or technology source;
-- one European or Italian source;
-- optionally one startup or opportunity source.
-
-The purpose is testing system behaviour, not achieving broad coverage.
-
-## Expected Files
-
-Likely files introduced during this phase:
+The pipeline can be run locally with:
 
 ```text
-config/
-├── sources.yaml
-├── domains.yaml
-└── settings.yaml
-
-src/daily_intelligence/
-├── __init__.py
-├── cli.py
-├── config.py
-├── collect.py
-├── normalize.py
-├── validate.py
-├── deduplicate.py
-├── classify.py
-├── rank.py
-├── storage.py
-├── report.py
-├── models.py
-└── logging_config.py
-
-tests/
-└── fixtures/
-
-pyproject.toml
+python -m daily_intelligence.cli run
 ```
 
-Files should be created only when the relevant functionality is implemented.
+The CLI currently constructs repository-default output paths and a previous-24-hours collection window.
+
+## Current Controlled Configuration
+
+Phase 1 intentionally uses a narrow controlled setup:
+
+- one fixture/sample source;
+- Technology and Software domain;
+- Artificial Intelligence domain;
+- deterministic ranking weights;
+- configurable report limits.
+
+This configuration validates pipeline behaviour. It is not intended to represent the final production source universe or taxonomy coverage.
+
+## Key Implemented Behaviour
+
+### Collection
+
+Each source returns a structured result with status:
+
+- `success`;
+- `empty`;
+- `failed`.
+
+Expected source-level failures are isolated so one bad source does not discard successful source results.
+
+### Normalisation and Identity
+
+Records preserve useful source metadata while normalising titles, URLs and timestamps. Record identity is deterministic from source identity and normalised URL.
+
+### Validation
+
+Invalid records are separated visibly from valid records before later processing.
+
+### Collection Window
+
+The reporting window is now enforced rather than recorded only as metadata.
+
+Current Phase 1 behaviour:
+
+- requires timezone-aware window boundaries;
+- uses inclusive boundaries;
+- excludes records published before or after the window;
+- excludes records without a confirmed publication timestamp;
+- rejects reversed windows.
+
+### Deduplication
+
+Current exact duplicate handling uses:
+
+1. normalised URL;
+2. normalised title.
+
+The first deterministic occurrence is retained.
+
+### Classification
+
+Classification uses source defaults plus deterministic keyword matching with word-boundary protection. Multiple domains are allowed. Unclassified records remain valid processed records but are omitted from the main report.
+
+### Ranking
+
+The current provisional score is deterministic and based on:
+
+- configured source tier;
+- number of domain matches;
+- number of keyword matches.
+
+Score components are stored for transparency.
+
+### Storage and Reporting
+
+Processed records are written as JSON Lines using deterministic overwrite semantics for a target file.
+
+The Markdown report:
+
+- applies deterministic selection;
+- respects total and per-domain limits;
+- places each item once under a primary domain;
+- shows secondary domains as metadata;
+- shows relevance score;
+- uses only feed-provided descriptions;
+- truncates descriptions to configuration limits;
+- omits unclassified records from the main report;
+- exposes run status, monitored window, source health, collected count and displayed count;
+- exposes warnings on degraded runs.
+
+### Run Summary and Logging
+
+Each run produces a structured JSON summary containing operational counts, status, warnings and monitored window.
+
+The pipeline also emits lightweight standard-library logs for:
+
+- pipeline start;
+- source outcomes;
+- validation counts;
+- collection-window retention;
+- duplicate counts;
+- classification/ranking counts;
+- output paths;
+- final run status.
+
+## Validation Completed
+
+Phase 1 has been validated through:
+
+- unit tests for deterministic modules;
+- controlled feed fixture tests;
+- end-to-end pipeline integration tests;
+- degraded source integration testing;
+- collection-window boundary and exclusion tests;
+- report-selection and operational-header tests;
+- CLI invocation tests;
+- logging tests;
+- manual one-command CLI runs;
+- generated JSONL inspection;
+- generated Markdown inspection;
+- run-summary inspection;
+- repeated full-suite execution.
+
+At Phase 1 closeout:
+
+> **104 tests pass.**
+
+A manual CLI run also exposed a real gap: the original pipeline recorded a collection window without enforcing it. The missing filter was then implemented, regression-tested and revalidated through the CLI. This is the model for future development: real output should drive the next justified change.
 
 ## Completion Criteria
 
-Phase 1 is complete when:
+Phase 1 is complete because:
 
 - the pipeline runs locally from one command;
-- sample feeds are collected successfully;
+- controlled feeds are collected successfully;
 - valid records are normalised;
 - invalid records are handled visibly;
+- the reporting window is enforced;
 - exact duplicates are reduced;
-- records receive at least one simple classification outcome;
-- relevance scores are deterministic;
+- deterministic classification and scoring work;
 - processed JSON Lines are written;
-- a readable Markdown report is generated;
+- a readable bounded Markdown report is generated;
 - a structured run summary is written;
-- repeated execution with unchanged input does not create uncontrolled duplicates;
-- critical functions have initial tests;
-- no paid service or AI call is used.
+- degraded runs remain usable and visibly incomplete;
+- repeated writes to the same target are deterministic;
+- critical deterministic behaviour has automated tests;
+- run-level logs are inspectable;
+- no paid service or production AI call is used.
 
-## Validation
+## Status
 
-- run the pipeline locally;
-- inspect output files;
-- inspect log messages;
-- inspect duplicate handling;
-- inspect classification;
-- inspect ranking order;
-- inspect report readability;
-- rerun with unchanged input;
-- run automated tests.
+**Complete**
 
 ---
 
-# Phase 2 — Quality Logic
+# Phase 2 — Minimal Real-Source Production Readiness
 
 ## Objective
 
-Improve information quality after the local pipeline works end to end.
+Validate the local pipeline against a very small real public source set before adding scheduled automation or speculative quality features.
+
+The purpose is to discover real source, metadata, network and report-quality problems with the smallest possible production-like input set.
+
+## Why This Phase Comes Next
+
+The earlier roadmap placed a large quality-logic phase before GitHub Actions. That sequence is no longer justified.
+
+Phase 1 proved the deterministic pipeline technically. The next unknowns are now external and operational:
+
+- live HTTP behaviour;
+- source reliability;
+- publication timestamp quality;
+- feed metadata quality;
+- output usefulness with real information;
+- maintenance burden.
+
+Near-duplicate clustering, entity tracking, geography logic and similar features should not be built until real output demonstrates a meaningful need.
 
 ## Scope
 
-- conservative near-duplicate detection;
-- multi-source story clustering;
-- stronger domain classification;
-- secondary-domain tags;
+Use a deliberately small real-source set and implement only the production-readiness work required to run it reliably.
+
+Likely scope:
+
+- select a small number of high-quality public RSS/Atom sources;
+- preserve the existing source-policy hierarchy;
+- validate live HTTP collection behaviour;
+- add explicit network timeouts if required by the current collector;
+- add conservative retry behaviour only if justified;
+- use a clear user agent where appropriate;
+- inspect malformed or unusual feed behaviour;
+- inspect publication timestamps and timezone handling;
+- inspect source descriptions and URLs;
+- inspect report relevance and repetition;
+- adjust only deterministic rules that fail on observed cases;
+- preserve source-level failure isolation;
+- keep the source set small enough for manual quality review.
+
+## Deliberately Excluded
+
+Unless real-source validation proves they are needed, do not add:
+
+- near-duplicate clustering;
+- semantic similarity;
+- entity extraction;
 - geographic classification;
 - content-type classification;
-- tracked entities;
-- configurable ranking weights;
-- report-length controls;
-- unclassified-item review;
-- source-quality penalties;
-- improved score explainability.
+- machine learning;
+- LLM calls;
+- embeddings;
+- RAG;
+- a large source registry;
+- dashboards;
+- frontends;
+- GitHub Issues delivery;
+- GitHub Pages.
 
 ## Entry Condition
 
-Phase 1 must already produce a reliable complete report.
+Phase 1 local vertical slice is complete.
 
 ## Completion Criteria
 
 Phase 2 is complete when:
 
-- near duplicates are reduced without excessive false merging;
-- classification is usable across a reviewed sample;
-- ranking places clearly important items above routine items;
-- score components are inspectable;
-- multi-domain records do not create excessive repetition;
-- report length remains within configured limits;
-- a manually reviewed validation sample passes agreed quality thresholds.
+- a small real-source set can be collected manually and repeatably;
+- live-source requests use acceptable timeout/error behaviour;
+- source failures remain isolated and visible;
+- publication timestamps behave predictably enough for the reporting window;
+- generated reports contain real items and are manually inspectable;
+- no critical metadata issue blocks the pipeline;
+- obvious low-quality source choices are removed rather than compensated for with complexity;
+- the report is useful enough to justify automated daily execution;
+- no recurring monetary cost or production AI dependency has been introduced.
 
 ## Validation
 
-- use curated fixtures;
-- review false-positive clusters;
-- review false-negative clusters;
-- review misclassifications;
-- compare ranking with manual judgment;
-- inspect unclassified-item rate;
-- inspect publisher and domain concentration.
+- run the pipeline manually against the real-source set;
+- inspect source-level logs;
+- inspect failed/empty source behaviour;
+- inspect publication timestamps;
+- inspect JSONL records;
+- inspect report relevance and repetition;
+- inspect run summary;
+- deliberately test one unavailable or invalid source;
+- rerun with unchanged or similar inputs;
+- run the full automated test suite after any code change.
+
+## Status
+
+**Next active development phase**
 
 ---
 
@@ -318,50 +466,55 @@ Phase 2 is complete when:
 
 ## Objective
 
-Run the validated pipeline automatically in the public repository.
+Run the validated production-ready pipeline automatically in the public repository with zero recurring monetary cost.
 
 ## Scope
 
-- create GitHub Actions workflow;
-- configure scheduled execution;
-- add manual workflow trigger;
-- set explicit timeout;
-- prevent overlapping runs;
-- use minimal permissions;
+- create a GitHub Actions workflow;
+- add `workflow_dispatch` for manual execution;
+- use minimal repository permissions;
+- set an explicit workflow timeout;
+- prevent unnecessary overlap where appropriate;
+- install the package and dependencies deterministically;
 - run configuration validation;
 - execute the pipeline;
-- validate generated output;
-- commit valid outputs automatically;
-- push changes;
-- expose failure logs.
+- validate generated outputs;
+- expose logs and failures clearly;
+- create one coherent automated output commit when files actually change;
+- avoid empty commits;
+- enable scheduled execution only after manual Actions validation.
 
 ## Entry Condition
 
-The local pipeline must be stable and repeatable.
+Phase 2 must show that the real-source pipeline is reliable enough to automate.
 
 ## Completion Criteria
 
 Phase 3 is complete when:
 
-- the workflow runs successfully through manual GitHub Actions execution;
-- outputs are generated correctly in the repository;
-- one coherent automated commit is created;
-- failed-source behaviour is visible;
-- critical failures stop publication;
+- `workflow_dispatch` completes successfully;
+- valid outputs are generated in the repository;
+- one coherent automated commit is created when appropriate;
 - no-change runs avoid empty commits;
-- no AI credits or paid services are used;
-- the scheduled trigger is enabled only after manual validation.
+- failed-source behaviour remains visible;
+- critical failures stop invalid publication;
+- workflow permissions are minimal;
+- logs are sufficient to diagnose failures;
+- execution stays within the configured timeout;
+- no AI credits or paid services are consumed;
+- scheduled execution is enabled only after manual workflow validation.
 
 ## Validation
 
-- run through `workflow_dispatch`;
 - inspect workflow permissions;
+- run through `workflow_dispatch`;
 - inspect logs;
-- inspect generated files;
-- inspect automated commit;
-- test a degraded source failure;
+- inspect generated JSONL, report and run-summary files;
+- inspect the automated commit;
+- test a degraded source run;
 - test a critical configuration failure;
-- confirm the workflow stays within the configured timeout.
+- test a no-change run;
+- confirm the workflow remains zero-cost under normal repository usage.
 
 ---
 
@@ -369,11 +522,11 @@ Phase 3 is complete when:
 
 ## Objective
 
-Evaluate whether the system is useful in real daily use.
+Evaluate whether the automated system is genuinely useful in daily use before expanding quality logic or delivery features.
 
 ## Evaluation Period
 
-Approximately two weeks after stable automation begins.
+Approximately two weeks after stable scheduled automation begins.
 
 ## Questions
 
@@ -386,14 +539,14 @@ Approximately two weeks after stable automation begins.
 ### Coverage
 
 - Are major relevant stories missed?
-- Are any domains consistently empty?
+- Are any important domains consistently empty?
 - Are some domains overrepresented?
 
 ### Noise
 
 - Are low-value items frequently displayed?
 - Is promotional content overrepresented?
-- Are obvious duplicates still common?
+- Are obvious duplicate stories still common?
 
 ### Classification
 
@@ -405,58 +558,98 @@ Approximately two weeks after stable automation begins.
 
 - Do high-value items appear near the top?
 - Do source-tier weights distort relevance?
-- Does multi-source coverage create inappropriate ranking inflation?
+- Are keyword matches creating noisy score inflation?
 
 ### Operations
 
 - Do scheduled runs complete reliably?
 - Are failures understandable?
-- Is maintenance acceptably low?
+- Is source maintenance acceptably low?
 - Does the project remain at zero recurring cost?
 
 ## Completion Criteria
 
 Phase 4 is complete when:
 
-- at least two weeks of reports have been reviewed;
-- major weaknesses are documented;
-- low-value sources are identified;
+- approximately two weeks of reports have been reviewed;
+- major weaknesses are documented with examples;
+- low-value or unreliable sources are identified;
 - useful sources are confirmed;
-- ranking and classification issues are prioritised;
-- further development decisions are based on evidence.
+- ranking and classification problems are prioritised by observed impact;
+- further development decisions are based on evidence rather than the original speculative roadmap.
 
 ---
 
-# Phase 5 — Controlled Expansion
+# Phase 5 — Evidence-Driven Quality Expansion
 
 ## Objective
 
-Add only features justified by the production evaluation.
+Add only quality features justified by production evidence.
 
 ## Possible Enhancements
 
-- broader source universe;
-- more robust source-health history;
-- improved clustering;
-- richer entity tracking;
-- weekly archive analytics;
-- GitHub Issue delivery;
-- GitHub Pages;
-- opportunity-specific report section;
-- selected public newsletter feeds;
-- more detailed concentration metrics;
-- improved trend detection.
+Depending on observed limitations, this phase may include:
 
-## Rules
+- broader source universe;
+- conservative near-duplicate detection;
+- multi-source story clustering;
+- stronger domain classification;
+- richer secondary-domain logic;
+- geographic classification;
+- content-type classification;
+- tracked entities;
+- source-quality penalties;
+- source-health history;
+- refined ranking weights;
+- report-length adjustments;
+- unclassified-item review tooling;
+- concentration metrics;
+- trend or archive analysis.
+
+## Entry Rules
 
 A feature should enter this phase only when:
 
-- the problem is observed in real use;
-- the feature creates measurable value;
+- the problem is observed in real reports;
+- the limitation materially reduces usefulness, reliability or maintainability;
+- the proposed feature creates measurable value;
+- a simpler deterministic solution is insufficient;
 - recurring monetary cost remains zero;
 - recurring AI-credit use remains zero;
-- maintenance remains proportionate;
-- a simpler solution is insufficient.
+- maintenance remains proportionate.
+
+## Validation
+
+Use evaluation appropriate to the observed problem, such as:
+
+- curated fixtures;
+- false-positive and false-negative duplicate review;
+- manual classification samples;
+- ranking comparison with human judgment;
+- unclassified-item rates;
+- publisher/domain concentration;
+- source-health history;
+- report-length and repetition review.
+
+---
+
+# Phase 6 — Optional Delivery and Interface Improvements
+
+## Objective
+
+Improve access only if repository-native Markdown reports become a demonstrated usability limitation.
+
+## Possible Enhancements
+
+- GitHub Issues delivery;
+- GitHub Pages;
+- weekly archive summaries;
+- opportunity-specific views;
+- other zero-cost delivery improvements.
+
+## Entry Condition
+
+Reports must already be used in practice and the delivery limitation must be observed rather than assumed.
 
 ## Excluded by Default
 
@@ -468,82 +661,46 @@ A feature should enter this phase only when:
 - RAG;
 - vector databases;
 - complex cloud infrastructure;
+- sophisticated frontend development;
 - mobile application development.
 
 ---
 
 # Current Milestone
 
-## Milestone 0 — Approve the Initial Project Definition
+## Milestone 2 — Validate a Minimal Real-Source Run Before Automation
 
 ### Objective
 
-Complete Phase 0 and create the first stable repository checkpoint.
+Move from controlled fixtures to a deliberately small production-like source set without expanding the system unnecessarily.
 
 ### Required Outputs
 
-- approved `00 Project Brief.md`;
-- approved `01 Product Requirements.md`;
-- approved `02 System Architecture.md`;
-- approved `03 Information Taxonomy and Source Policy.md`;
-- approved `04 Development Roadmap and Status.md`.
+- a small approved real-source subset in `config/sources.yaml`;
+- reliable live collection behaviour;
+- explicit request timeout/error handling where needed;
+- real JSONL output;
+- real Markdown report;
+- real JSON run summary;
+- manual quality inspection notes;
+- tests for any newly discovered deterministic edge cases.
 
 ### Validation Checklist
 
-- [ ] Project purpose is clear.
-- [ ] MVP scope is clear.
-- [ ] Non-goals are explicit.
-- [ ] Hard constraints are consistent.
-- [ ] Product requirements are testable.
-- [ ] Architecture satisfies the requirements.
-- [ ] Taxonomy matches intended domains.
-- [ ] Public-repository boundaries are clear.
-- [ ] Open decisions are visible.
-- [ ] No code has been prematurely added.
-- [ ] No private Career OS content is present.
-- [ ] Documentation ownership is clear.
+- [ ] Real feeds can be collected manually.
+- [ ] Network requests cannot hang indefinitely.
+- [ ] Source-level failures remain isolated.
+- [ ] Publication timestamps are usable for collection-window filtering.
+- [ ] Real records preserve useful source metadata.
+- [ ] The report contains relevant real items.
+- [ ] Obvious noise or duplication is documented.
+- [ ] No speculative quality feature has been added without evidence.
+- [ ] No recurring monetary cost has been introduced.
+- [ ] Full automated tests still pass.
 
 ### Completion Action
 
-Commit and push the full documentation set as one coherent project-definition commit.
-
-### Suggested Commit Message
-
-```text
-docs: restore complete project definition
-```
-
----
-
-# Next Milestone
-
-## Milestone 1 — Build the Local Collection-to-Report Slice
-
-The first implementation milestone should produce a working local report from a very small source set.
-
-### First Technical Deliverables
-
-- `pyproject.toml`;
-- initial package structure;
-- typed article model;
-- configuration loader;
-- small `sources.yaml`;
-- small `domains.yaml`;
-- feed collection;
-- basic normalisation;
-- JSON Lines output;
-- basic Markdown report;
-- initial tests.
-
-### Important Constraint
-
-Do not implement the full architecture at once.
-
-The first technical checkpoint should be:
-
-> Load valid configuration and successfully parse one controlled RSS or Atom fixture into a typed normalised record.
-
-Only after that works should the next pipeline stage be added.
+When the real-source slice is stable, stop and review whether the system is ready for `workflow_dispatch` and GitHub Actions rather than automatically expanding the source set or taxonomy.
 
 ---
 
@@ -551,65 +708,83 @@ Only after that works should the next pipeline stage be added.
 
 | Feature | Status | Reason |
 |---|---|---|
-| GitHub Issues delivery | Deferred | Core report should be validated first |
-| GitHub Pages | Deferred | Avoid frontend work before usefulness is proven |
-| Newsletter-email ingestion | Deferred | Adds privacy and authentication complexity |
-| Public newsletter feeds | Monitoring | May be added as normal sources if structured and valuable |
-| LLM summaries | Rejected for MVP | Recurring cost and unnecessary dependency |
-| Automated ChatGPT integration | Rejected for MVP | Connectors and API assumptions violate constraints |
-| Machine-learning classification | Rejected for MVP | Deterministic logic should be tested first |
-| Embeddings and semantic search | Rejected for MVP | No validated need |
-| RAG | Rejected for MVP | No validated workflow problem |
-| Autonomous agents | Rejected for MVP | Adds complexity without current value |
-| Cloud database | Rejected for MVP | JSON Lines is sufficient initially |
-| Private source ingestion | Rejected for MVP | Public repository and privacy constraints |
-| Multi-user support | Rejected for MVP | Initial product is single-user |
+| Near-duplicate clustering | Deferred pending evidence | Exact deduplication is sufficient until real reports show material repetition |
+| Multi-source story clustering | Deferred pending evidence | Adds logic and false-merge risk without a validated current need |
+| Geographic classification | Deferred pending evidence | Current controlled taxonomy does not require it yet |
+| Entity tracking | Deferred pending evidence | No demonstrated report-quality requirement yet |
+| Content-type classification | Deferred pending evidence | Keep Phase 2 focused on real-source reliability |
+| Broad source expansion | Deferred | Start with a small production-quality set and expand only when coverage gaps are demonstrated |
+| GitHub Issues delivery | Deferred | Core repository report should be validated first |
+| GitHub Pages | Deferred | Avoid frontend work before repository browsing is proven insufficient |
+| Newsletter-email ingestion | Rejected for core MVP | Adds privacy, authentication and workflow complexity |
+| Public newsletter feeds | Possible later | May be added as ordinary structured sources if valuable and compliant |
+| LLM summaries | Rejected for core MVP | Recurring cost and unnecessary dependency |
+| Automated ChatGPT integration | Rejected for core MVP | Violates the deterministic zero-cost architecture |
+| Machine-learning classification | Rejected for core MVP | Deterministic logic should remain default until insufficient |
+| Embeddings and semantic search | Rejected for core MVP | No validated need |
+| RAG | Rejected for core MVP | No validated workflow problem |
+| Autonomous agents | Rejected for core MVP | Adds complexity without current value |
+| Cloud database | Rejected for core MVP | Repository-native JSONL is sufficient initially |
+| Private source ingestion | Rejected for core MVP | Conflicts with public-repository and privacy boundaries |
+| Multi-user support | Rejected for core MVP | Initial product is single-user |
 
 ---
 
 # Project Risks
 
-## Documentation Without Execution
+## Planning Without Use
 
-The project may remain in planning mode.
+The project may accumulate architecture or quality features before producing value from real information.
 
-**Control:** Phase 0 ends with one documentation commit, after which the next action must be technical implementation.
+**Control:** the next milestone is a minimal real-source run, not another planning or infrastructure phase.
 
 ## Scope Expansion
 
-New features may be added before the MVP works.
+Features may be added because they are technically interesting rather than because the report needs them.
 
-**Control:** every new feature must solve a documented limitation.
+**Control:** every material feature must solve a documented observed limitation.
 
 ## Premature Source Expansion
 
-A large source list may create noise before the pipeline is stable.
+A large source registry may create noise and maintenance before source quality is understood.
 
-**Control:** Phase 1 uses only three to five test sources.
+**Control:** Phase 2 uses a deliberately small real-source set.
 
-## Weak Quality Evaluation
+## Weak Information Quality
 
-The system may run technically but produce poor information.
+The pipeline may run correctly while producing a noisy, repetitive or unhelpful report.
 
-**Control:** quality review is a dedicated phase with manual comparison.
+**Control:** manual report inspection remains a required validation step; technical success alone is not sufficient.
+
+## Network and Feed Instability
+
+Real RSS/Atom sources may fail, hang, change format or publish inconsistent timestamps.
+
+**Control:** source-level isolation, explicit timeout/error behaviour, conservative source selection and visible run summaries.
 
 ## GitHub Actions Complexity
 
-Automation may be added before local behaviour is reliable.
+Automation may be added before real-source behaviour is understood.
 
-**Control:** GitHub Actions begins only after the local vertical slice works.
+**Control:** GitHub Actions starts only after minimal real-source validation.
 
 ## Repository Growth
 
-Daily JSON and Markdown files may accumulate.
+Daily JSON and Markdown files may accumulate indefinitely.
 
-**Control:** review storage strategy after the initial production period.
+**Control:** keep the initial repository-native storage model and review retention only after real production usage provides evidence.
 
 ## Maintenance Burden
 
 Source instability may create recurring manual work.
 
-**Control:** source-level isolation, health tracking and conservative source selection.
+**Control:** prefer stable structured sources, remove low-value sources, and avoid compensating for poor sources with complex code.
+
+## Misleading Success States
+
+A technically completed run may conceal failed sources or incomplete output.
+
+**Control:** structured run status, user-facing report metadata, warnings and logs must remain aligned.
 
 ---
 
@@ -619,97 +794,165 @@ The following gates prevent premature expansion.
 
 ## Gate 1 — Begin Implementation
 
+**Status: passed**
+
 Required:
 
-- documents `00` through `04` approved;
-- initial commit pushed;
-- no major unresolved blocker.
+- core project documents existed;
+- repository foundations existed;
+- no major unresolved blocker prevented the local slice.
 
-## Gate 2 — Add Quality Logic
+## Gate 2 — Complete the Local Vertical Slice
+
+**Status: passed**
 
 Required:
 
 - local end-to-end pipeline works;
-- output is inspectable;
+- collection-window filtering works;
 - exact duplicate handling works;
-- initial tests pass.
+- deterministic classification and ranking work;
+- output is inspectable;
+- failures are visible;
+- initial tests pass;
+- one-command local execution works.
 
 ## Gate 3 — Add GitHub Actions
 
-Required:
-
-- local pipeline is stable;
-- configuration is validated;
-- report generation is repeatable;
-- failure modes are understood.
-
-## Gate 4 — Expand Sources
+**Status: not yet passed**
 
 Required:
 
-- source gaps are demonstrated;
-- new sources pass the source policy;
-- additional coverage justifies added maintenance.
+- local pipeline remains stable;
+- a small real-source set has been validated manually;
+- network timeout/error behaviour is acceptable;
+- report generation is repeatable with real data;
+- failure modes are understood;
+- output is useful enough to justify automation.
+
+## Gate 4 — Expand Sources or Quality Logic
+
+**Status: not yet passed**
+
+Required:
+
+- a concrete coverage, repetition, classification or ranking gap is demonstrated;
+- proposed changes solve that observed gap;
+- added maintenance is proportionate;
+- the simpler current system is insufficient.
 
 ## Gate 5 — Add Delivery Features
+
+**Status: not yet passed**
 
 Required:
 
 - reports are being used;
-- repository browsing is a real usability limitation;
-- delivery feature remains zero-cost and low-maintenance.
+- repository browsing is a demonstrated usability limitation;
+- the proposed delivery feature remains zero-cost and low-maintenance.
 
 ---
 
-# Status Tracking Template
-
-Use this section during active development.
+# Status Tracking
 
 ## Current Phase
 
-Phase:
+Phase 1 complete; transitioning into Phase 2 — Minimal Real-Source Production Readiness.
 
 ## Current Milestone
 
-Milestone:
+Milestone 2 — Validate a Minimal Real-Source Run Before Automation.
 
-## Completed Since Last Update
+## Completed Since Last Documentation Baseline
 
--
+- implemented the full local deterministic pipeline;
+- added structured source-level collection results;
+- implemented normalisation and deterministic record identity;
+- implemented record validation;
+- implemented exact deduplication;
+- implemented deterministic classification and ranking;
+- implemented JSONL storage;
+- implemented deterministic Markdown reporting;
+- implemented structured run summaries;
+- implemented end-to-end orchestration;
+- added a one-command local CLI;
+- added collection-window filtering after manual validation exposed the missing enforcement;
+- validated degraded partial-source behaviour;
+- added operational status, source health, monitored window and warnings to the Markdown report;
+- added minimal run-level logging;
+- validated the full local workflow manually;
+- reached 104 passing automated tests at Phase 1 closeout.
 
 ## Active Work
 
--
+- refresh project documents `00` through `04` so canonical documentation matches the implemented system;
+- prepare the minimal real-source validation milestone.
 
 ## Blockers
 
--
+No current Phase 1 blocker.
+
+Before automation, live network/source behaviour remains intentionally unvalidated.
 
 ## Decisions Needed
 
--
+Before or during Phase 2:
+
+- exact small real-source set for first production-like run;
+- request timeout policy based on current collector implementation and live-source behaviour;
+- whether a minimal retry policy is necessary;
+- whether the current 24-hour collection window remains appropriate for real sources;
+- whether any real feed requires a revised missing-publication-time policy.
+
+These decisions should be resolved from evidence rather than assumed in advance.
 
 ## Validation Completed
 
--
+- 104 passing tests at Phase 1 closeout;
+- targeted unit and integration suites;
+- degraded-run test;
+- collection-window regression test;
+- CLI invocation test;
+- logging test;
+- manual CLI execution;
+- manual inspection of generated JSONL, Markdown and JSON run summary.
 
 ## Next Highest-Priority Action
 
--
+After the documentation refresh is complete:
+
+> Select the smallest credible real RSS/Atom source set and validate one manual production-like run before building GitHub Actions.
 
 ## Deferred Until Later
 
--
+- broad taxonomy expansion;
+- near-duplicate logic;
+- entities;
+- geography;
+- content types;
+- source-health history;
+- advanced ranking;
+- scheduled automation;
+- delivery interfaces;
+- AI-generated content.
 
 ---
 
 # Changelog
 
-## 2026-08-05 — Complete Roadmap Restored
+## 2026-08-11 — Phase 1 Local Vertical Slice Completed
 
-- Restored the full document after earlier truncation.
-- Updated the current blocker to documentation restoration and consistency review.
-- Updated the remaining Phase 0 actions to reflect the actual repository state.
-- Preserved the local vertical slice as the first implementation target.
-- Deferred automation until local validation.
-- Deferred secondary delivery and AI features.
+- Replaced the stale Phase 0 implementation status with the validated repository state.
+- Marked Phase 0 and Phase 1 complete.
+- Recorded the implemented local pipeline, CLI, collection-window filtering, operational reporting and logging.
+- Recorded 104 passing tests at Phase 1 closeout.
+- Reordered the roadmap so minimal real-source production-readiness validation precedes GitHub Actions.
+- Moved speculative quality features behind evidence from real reports.
+- Preserved zero recurring cost, deterministic processing, negligible daily manual work and public-repository safety as fixed constraints.
+- Defined Milestone 2 as the next active development milestone.
+
+## 2026-08-05 — Initial Roadmap Baseline
+
+- Restored the original project roadmap and project-control structure.
+- Defined the local vertical slice as the first implementation phase.
+- Deferred automation, delivery features and production AI until the deterministic core was validated.

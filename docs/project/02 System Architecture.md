@@ -2,1619 +2,1551 @@
 
 > **Purpose**
 >
-> This document defines how the Daily Intelligence System will satisfy the approved product requirements.
+> This document defines the technical architecture of the Daily Intelligence System.
 >
-> It describes the system components, data flow, configuration, storage, automation, failure handling and public-repository boundaries.
+> It describes the implemented processing model, component boundaries, data flow, storage model, configuration model, failure behaviour, observability and the architectural constraints that govern future development.
 >
-> It defines the intended architecture without locking the project into unnecessary implementation complexity.
+> It is not the implementation-status tracker. Current phase, milestone and development sequencing belong in `04 Development Roadmap and Status.md`.
 >
 > ---
 >
 > **Primary Question**
 >
-> > *How should the system collect, process, store and publish information reliably at zero recurring cost and with negligible daily manual work?*
+> > *How is the Daily Intelligence System structured, how does information move through it, and which architectural decisions are fixed, implemented, planned or deferred?*
 >
 > ---
 >
-> **Update Frequency**
+> **Architecture Principle**
 >
-> Update when a material architectural decision changes the system’s components, data flow, storage, automation, security boundaries or operational model.
+> The system should remain a small deterministic information pipeline unless real usage demonstrates that additional complexity creates material value.
 
 ---
 
-# Architectural Objective
+# 1. Architecture Goals
 
-The architecture should support one complete daily workflow:
+The architecture should satisfy the following priorities, in order:
 
-    Configured public sources
-            ↓
-    Collection
-            ↓
-    Record normalisation
-            ↓
-    Validation
-            ↓
-    Duplicate reduction
-            ↓
-    Domain classification
-            ↓
-    Relevance scoring
-            ↓
-    Processed storage
-            ↓
-    Daily Markdown report
-            ↓
-    Automated persistence
-            ↓
-    Visible run status
+1. zero recurring monetary cost;
+2. reliability;
+3. negligible recurring manual work;
+4. information and source quality;
+5. maintainability;
+6. transparency and auditability;
+7. security and privacy;
+8. learning and signaling value;
+9. technical sophistication.
 
-The system should remain:
+The architecture should therefore prefer:
 
-- zero-cost in normal operation;
-- deterministic;
-- repository-native;
-- transparent;
-- modular enough to maintain;
-- simple enough to understand;
-- resilient to individual source failures;
-- independent from paid AI services.
+- ordinary Python;
+- GitHub-native automation;
+- structured public sources;
+- deterministic processing;
+- explicit configuration;
+- inspectable intermediate data;
+- local files rather than unnecessary databases;
+- standard-library capabilities where practical;
+- small modules with clear responsibilities;
+- visible failure states;
+- tests for important deterministic behaviour.
 
-The architecture should solve the current workflow before supporting future features.
+The architecture should avoid:
 
----
-
-# Architectural Principles
-
-## Repository-Native
-
-The system should run primarily through:
-
-- Python;
-- GitHub Actions;
-- version-controlled configuration;
-- repository-based reports and processed data.
-
-External infrastructure should not be required for the MVP.
-
-## Deterministic Before Intelligent
-
-Classification, ranking and duplicate reduction should begin with deterministic logic.
-
-The architecture should not depend on:
-
-- LLM calls;
+- paid APIs;
+- paid news services;
+- automation platforms with recurring fees;
+- production LLM calls;
+- GitHub AI or Copilot credit consumption;
+- agents;
+- RAG;
 - embeddings;
 - vector databases;
-- autonomous agents;
-- machine-learning services;
-- paid inference APIs.
-
-## Configuration Before Hard-Coding
-
-Sources, domains, keywords, entities and ranking weights should be maintained outside core Python logic where practical.
-
-## Partial Failure Tolerance
-
-A single invalid feed or malformed record should not stop all successful sources from being processed.
-
-Critical pipeline failures should stop publication of a falsely successful report.
-
-## Explainability
-
-The system should preserve enough metadata to explain:
-
-- where an item came from;
-- how it was classified;
-- why it received its score;
-- whether it belongs to a duplicate cluster;
-- whether a run was complete.
-
-## Minimal Dependencies
-
-The architecture should use a small number of stable libraries.
-
-New dependencies should be introduced only when they provide clear value.
-
-## Public-Safe by Default
-
-All committed outputs must remain suitable for a public repository.
+- cloud infrastructure;
+- private newsletter ingestion;
+- complex frontend applications;
+- machine-learning components without a validated need.
 
 ---
 
-# System Boundary
+# 2. Architectural Status
 
-The GitHub repository owns:
+The deterministic local processing core is implemented and validated.
 
-- source configuration;
-- collection;
+The current architecture supports:
+
+- configuration loading;
+- RSS/Atom collection;
+- structured source-level outcomes;
 - normalisation;
 - validation;
-- deduplication;
-- classification;
-- ranking;
-- storage;
-- report generation;
-- automated execution;
-- execution visibility.
+- collection-window filtering;
+- exact deduplication;
+- deterministic classification;
+- deterministic ranking;
+- JSONL persistence;
+- deterministic Markdown report generation;
+- structured JSON run summaries;
+- pipeline orchestration;
+- one-command local execution;
+- degraded partial-source behaviour;
+- operational report metadata;
+- lightweight run-level logging;
+- automated unit and integration testing.
 
-The repository does not own:
+At the Phase 1 closeout, the repository has 104 passing tests.
 
-- ChatGPT scheduled research;
-- AI-generated interpretation;
-- private newsletter ingestion;
-- private email access;
-- Career OS updates;
-- paid source access;
-- full article extraction;
-- investment or political recommendations.
+The following production components are not yet implemented:
 
----
-
-# High-Level Components
-
-The MVP should contain the following logical components.
-
-    Configuration
-        ↓
-    Collector
-        ↓
-    Normalizer
-        ↓
-    Validator
-        ↓
-    Deduplicator
-        ↓
-    Classifier
-        ↓
-    Ranker
-        ↓
-    Storage
-        ↓
-    Report Generator
-        ↓
-    Automation and Persistence
-        ↓
-    Logs and Run Summary
-
-Each component should have one clear responsibility.
+- production multi-source registry;
+- hardened remote-network behaviour;
+- GitHub Actions workflow;
+- scheduled execution;
+- automated repository commits;
+- production source-health history;
+- evidence-driven advanced quality logic.
 
 ---
 
-# 1. Configuration Layer
+# 3. High-Level Architecture
 
-## Responsibility
+The implemented local data flow is:
 
-Define the behaviour of the system without requiring changes to core processing logic.
+```text
+Configuration
+→ Collection
+→ Normalisation
+→ Validation
+→ Collection-window filtering
+→ Exact deduplication
+→ Classification
+→ Ranking
+→ Processed-record storage
+→ Report selection and rendering
+→ Run-summary generation
+→ Output persistence
+```
 
-## Initial Configuration Areas
+The orchestration layer coordinates these stages and exposes them through a thin command-line interface.
 
-The architecture should support configuration for:
+Conceptually:
 
-- sources;
-- domains;
-- keywords;
-- tracked entities;
-- geographic priorities;
-- ranking weights;
-- report limits;
-- collection window;
-- timezone;
-- language handling;
-- source activation status.
+```text
+User / Scheduler
+        |
+        v
+      CLI
+        |
+        v
+   Pipeline Orchestrator
+        |
+        +--> Configuration
+        |
+        +--> Source Collection
+        |
+        +--> Normalisation
+        |
+        +--> Validation
+        |
+        +--> Window Filtering
+        |
+        +--> Deduplication
+        |
+        +--> Classification
+        |
+        +--> Ranking
+        |
+        +--> JSONL Storage
+        |
+        +--> Report Selection
+        |
+        +--> Run Summary
+        |
+        +--> Markdown Report
+        |
+        +--> Logging
+```
 
-## Recommended Format
-
-Use YAML for manually maintained configuration.
-
-Reasons:
-
-- readable in GitHub and VS Code;
-- suitable for nested structures;
-- easier to edit than JSON;
-- widely supported in Python;
-- appropriate for small configuration files.
-
-## Initial Configuration Files
-
-The likely initial structure is:
-
-    config/
-    ├── sources.yaml
-    ├── domains.yaml
-    ├── entities.yaml
-    └── settings.yaml
-
-### `sources.yaml`
-
-Defines:
-
-- source ID;
-- name;
-- feed URL;
-- homepage URL;
-- source tier;
-- source type;
-- default domains;
-- language;
-- geographic scope;
-- active status.
-
-### `domains.yaml`
-
-Defines:
-
-- domain IDs;
-- display names;
-- report order;
-- keywords;
-- exclusions;
-- default weights;
-- active status.
-
-### `entities.yaml`
-
-Defines tracked entities and aliases.
-
-This file may remain small during the MVP.
-
-### `settings.yaml`
-
-Defines operational settings such as:
-
-- collection-window length;
-- timezone;
-- report item limits;
-- similarity thresholds;
-- ranking weights;
-- output paths;
-- whether optional sections are displayed.
-
-## Validation
-
-Configuration should be validated at startup.
-
-Invalid required fields should produce a clear error before collection begins.
+The production automation layer will eventually invoke the same deterministic pipeline rather than introducing a separate processing path.
 
 ---
 
-# 2. Collection Layer
+# 4. Repository Architecture
 
-## Responsibility
+The current processing package is organised under:
 
-Retrieve items from configured public structured sources.
+```text
+src/daily_intelligence/
+```
 
-## Initial Supported Source Types
+Implemented modules are:
 
-The MVP should initially support:
+```text
+__init__.py
+cli.py
+classify.py
+collect.py
+config.py
+deduplicate.py
+filter_window.py
+models.py
+normalize.py
+pipeline.py
+rank.py
+report.py
+run_summary.py
+storage.py
+validate.py
+```
 
-- RSS;
-- Atom.
+Configuration lives under:
 
-Official public APIs may be added later when they fill a demonstrated coverage gap.
+```text
+config/
+```
 
-Supporting RSS and Atom first is sufficient to test the complete architecture.
+Current configuration files include:
 
-## Collector Behaviour
+```text
+sources.yaml
+domains.yaml
+settings.yaml
+```
 
-For each active source:
+Tests live under:
 
-1. read the source configuration;
-2. request or parse the feed;
-3. record collection start time;
-4. capture available entries;
-5. preserve source identity;
-6. record success, empty result or failure;
-7. continue to the next source.
+```text
+tests/
+```
 
-## Source-Level Isolation
+Controlled feed fixtures live under:
 
-Each source should be processed independently.
+```text
+tests/fixtures/
+```
 
-A failure should create a source result such as:
+Generated production-style outputs are intended to use repository paths under:
 
-    source_id
-    status
-    items_received
-    error_type
-    error_message
-    retrieved_at
+```text
+data/
+reports/
+```
 
-The collector should distinguish:
-
-- successful source with items;
-- successful source with no new items;
-- source parse failure;
-- source network failure;
-- invalid source configuration.
-
-## Network Handling
-
-Where direct HTTP requests are used:
-
-- use an explicit timeout;
-- use a descriptive user agent;
-- avoid repeated unnecessary requests;
-- respect the source’s public endpoint and usage conditions;
-- avoid aggressive retry behaviour.
-
-## Output
-
-The collection layer should return raw source records in a common preliminary structure.
-
-It should not perform final classification or ranking.
+The exact repository tree is always the source of truth if file names or directories later change.
 
 ---
 
-# 3. Normalisation Layer
+# 5. Component Responsibilities
 
-## Responsibility
+## 5.1 `models.py`
 
-Convert raw feed entries into a consistent internal record format.
+Owns the canonical structured article record used across pipeline stages.
 
-## Normalisation Tasks
+The article model preserves both original and derived metadata so deterministic processing remains auditable.
 
-The normaliser should handle:
+Current important fields include:
 
-- field-name consistency;
-- whitespace cleanup;
-- title cleanup;
-- timestamp parsing;
-- timezone normalisation;
-- URL cleanup;
-- author formatting;
-- description cleanup;
-- language and source metadata attachment.
-
-## Timestamp Convention
-
-Use UTC internally.
-
-Reasons:
-
-- consistent comparison across global sources;
-- compatible with ISO 8601;
-- easier scheduled processing;
-- avoids ambiguity during daylight-saving changes.
-
-Reports may display timestamps in Europe/Rome where useful, but stored timestamps should remain UTC.
-
-## URL Policy
-
-For each item, preserve:
-
-- original URL;
-- normalised URL.
-
-Normalisation may remove:
-
-- common tracking parameters;
-- URL fragments;
-- unnecessary trailing slashes.
-
-The system should not attempt aggressive canonicalisation that could break a valid link.
-
-## Title Policy
-
-Preserve:
-
+- source identifier;
 - original title;
-- normalised title.
-
-The normalised title may:
-
-- convert to lowercase;
-- remove repeated whitespace;
-- standardise punctuation;
-- remove leading or trailing whitespace.
-
-The original title must remain available for report display.
-
-## Output
-
-The normalisation layer should produce candidate internal records.
-
----
-
-# 4. Validation Layer
-
-## Responsibility
-
-Determine whether each candidate record is usable.
-
-## Required Fields
-
-A record should normally require:
-
-- source ID;
-- title;
-- usable article URL;
-- retrieval timestamp.
-
-Publication timestamp is strongly preferred but may be absent.
-
-## Publication Timestamp Policy
-
-If `published_at` is missing or invalid:
-
-1. retain the record only if the source and retrieval metadata are otherwise valid;
-2. mark the publication time as unavailable;
-3. avoid treating retrieval time as confirmed publication time;
-4. apply a ranking or report penalty if configured;
-5. keep the limitation visible.
-
-The system should not invent publication timestamps.
-
-## Invalid Records
-
-Records should be excluded when:
-
-- title is missing or empty;
-- URL is unusable;
-- source identity is missing;
-- required fields cannot be normalised safely.
-
-Excluded records should be counted and logged with a reason.
-
-## Output
-
-The validator should produce:
-
-- valid candidate records;
-- invalid-record summaries.
-
----
-
-# 5. Collection-Window Filtering
-
-## Responsibility
-
-Select records relevant to the current reporting period.
-
-## Initial Policy
-
-The daily run should primarily select items published within the previous 24 hours.
-
-A configurable tolerance should be allowed because:
-
-- GitHub Actions may start later than scheduled;
-- some feeds publish delayed timestamps;
-- international time zones differ;
-- occasional workflow failures may require recovery.
-
-## Recommended Initial Window
-
-Use a configurable 30-hour lookback during the MVP.
-
-This provides modest tolerance without turning the report into a multi-day archive.
-
-The exact value should remain configurable and should be evaluated during testing.
-
-## Missing Timestamp Items
-
-Items without a reliable publication timestamp may be included only when:
-
-- they were not previously processed;
-- they were retrieved during the current run;
-- configuration allows them.
-
-They should be visibly marked and may receive a ranking penalty.
-
----
-
-# 6. Record Identity and Idempotency
-
-## Responsibility
-
-Prevent repeated runs from creating uncontrolled duplicate records.
-
-## Record ID
-
-Each record should receive a deterministic identifier derived from stable values.
-
-Recommended approach:
-
-    record_id = hash(source_id + normalized_url)
-
-Fallback when URL normalisation is insufficient:
-
-    record_id = hash(source_id + normalized_title + published_at)
-
-The exact implementation should preserve consistency across repeated runs.
-
-## Idempotent Behaviour
-
-Running the pipeline twice with the same inputs should not create additional copies of the same record.
-
-The system should:
-
-- recognise existing record IDs;
-- update only when a meaningful field changes;
-- avoid duplicate daily report entries;
-- avoid unnecessary commits when outputs are unchanged.
-
----
-
-# 7. Duplicate Reduction Layer
-
-## Responsibility
-
-Reduce repeated presentation while preserving useful source diversity.
-
-## Stage 1 — Exact Duplicate Detection
-
-The MVP must detect:
-
-- identical normalised URLs;
-- identical normalised titles;
-- repeated source records.
-
-Exact duplicates may be merged or suppressed automatically.
-
-## Stage 2 — Near-Duplicate Detection
-
-The MVP should support conservative title similarity.
-
-Recommended initial method:
-
-- token-based title similarity;
-- deterministic similarity threshold;
-- comparison only within the relevant time window;
-- optional support from shared entities or keywords.
-
-The exact algorithm should be simple and inspectable.
-
-A lightweight library may be used if it materially improves reliability.
-
-## Cluster Structure
-
-Each cluster should preserve:
-
-- cluster ID;
-- primary record ID;
-- member record IDs;
-- unique source count;
-- earliest publication time;
-- latest publication time.
-
-## Primary Record Selection
-
-Select the primary record using a deterministic order such as:
-
-1. highest source tier;
-2. highest relevance score;
-3. most complete metadata;
-4. earliest direct publication;
-5. stable record-ID tie-break.
-
-The final order may be refined after sample evaluation.
-
-## Conservative Policy
-
-When similarity is uncertain, preserve separate records.
-
-False merging is more harmful than displaying a limited amount of duplication during the MVP.
-
----
-
-# 8. Domain Classification Layer
-
-## Responsibility
-
-Assign topic domains and geographic tags using transparent rules.
-
-## Classification Inputs
-
-The classifier may use:
-
-- source default domains;
-- title keywords;
-- description keywords;
-- tracked entities;
-- aliases;
-- exclusion terms;
-- geographic references.
-
-## Initial Rule Model
-
-Each domain configuration may contain:
-
-    id
-    name
-    keywords
-    strong_keywords
-    keyword_groups
-    exclusions
-    default_weight
-    report_order
-
-## Suggested Classification Logic
-
-1. Start with configured source defaults.
-2. Detect strong title matches.
-3. Detect entity matches.
-4. Detect keyword groups.
-5. Review description matches.
-6. Apply exclusion rules.
-7. Assign one or more domains.
-8. Mark unmatched records as unclassified.
-
-## Classification Evidence
-
-Each record should preserve:
-
+- normalised title;
+- original article URL;
+- normalised URL;
+- publication timestamp;
+- retrieval timestamp;
+- description;
 - assigned domains;
 - matched keywords;
-- matched entities;
-- source-default contribution;
-- exclusions applied.
+- relevance score;
+- score components;
+- deterministic record identifier.
 
-## Primary Domain
-
-For report placement, one primary domain may be selected from the assigned domains using:
-
-1. strongest classification evidence;
-2. domain priority;
-3. configured report order.
-
-Secondary domains remain stored.
-
-This avoids excessive repetition in the daily report.
-
-## Unclassified Records
-
-Unclassified records should:
-
-- remain in processed storage;
-- be counted in the run summary;
-- remain available for evaluation;
-- be omitted from the main report by default.
-
-A high unclassified rate should trigger taxonomy review.
+The article record is enriched as it moves through the pipeline rather than replaced by unrelated stage-specific formats.
 
 ---
 
-# 9. Geographic Classification
+## 5.2 `config.py`
 
-## Responsibility
+Owns configuration loading and validation.
 
-Assign geographic tags independently from topic domains.
+It reads the repository configuration and exposes typed configuration objects used by processing modules.
 
-## Inputs
+Current configuration types include:
 
-Geographic classification may use:
+- source configuration;
+- domain configuration;
+- ranking configuration;
+- report configuration.
 
-- source geographic defaults;
-- country names;
-- city names;
-- institutions;
-- tracked entities;
-- configured aliases.
-
-## Output
-
-Each record may receive:
-
-- zero or more geographic tags;
-- one primary geography for ranking or display.
-
-Geography should not be inferred from publication location alone.
+Configuration should remain separate from business logic so changing sources, keywords, score weights or report limits does not require modifying core processing code.
 
 ---
 
-# 10. Content-Type Classification
+## 5.3 `collect.py`
 
-## Responsibility
+Owns source collection.
 
-Assign one content type where practical.
+The collector currently supports RSS/Atom-style structured feeds and returns source-level structured outcomes rather than allowing ordinary source failures to terminate the complete run.
 
-## Initial Types
+Each collection result records:
 
-- Official Announcement;
-- Data Release;
-- Research;
-- News Reporting;
-- Analysis;
-- Opinion;
-- Company Update;
-- Funding or Transaction;
-- Event or Opportunity;
-- Technical Release;
-- Other.
+- source identifier;
+- status;
+- entries;
+- received-item count;
+- error type;
+- error message;
+- retrieval timestamp.
 
-## Classification Method
+Current statuses are:
 
-Content type may be inferred from:
+- `success`;
+- `empty`;
+- `failed`.
 
-- source type;
-- feed category;
-- title patterns;
-- configured keywords;
-- source defaults.
+Expected source-level failures are isolated.
 
-The classification should remain conservative.
+A failed source should not discard valid results from successful sources.
+
+Unexpected programming failures should not be silently converted into normal source failures.
 
 ---
 
-# 11. Relevance-Scoring Layer
+## 5.4 `normalize.py`
 
-## Responsibility
+Owns deterministic article normalisation.
 
-Assign a deterministic and explainable score used for report ordering.
+Current responsibilities include:
 
-## Scoring Philosophy
+- trimming and normalising titles;
+- normalising URLs;
+- removing selected tracking parameters;
+- removing fragments;
+- parsing publication timestamps;
+- converting recognised timestamps to timezone-aware UTC values;
+- creating deterministic record identifiers.
 
-The score should represent practical relevance to the user, not absolute global importance.
+The original article URL is preserved separately from the normalised URL so the report can continue linking to the publisher-provided location.
 
-The score should remain:
+### Record Identity
+
+The implemented identifier is based deterministically on:
+
+```text
+source_id + normalized_url
+```
+
+using SHA-256.
+
+There is currently no fallback identifier when a valid URL is unavailable.
+
+That behaviour should not be broadened until real-source validation demonstrates a need.
+
+---
+
+## 5.5 `validate.py`
+
+Owns structural record validation before later processing.
+
+Validation currently checks important conditions such as:
+
+- source identifier exists;
+- title exists;
+- article URL is valid HTTP or HTTPS;
+- retrieval timestamp is timezone-aware.
+
+Validation returns valid and invalid records separately.
+
+Invalid input should be visible rather than silently disappearing.
+
+Validation is intentionally distinct from collection-window eligibility.
+
+A record may be structurally valid but later excluded because its publication timestamp falls outside the monitored window.
+
+---
+
+## 5.6 `filter_window.py`
+
+Owns deterministic publication-window filtering.
+
+This component was added after manual end-to-end validation showed that recording a collection window without enforcing it produced misleading daily output.
+
+Current behaviour:
+
+- accepts timezone-aware start and end datetimes;
+- rejects naive boundaries;
+- rejects a window whose end precedes its start;
+- uses inclusive boundaries;
+- retains records whose `published_at` falls within the window;
+- excludes records published before the window;
+- excludes records published after the window;
+- excludes records whose `published_at` is missing.
+
+Current CLI behaviour constructs a previous-24-hours window.
+
+The missing-publication-time policy is conservative and provisional.
+
+Alternative fallback behaviour should be considered only if real production feeds demonstrate a meaningful need.
+
+---
+
+## 5.7 `deduplicate.py`
+
+Owns deterministic exact duplicate reduction.
+
+Current duplicate checks are applied in this order:
+
+1. normalised URL;
+2. normalised title.
+
+The first deterministic occurrence is retained.
+
+The component returns both:
+
+- unique records;
+- duplicate records.
+
+Near-duplicate or semantic clustering is not part of the implemented core.
+
+That functionality remains deferred until real reports demonstrate material repetition that exact deduplication cannot address.
+
+---
+
+## 5.8 `classify.py`
+
+Owns deterministic domain classification.
+
+Current logic combines:
+
+- source-level default domains;
+- configured domain keywords;
+- title and description text.
+
+Keyword matching is:
+
+- case-insensitive;
+- protected by word-boundary behaviour;
+- deterministic.
+
+A record may belong to multiple domains.
+
+Classification does not require every record to receive a domain.
+
+Unclassified records remain valid processed records but are omitted from the main Markdown report by default.
+
+The current implemented taxonomy contains two active domains:
+
+- Technology and Software;
+- Artificial Intelligence.
+
+This is a controlled Phase 1 taxonomy used to validate system behaviour, not the intended final coverage model.
+
+---
+
+## 5.9 `rank.py`
+
+Owns deterministic relevance scoring.
+
+The current Phase 1 score is provisional and intentionally simple.
+
+Conceptually:
+
+```text
+relevance score
+=
+source-tier score
++ domain-match score
++ keyword-match score
+```
+
+Current configured source-tier values are:
+
+- Tier 1 → 4 points;
+- Tier 2 → 3 points;
+- Tier 3 → 2 points;
+- Tier 4 → 1 point.
+
+Current additional weights are:
+
+- 2 points per domain match;
+- 1 point per matched keyword.
+
+Score components are retained with each processed record for transparency.
+
+The current formula is not treated as a final relevance model.
+
+Ranking should change only when real-report review demonstrates systematic ordering problems.
+
+---
+
+## 5.10 `storage.py`
+
+Owns processed-record persistence.
+
+Processed records are written as JSON Lines.
+
+The current write model overwrites the target file deterministically rather than continually appending to the same file.
+
+This supports idempotent reruns for a given target path and prevents uncontrolled duplication.
+
+Repository-native files remain the preferred storage mechanism unless production usage demonstrates a real database requirement.
+
+---
+
+## 5.11 `report.py`
+
+Owns deterministic report selection and Markdown rendering.
+
+It contains two distinct responsibilities:
+
+### Selection
+
+The public report selector determines which processed records appear.
+
+Current selection behaviour:
+
+- excludes unclassified records;
+- requires an active primary domain;
+- orders records deterministically;
+- respects maximum items per domain;
+- respects maximum items overall.
+
+### Rendering
+
+The Markdown renderer presents selected records in a readable daily report.
+
+Current report behaviour includes:
+
+- date heading;
+- generation timestamp;
+- run status;
+- monitored time window;
+- active source count;
+- successful source count;
+- empty source count;
+- failed source count;
+- collected-item count;
+- displayed-item count;
+- degraded-run warnings;
+- domain sections;
+- article title and publisher link;
+- source name;
+- publication timestamp;
+- relevance score;
+- secondary-domain metadata;
+- short feed-provided description;
+- configured description truncation.
+
+Each story appears once under its primary domain.
+
+Secondary domains are shown as metadata rather than duplicating the story across sections.
+
+No generated summary text is produced.
+
+---
+
+## 5.12 `run_summary.py`
+
+Owns structured operational metadata for one pipeline execution.
+
+The run summary is the persistent operational record of what happened.
+
+Current summary information includes:
+
+- run identifier;
+- start timestamp;
+- completion timestamp;
+- run status;
+- collection window;
+- active sources;
+- successful sources;
+- empty sources;
+- failed sources;
+- raw item count;
+- valid item count;
+- invalid item count;
+- duplicate item count;
+- displayed item count;
+- warnings.
+
+Run status distinguishes:
+
+- successful execution;
+- degraded execution;
+- failed execution where applicable.
+
+The same summary object is used to support both:
+
+- persistent JSON operational output;
+- user-facing Markdown operational metadata.
+
+This prevents report status from being recomputed independently.
+
+---
+
+## 5.13 `pipeline.py`
+
+Owns end-to-end local orchestration.
+
+It coordinates the processing stages without absorbing their internal logic.
+
+The current orchestration sequence is:
+
+1. load active sources;
+2. load domains;
+3. load ranking settings;
+4. load report settings;
+5. collect all active sources;
+6. normalise successful source entries;
+7. validate records;
+8. filter records by collection window;
+9. deduplicate eligible records;
+10. classify and score unique records;
+11. determine report-selected records;
+12. write processed JSONL;
+13. build the run summary;
+14. render the Markdown report using the run summary;
+15. write the Markdown report;
+16. write the JSON run summary;
+17. emit completion logging;
+18. return a structured pipeline result.
+
+The orchestrator deliberately remains thin.
+
+Business rules should continue to live in focused modules rather than accumulating inside `pipeline.py`.
+
+---
+
+## 5.14 `cli.py`
+
+Owns the local command-line entry point.
+
+The implemented command is:
+
+```text
+python -m daily_intelligence.cli run
+```
+
+The CLI is intentionally thin.
+
+It currently:
+
+- creates the run timestamp;
+- creates the run identifier;
+- constructs a previous-24-hours collection window;
+- derives repository-default output paths;
+- invokes the pipeline.
+
+The CLI should not duplicate pipeline logic.
+
+Future GitHub Actions automation should call the same underlying pipeline behaviour rather than creating a parallel implementation.
+
+---
+
+# 6. Configuration Architecture
+
+Configuration is repository-native and human-readable.
+
+The goal is to separate changing information policy from stable processing code.
+
+## 6.1 `sources.yaml`
+
+Current implemented source fields include:
+
+- `id`;
+- `name`;
+- `feed_url`;
+- `source_type`;
+- `source_tier`;
+- `default_domains`;
+- `language`;
+- `geographic_scope`;
+- `active`.
+
+The current Phase 1 source registry contains one controlled sample source.
+
+Production source selection belongs to the next development phase.
+
+Potential future source metadata should not be added until required.
+
+---
+
+## 6.2 `domains.yaml`
+
+Current implemented domain fields include:
+
+- `id`;
+- `name`;
+- `keywords`;
+- `active`.
+
+Current active Phase 1 domains are:
+
+- Technology and Software;
+- Artificial Intelligence.
+
+The broader target taxonomy is defined in `03 Information Taxonomy and Source Policy.md`.
+
+---
+
+## 6.3 `settings.yaml`
+
+Current settings include deterministic ranking and report configuration.
+
+Ranking configuration currently defines:
+
+- source-tier scores;
+- domain-match score;
+- keyword-match score.
+
+Report configuration currently defines:
+
+- maximum items per domain;
+- maximum total items;
+- maximum description length.
+
+Current report limits are:
+
+- maximum 5 items per domain;
+- maximum 30 items overall;
+- maximum description length 300 characters.
+
+These are configurable defaults rather than permanent product truths.
+
+---
+
+# 7. Data Model and Record Lifecycle
+
+A collected feed entry passes through several states.
+
+Conceptually:
+
+```text
+Raw feed entry
+→ normalised article record
+→ validated article record
+→ window-eligible article record
+→ unique article record
+→ classified article record
+→ scored article record
+→ stored processed record
+→ optional displayed report item
+```
+
+These states are deliberately separate.
+
+For example:
+
+- a structurally valid article may be outside the collection window;
+- an in-window article may be a duplicate;
+- a unique article may remain unclassified;
+- a processed article may not appear because of report limits.
+
+This separation prevents misleading counters and allows each processing rule to remain testable.
+
+---
+
+# 8. Collection-Window Architecture
+
+The collection window represents the publication-time interval eligible for the current report.
+
+The implemented Phase 1 CLI uses:
+
+```text
+run timestamp - 24 hours
+through
+run timestamp
+```
+
+Both boundaries are inclusive.
+
+The window must be timezone-aware.
+
+Current eligibility is determined using `published_at`, not retrieval time.
+
+A record can therefore be:
+
+- collected now;
+- structurally valid;
+- excluded from today's report because it was published earlier.
+
+This distinction is important.
+
+The run summary currently records validation counts separately from report eligibility.
+
+For example:
+
+```text
+raw items: 1
+valid items: 1
+displayed items: 0
+```
+
+is legitimate when the valid article falls outside the monitored publication window.
+
+An explicit post-window eligibility count is not currently part of the run-summary schema.
+
+That should be added only if operational use demonstrates that it materially improves observability.
+
+---
+
+# 9. Deduplication Architecture
+
+Deduplication is intentionally conservative.
+
+Current exact duplicate rules:
+
+### Rule 1 — Normalised URL
+
+Records with the same deterministic normalised URL are considered duplicates.
+
+### Rule 2 — Normalised Title
+
+Records that survive URL matching but share the same normalised title are considered duplicates.
+
+This approach is:
 
 - deterministic;
-- configurable;
-- inspectable;
-- reproducible.
+- inexpensive;
+- explainable;
+- easy to test.
 
-## Initial Score Components
+It does not attempt to infer that differently worded articles describe the same event.
 
-A first scoring model may include:
-
-    base score
-    + source-tier weight
-    + domain-priority weight
-    + geography-priority weight
-    + tracked-entity weight
-    + content-type weight
-    + multi-source coverage bonus
-    + recency bonus
-    - duplicate penalty
-    - missing-metadata penalty
-    - promotional-content penalty
-
-## Example Conceptual Formula
-
-    relevance_score =
-        source_quality
-      + domain_relevance
-      + geography_relevance
-      + entity_relevance
-      + content_type_relevance
-      + coverage_bonus
-      + recency_bonus
-      - quality_penalties
-
-The exact weights should be defined through configuration after sample testing.
-
-## Score Components
-
-Each record should preserve the contribution of each component.
-
-Example:
-
-    score_components:
-      source_tier: 3
-      domain_priority: 4
-      geography_priority: 2
-      entity_priority: 1
-      coverage_bonus: 2
-      metadata_penalty: -1
-
-## Tie-Breaking
-
-Recommended stable order:
-
-1. relevance score descending;
-2. publication time descending;
-3. source tier ascending;
-4. normalised title;
-5. record ID.
+Potential future approaches such as title similarity, semantic clustering or story grouping remain deferred because they introduce false-merge risk and additional maintenance.
 
 ---
 
-# 12. Storage Architecture
+# 10. Classification Architecture
 
-## Responsibility
+Classification is currently rules-based.
 
-Persist processed records, reports and run summaries in a form compatible with a public Git repository.
+The design intentionally separates:
 
-## Storage Decision
+- source defaults;
+- domain configuration;
+- keyword matching.
 
-Use JSON Lines for processed article records during the MVP.
+Source defaults provide prior domain knowledge for a publisher.
 
-### Why JSON Lines
+Keyword matching allows individual articles to receive additional domains.
 
-- simple and human-inspectable;
-- each record remains independently readable;
-- append and filter operations are straightforward;
-- nested fields such as domains and score components are supported;
-- easy to use with Python;
-- compatible with Git diffs at small MVP scale;
-- avoids introducing a database before required.
+A record can therefore receive multiple domains.
 
-### Why Not SQLite Initially
+Current primary-domain behaviour is deterministic:
 
-SQLite is useful for querying and scale, but during the MVP it would:
+- the first assigned eligible domain becomes the report section;
+- later domains become secondary tags.
 
-- produce binary database diffs;
-- reduce GitHub readability;
-- complicate review;
-- add migration concerns;
-- provide more capability than initially needed.
+Potential future classification dimensions include:
 
-SQLite may be reconsidered if the archive becomes too large or query requirements materially increase.
+- geography;
+- content type;
+- entities.
 
-### Why Not CSV
+They are not implemented dependencies of the core pipeline.
 
-CSV is weak for:
+---
 
-- lists of domains;
-- score components;
-- duplicate clusters;
-- nested metadata;
-- optional fields.
+# 11. Ranking Architecture
 
-## Proposed Data Structure
+Ranking is a deterministic prioritisation layer, not an attempt to model objective news importance.
 
-    data/
-    ├── processed/
-    │   ├── 2026/
-    │   │   ├── 08/
-    │   │   │   ├── 2026-08-04.jsonl
-    │   │   │   └── ...
-    │   └── ...
-    └── runs/
-        ├── 2026/
-        │   ├── 08/
-        │   │   ├── 2026-08-04.json
-        │   │   └── ...
+The score is currently used to order already-processed items before report limits are applied.
 
-## Raw Data
+Current signals are intentionally simple:
 
-The MVP should not persist complete raw feed responses by default.
+- source tier;
+- domain count;
+- keyword count.
 
-Reasons:
+Future ranking changes may incorporate observed signals such as:
 
-- unnecessary repository growth;
-- possible copyrighted content;
-- low operational value;
-- duplication of public source data.
+- source-quality penalties;
+- domain-specific weights;
+- geography;
+- recency;
+- entity importance;
+- duplicate-cluster significance.
 
-Small test fixtures may be stored under `tests/fixtures/`.
+None should be added without evidence from real report evaluation.
+
+The ranking system should remain explainable even if additional deterministic signals are introduced.
+
+---
+
+# 12. Report Architecture
+
+The Markdown report is the primary user-facing artifact of the deterministic system.
+
+The report is designed for rapid scanning rather than exhaustive archival reading.
+
+Current objectives:
+
+- concise;
+- deterministic;
+- source-transparent;
+- bounded in length;
+- visibly incomplete when degraded;
+- easy to inspect in GitHub or locally.
+
+The report does not rewrite or summarise full articles.
+
+It exposes publisher-provided metadata and short descriptions.
+
+The user can then choose which original sources deserve deeper reading or separate interpretation through ChatGPT.
+
+---
+
+# 13. Run Status and Failure Architecture
+
+Failure handling distinguishes ordinary source degradation from critical system failures.
+
+## Source-Level Failures
+
+Expected source-level failures should be isolated.
+
+Examples may include:
+
+- unavailable feed;
+- missing local fixture;
+- malformed source response that the collector explicitly handles.
+
+A source failure should produce:
+
+- `failed` source status;
+- error metadata;
+- degraded run status where appropriate;
+- visible warning in the Markdown report;
+- visible warning in logs.
+
+Successful sources should still contribute output.
+
+## Empty Sources
+
+A valid source with no entries should be represented as `empty`, not as a failure.
+
+## Critical Failures
+
+Failures that prevent trustworthy execution should not be silently downgraded.
+
+Examples include:
+
+- invalid core configuration;
+- unexpected programming errors;
+- invalid critical assumptions;
+- failures that prevent valid output persistence.
+
+Critical failure policy will need to be incorporated explicitly into GitHub Actions publication behaviour.
+
+---
+
+# 14. Observability Architecture
+
+Observability uses three complementary surfaces.
+
+## 14.1 Run Summary JSON
+
+Purpose:
+
+- persistent machine-readable operational record.
+
+Contains:
+
+- run status;
+- source outcomes;
+- counts;
+- collection window;
+- warnings;
+- timestamps.
+
+## 14.2 Markdown Operational Header
+
+Purpose:
+
+- user-facing indication of report completeness.
+
+Shows:
+
+- run status;
+- monitored window;
+- source health;
+- item counts;
+- warnings.
+
+This prevents a degraded report from appearing indistinguishable from a complete one.
+
+## 14.3 Standard-Library Logging
+
+Purpose:
+
+- technical execution diagnosis;
+- local development visibility;
+- future GitHub Actions log visibility.
+
+Current pipeline logs include:
+
+- pipeline start;
+- source collection outcomes;
+- validation counts;
+- collection-window filtering counts;
+- deduplication counts;
+- classification/ranking counts;
+- output paths;
+- final status.
+
+No custom logging framework is required.
+
+---
+
+# 15. Storage Architecture
+
+The repository itself is the initial storage and delivery layer.
 
 ## Processed Records
 
-Processed records may contain:
+Intended path pattern:
 
-- permitted source metadata;
-- classifications;
-- duplicate information;
-- ranking data;
-- processing status.
+```text
+data/processed/YYYY/MM/YYYY-MM-DD.jsonl
+```
 
-## Run Summary
+## Run Summaries
 
-Each run should create a structured summary containing:
+Intended path pattern:
 
-    run_id
-    started_at
-    completed_at
-    status
-    collection_window
-    active_sources
-    successful_sources
-    empty_sources
-    failed_sources
-    raw_items
-    valid_items
-    invalid_items
-    duplicate_items
-    displayed_items
-    warnings
+```text
+data/runs/YYYY/MM/YYYY-MM-DD.json
+```
 
----
+## Daily Reports
 
-# 13. Report-Generation Layer
+Intended path pattern:
 
-## Responsibility
+```text
+reports/daily/YYYY/MM/YYYY-MM-DD.md
+```
 
-Generate a concise, readable Markdown report from processed records.
+The CLI currently derives paths using this structure.
 
-## Separation from Collection
+Runtime output generated during controlled local testing should not automatically be treated as permanent repository data.
 
-Report generation should operate on processed records, not directly on live feed responses.
-
-This improves:
-
-- reproducibility;
-- testing;
-- debugging;
-- future formatting changes.
-
-## Proposed Report Path
-
-    reports/
-    └── daily/
-        └── 2026/
-            └── 08/
-                └── 2026-08-04.md
-
-## Report Construction
-
-The generator should:
-
-1. load the current run summary;
-2. load eligible processed records;
-3. select primary cluster records;
-4. assign each item to one display section;
-5. apply report limits;
-6. render the header;
-7. render domain sections;
-8. render warnings;
-9. write the Markdown file.
-
-## Report Limits
-
-Initial configurable defaults should be:
-
-- maximum 5 items per domain;
-- maximum 30 items in the full report.
-
-These are starting values and should be evaluated during real use.
-
-## Domain Placement
-
-Each record should appear once in the main report under its primary domain.
-
-Secondary domains may be shown as tags.
-
-This avoids excessive repetition.
-
-## Story Entry
-
-A story entry should contain:
-
-- title;
-- source;
-- publication time;
-- short feed-provided description when available;
-- direct link;
-- secondary-domain tags where useful;
-- related-source count when greater than one.
-
-Displaying raw relevance scores should remain optional.
-
-Scores are useful for debugging but may reduce report readability.
-
-## Description Length
-
-Descriptions should be truncated to a configurable maximum.
-
-Recommended initial value:
-
-- approximately 300 characters.
-
-The report must not fabricate summaries.
+Automated production persistence will be defined when GitHub Actions is implemented.
 
 ---
 
-# 14. Automation Layer
+# 16. Idempotency and Determinism
 
-## Responsibility
+The system should produce predictable results from equivalent inputs and configuration.
 
-Run the complete pipeline automatically through GitHub Actions.
+Current deterministic properties include:
 
-## Workflow Triggers
+- deterministic URL normalisation;
+- deterministic record identifier;
+- deterministic validation;
+- deterministic collection-window boundaries supplied by the run;
+- deterministic exact deduplication;
+- deterministic keyword classification;
+- deterministic relevance score;
+- deterministic report ordering;
+- deterministic report limits;
+- overwrite semantics for a target JSONL file.
 
-The production workflow should support:
+A rerun targeting the same output path should not create uncontrolled duplicate content.
 
-- scheduled daily execution;
-- manual execution through `workflow_dispatch`.
-
-## Schedule
-
-The exact time remains a product decision.
-
-The workflow schedule should be defined in UTC because GitHub Actions cron uses UTC.
-
-A morning report for Europe/Rome should account for daylight-saving changes.
-
-Because GitHub cron cannot automatically follow local daylight-saving time, the initial schedule should prioritise practical consistency rather than exact local-time precision.
-
-## Workflow Stages
-
-The GitHub Actions workflow should:
-
-1. check out the repository;
-2. set up the supported Python version;
-3. install dependencies;
-4. run configuration validation;
-5. run the pipeline;
-6. run critical validation;
-7. inspect whether output changed;
-8. commit generated outputs when valid;
-9. push the commit;
-10. expose workflow status and logs.
-
-## Explicit Timeout
-
-The workflow should define a timeout.
-
-Recommended initial maximum:
-
-- 10 minutes.
-
-The pipeline should normally run substantially faster.
-
-## Concurrency
-
-The workflow should prevent overlapping daily runs.
-
-Use a GitHub Actions concurrency group so that a second run does not create conflicting output.
-
-## Permissions
-
-Use the minimum required workflow permissions.
-
-The workflow will likely require repository content write permission if it commits generated outputs.
-
-It should not receive unrelated permissions.
+Network-fed production runs will naturally differ when the external source data changes.
 
 ---
 
-# 15. Automated Commit Strategy
+# 17. Testing Architecture
 
-## Responsibility
+Testing is part of the architecture rather than an optional development convenience.
 
-Preserve generated outputs without daily user intervention.
+At Phase 1 closeout, 104 tests pass.
 
-## Commit Contents
+Current coverage includes:
 
-An automated run may update:
+- configuration loading;
+- source collection;
+- controlled feed fixtures;
+- normalisation;
+- validation;
+- collection-window filtering;
+- exact deduplication;
+- classification;
+- ranking;
+- storage;
+- report selection;
+- report rendering;
+- run-summary generation;
+- end-to-end pipeline orchestration;
+- source-level degraded behaviour;
+- CLI invocation;
+- run-level logging.
 
-- the daily processed-record file;
-- the daily report;
-- the run-summary file.
+Important integration scenarios include:
 
-## Commit Message
+### Happy Path
 
-Recommended pattern:
+One controlled source produces one valid in-window record that is processed and displayed.
 
-    chore(data): generate intelligence report for YYYY-MM-DD
+### Degraded Source
 
-## No-Change Runs
+One source succeeds and one source fails.
 
-If no repository output changes, the workflow should not create an empty commit.
+Expected behaviour:
 
-## Commit Identity
+- successful records survive;
+- run status becomes degraded;
+- report contains successful information;
+- report displays a warning;
+- run summary exposes failure counts.
 
-The automated workflow should use a clearly identifiable bot-style Git identity.
+### Out-of-Window Record
 
-## Risk
+A structurally valid article is collected but published outside the monitored interval.
 
-Scheduled commits can create repository noise.
+Expected behaviour:
 
-This is acceptable for a daily archive but should remain limited to one coherent automated commit per run.
+- raw count reflects collection;
+- validation count reflects structural validity;
+- record is excluded before deduplication/classification/reporting;
+- displayed count is zero if no other eligible items exist.
 
----
+### Logging
 
-# 16. Logging and Observability
-
-## Responsibility
-
-Make system behaviour understandable without requiring advanced monitoring infrastructure.
-
-## Logging Levels
-
-Use standard levels:
-
-- `DEBUG` for local troubleshooting;
-- `INFO` for normal pipeline progress;
-- `WARNING` for degraded but recoverable conditions;
-- `ERROR` for source or record failures;
-- `CRITICAL` for failures that prevent valid output.
-
-## Required Log Events
-
-Log:
-
-- configuration loaded;
-- number of active sources;
-- source collection results;
-- number of raw items;
-- number of invalid items;
-- duplicate reduction results;
-- classification counts;
-- unclassified count;
-- report item count;
-- output paths;
-- workflow completion status.
-
-## Structured Run Summary
-
-The run-summary JSON file is the main persistent observability artifact.
-
-GitHub Actions logs provide technical detail.
-
-The report provides user-visible warnings.
-
-## Failure Visibility
-
-A degraded run should produce:
-
-- a valid report when core processing succeeds;
-- a visible warning;
-- failed-source details in the run summary.
-
-A critical failure should:
-
-- fail the workflow;
-- avoid committing a falsely successful report;
-- preserve logs for investigation.
+Important run-stage messages are exposed through the pipeline logger.
 
 ---
 
-# 17. Error-Handling Model
+# 18. Production Automation Architecture
 
-## Recoverable Errors
+GitHub Actions is the intended production execution environment, but it is not yet implemented.
 
-Examples:
+The future workflow should remain a wrapper around the same Python pipeline.
 
-- one source unavailable;
-- one malformed entry;
-- missing optional metadata;
-- no new items from a valid source;
-- a record failing classification.
+Planned responsibilities include:
 
-The pipeline should continue and record the issue.
+- checkout repository;
+- configure Python;
+- install project;
+- validate configuration;
+- run tests or required pre-run validation;
+- execute pipeline;
+- inspect output validity;
+- commit changed production artifacts;
+- avoid empty commits;
+- expose failures through workflow logs;
+- run manually through `workflow_dispatch`;
+- later run on a schedule.
 
-## Critical Errors
+The workflow should use:
 
-Examples:
+- minimum required permissions;
+- explicit timeout;
+- no AI service;
+- no paid external service;
+- no secret unless a real source eventually requires one.
 
-- invalid global configuration;
-- processed storage cannot be written;
-- report cannot be generated;
-- output validation fails;
-- repository persistence logic is unsafe;
-- all sources fail and no valid report can be produced.
-
-The workflow should fail.
-
-## Degraded Success
-
-The architecture should support a run status such as:
-
-- `success`;
-- `degraded`;
-- `failed`.
-
-### Success
-
-Core pipeline completed and no material failures occurred.
-
-### Degraded
-
-Core pipeline completed, but one or more sources or records failed.
-
-### Failed
-
-A critical stage failed or no trustworthy report could be produced.
+Scheduled execution should not be enabled until a manual production-like run and a manual GitHub Actions run are successful.
 
 ---
 
-# 18. Output Validation
+# 19. Network Architecture
 
-Before outputs are committed, the system should verify:
+Real remote-source hardening is intentionally incomplete.
 
-- report file exists;
-- report date matches the run;
-- required report header fields exist;
-- at least one valid item exists, unless the run legitimately found none;
-- all displayed items contain usable links;
-- no duplicate primary records appear;
-- processed JSON Lines parse correctly;
-- run-summary JSON is valid;
-- no restricted raw article bodies are present.
+Phase 1 focused on deterministic local behaviour.
 
-A legitimate no-news report should still be distinguishable from a failed run.
+Before automated production collection, the collector should be validated against a small real-source set.
 
----
+Production-readiness review should determine the minimum required behaviour for:
 
-# 19. Testing Architecture
+- request timeout;
+- user agent;
+- retry count;
+- retryable errors;
+- malformed responses;
+- redirect handling;
+- feed parser behaviour;
+- rate limits.
 
-The initial repository should eventually include:
+The default design principle is conservative:
 
-    tests/
-    ├── fixtures/
-    ├── test_config.py
-    ├── test_normalize.py
-    ├── test_validate.py
-    ├── test_deduplicate.py
-    ├── test_classify.py
-    ├── test_rank.py
-    ├── test_storage.py
-    └── test_report.py
+- requests must not hang indefinitely;
+- retries should be bounded;
+- source failures should remain isolated;
+- a poor source should be removed rather than supported through disproportionate complexity.
 
-## Unit Tests
-
-Test deterministic logic independently.
-
-## Integration Test
-
-Use a controlled set of local feed fixtures to test the complete pipeline without relying on live external sources.
-
-## Live Source Smoke Test
-
-A limited optional test may verify that a small number of active feeds remain reachable.
-
-Live tests should not make unit tests dependent on internet availability.
-
-## Workflow Validation
-
-The GitHub Actions workflow should initially be tested through manual execution before enabling the daily schedule.
+No production network feature should be added without a real-source reason.
 
 ---
 
-# 20. Proposed Repository Structure After MVP Setup
+# 20. Security and Privacy Architecture
 
-The expected structure is:
+The repository is public.
 
-    daily-intelligence-system/
-    ├── .github/
-    │   └── workflows/
-    │       └── daily-intelligence.yml
-    │
-    ├── config/
-    │   ├── sources.yaml
-    │   ├── domains.yaml
-    │   ├── entities.yaml
-    │   └── settings.yaml
-    │
-    ├── data/
-    │   ├── processed/
-    │   └── runs/
-    │
-    ├── docs/
-    │   └── project/
-    │       ├── 00 Project Brief.md
-    │       ├── 01 Product Requirements.md
-    │       ├── 02 System Architecture.md
-    │       ├── 03 Information Taxonomy and Source Policy.md
-    │       └── 04 Development Roadmap and Status.md
-    │
-    ├── reports/
-    │   └── daily/
-    │
-    ├── src/
-    │   └── daily_intelligence/
-    │       ├── __init__.py
-    │       ├── cli.py
-    │       ├── config.py
-    │       ├── collect.py
-    │       ├── normalize.py
-    │       ├── validate.py
-    │       ├── deduplicate.py
-    │       ├── classify.py
-    │       ├── rank.py
-    │       ├── storage.py
-    │       ├── report.py
-    │       ├── models.py
-    │       └── logging_config.py
-    │
-    ├── tests/
-    │   └── fixtures/
-    │
-    ├── .gitignore
-    ├── LICENSE
-    ├── README.md
-    ├── pyproject.toml
-    └── requirements.txt
+Therefore the architecture must never require committing:
 
-This is the expected direction, not a requirement to create every file immediately.
+- credentials;
+- private Career OS data;
+- private email content;
+- private newsletter content;
+- access tokens;
+- personally sensitive datasets;
+- restricted copyrighted content.
 
-Files should be introduced only when their corresponding functionality is implemented.
+If credentials become necessary for an optional future source, they must use environment variables or GitHub Secrets and must not become a core-system dependency.
 
-## Packaging Decision
-
-Use a `src/` package layout.
-
-Reasons:
-
-- avoids accidental imports from the repository root;
-- keeps code responsibilities clear;
-- supports testing cleanly;
-- remains appropriate if the project grows;
-- adds little practical complexity.
+The preferred source universe remains public structured information that does not require authentication.
 
 ---
 
-# 21. Python and Dependency Strategy
+# 21. Copyright and Content Boundaries
 
-## Python Version
+The system should preserve metadata required for intelligence triage without reproducing restricted source content.
 
-Use a currently supported stable Python version available in GitHub Actions.
+The repository may store:
 
-The exact version should be verified against current GitHub-hosted runner support before implementation.
-
-## Initial Dependencies
-
-The likely MVP dependencies are:
-
-- `feedparser` for RSS and Atom parsing;
-- `PyYAML` for configuration;
-- `python-dateutil` for timestamp parsing;
-- `pytest` for testing.
-
-A lightweight title-similarity dependency may be considered later if standard-library logic is insufficient.
-
-## Standard Library
-
-Prefer standard-library tools for:
-
-- URL parsing;
-- hashing;
-- JSON;
-- logging;
-- dataclasses;
-- datetime handling where adequate;
-- file operations.
-
-## Dependency Management
-
-Use `pyproject.toml` as the main project and dependency definition.
-
-A separate `requirements.txt` may be generated or retained only if it materially simplifies GitHub Actions or user setup.
-
-Avoid maintaining duplicated dependency declarations manually.
-
----
-
-# 22. Data Model
-
-The internal article record should be represented as a typed Python model.
-
-A dataclass is sufficient for the MVP.
-
-The model should support:
-
-- serialisation to JSON;
-- optional fields;
-- lists of domains and geographies;
-- score-component storage;
-- processing status.
-
-A complex validation framework is not required initially unless configuration and record complexity justify it.
-
----
-
-# 23. Command-Line Interface
-
-The MVP should expose one main command for the complete pipeline.
-
-Conceptual usage:
-
-    python -m daily_intelligence.cli run
-
-Possible later commands:
-
-    validate-config
-    collect
-    generate-report
-    check-sources
-
-The first implementation should avoid building an elaborate CLI.
-
-A single end-to-end command plus configuration validation is sufficient.
-
----
-
-# 24. Security and Privacy Architecture
-
-## Secrets
-
-The MVP should avoid secrets entirely where possible.
-
-If a future public API requires a key:
-
-- store it in GitHub Secrets;
-- never print it;
-- never commit it;
-- make that source optional.
-
-## Public Outputs
-
-Only permitted public metadata should be committed.
-
-## Private Context
-
-The following remain outside the repository:
-
-- Career OS source files;
-- personal emails;
-- private newsletters;
-- private account details;
-- proprietary information;
-- authentication cookies.
-
-## Dependency Security
-
-Dependencies should remain minimal and should be periodically reviewed.
-
-Automated dependency tooling may be considered later, but it is not required before the MVP works.
-
----
-
-# 25. Copyright Architecture
-
-The system should not fetch or store full article bodies during the MVP.
-
-The architecture should operate on:
-
-- feed titles;
-- links;
-- authors;
+- titles;
+- publisher names;
+- article links;
 - timestamps;
-- short descriptions;
-- categories;
-- system-generated metadata.
+- short feed-provided descriptions where appropriate;
+- derived deterministic metadata;
+- scores;
+- classifications.
 
-Descriptions should be truncated for presentation.
+The system should not store:
 
-When source permissions are uncertain, the system should store less content.
+- complete copyrighted articles;
+- bypassed paywall content;
+- unauthorised scraped full text.
 
----
-
-# 26. ChatGPT Boundary
-
-The GitHub pipeline and ChatGPT scheduled briefing remain independent.
-
-The architecture does not include:
-
-- automated GitHub-to-ChatGPT transfer;
-- ChatGPT API calls;
-- automatic report upload;
-- plugin or connector access;
-- AI-generated repository summaries.
-
-This avoids:
-
-- paid API usage;
-- connector dependency;
-- daily manual copying;
-- fragile authentication;
-- privacy uncertainty.
+The report is intended to direct the user toward original sources rather than replace them.
 
 ---
 
-# 27. Architectural Decisions
+# 22. Architecture for ChatGPT Use
 
-The following decisions are established for the MVP.
+ChatGPT is outside the automated production dependency chain.
 
-| Area | Decision |
-|---|---|
-| Runtime | Python |
-| Automation | GitHub Actions |
-| Initial sources | RSS and Atom |
-| Configuration | YAML |
-| Internal timezone | UTC |
-| Processed storage | JSON Lines |
-| Run summaries | JSON |
-| Reports | Markdown |
-| Production AI calls | None |
-| Full article storage | Not allowed |
-| Database | Not required initially |
-| Report placement | One primary domain per item |
-| Secondary domains | Stored and optionally shown as tags |
-| Daily persistence | Automated repository commit |
-| Delivery interface | GitHub repository report |
-| GitHub issues | Deferred |
-| GitHub Pages | Deferred |
-| Newsletter ingestion | Deferred |
-| Private sources | Excluded from MVP |
+The deterministic system should be useful without any ChatGPT API call.
 
-These decisions may be revised only when evidence shows a meaningful limitation.
+ChatGPT may be used manually for:
 
----
+- interpreting selected stories;
+- connecting information to career or project context;
+- analysing trends;
+- deciding whether a system limitation is worth addressing;
+- development reasoning;
+- code generation and review.
 
-# 28. Open Architectural Decisions
+The architectural separation is:
 
-The following remain unresolved:
+```text
+Daily Intelligence System
+= deterministic collection and filtering infrastructure
 
-- exact Python version;
-- exact GitHub Actions execution time;
-- exact title-similarity method;
-- exact near-duplicate threshold;
-- exact source and domain configuration schemas;
-- exact score weights;
-- whether relevance scores appear in the public report;
-- how missing-timestamp records are displayed;
-- whether JSON Lines files are daily or monthly after scale increases;
-- whether source-health history requires a separate file;
-- whether a dependency-lock file is needed;
-- whether `requirements.txt` is necessary alongside `pyproject.toml`;
-- exact format of automated report commits;
-- exact no-news report behaviour.
+ChatGPT
+= optional external reasoning and interpretation layer
+```
 
-These should be resolved during implementation or sample evaluation rather than guessed prematurely.
+This separation preserves:
+
+- zero recurring system cost;
+- auditability;
+- portability;
+- reliability;
+- freedom from API-credit dependence.
 
 ---
 
-# 29. Architecture Validation Plan
+# 23. Implemented vs Planned vs Deferred Architecture
 
-Before enabling scheduled production, validate the architecture through four stages.
+## Implemented and Validated
 
-## Stage 1 — Configuration Validation
+- Python package;
+- repository configuration;
+- RSS/Atom collection;
+- structured source results;
+- normalisation;
+- deterministic URL cleaning;
+- UTC timestamp parsing;
+- deterministic SHA-256 record IDs;
+- validation;
+- collection-window filtering;
+- exact deduplication;
+- deterministic domain classification;
+- deterministic ranking;
+- JSONL persistence;
+- deterministic report selection;
+- Markdown rendering;
+- operational report metadata;
+- structured run-summary JSON;
+- end-to-end pipeline orchestration;
+- local CLI;
+- source-level degraded behaviour;
+- lightweight logging;
+- automated tests.
 
-Confirm that:
+## Planned for Production MVP
 
-- valid configuration loads;
-- missing required fields fail clearly;
-- inactive sources are skipped;
-- domains and settings are internally consistent.
+- small real-source registry;
+- validated HTTP timeout behaviour;
+- bounded retry policy if needed;
+- production user-agent behaviour if needed;
+- GitHub Actions workflow;
+- `workflow_dispatch`;
+- automated output persistence;
+- automated commits;
+- scheduled execution;
+- real-use evaluation.
 
-## Stage 2 — Local Vertical Slice
+## Deferred Until Evidence
 
-Using local fixtures:
-
-- parse feed entries;
-- normalise records;
-- validate required fields;
-- remove exact duplicates;
-- classify domains;
-- assign provisional scores;
-- write JSON Lines;
-- generate Markdown.
-
-## Stage 3 — Live Manual Run
-
-Using a small source universe:
-
-- run the pipeline locally;
-- inspect source failures;
-- inspect processed records;
-- inspect classifications;
-- inspect duplicates;
-- inspect report length and readability.
-
-## Stage 4 — GitHub Actions Manual Run
-
-Before scheduling:
-
-- trigger the workflow manually;
-- confirm dependencies install;
-- confirm outputs generate;
-- confirm permissions;
-- confirm automated commit;
-- confirm failure behaviour.
-
-Only after these stages should the daily schedule be enabled.
+- near-duplicate clustering;
+- story clustering;
+- entity extraction;
+- geographic classification;
+- content-type classification;
+- source-health history;
+- advanced source penalties;
+- sophisticated ranking;
+- broad taxonomy expansion logic;
+- dashboards;
+- GitHub Pages;
+- GitHub Issues delivery;
+- machine learning;
+- LLM processing;
+- embeddings;
+- RAG;
+- agents;
+- databases;
+- cloud infrastructure.
 
 ---
 
-# 30. Current Status
+# 24. Current Architectural Limitations
 
-**Status:** Initial architecture defined
+The current system should not be described as production-complete.
 
-**Architecture decisions completed:**
+Known limitations include:
 
-- repository-native Python workflow;
-- RSS and Atom as initial source types;
-- YAML configuration;
-- UTC internal timestamps;
-- deterministic processing;
-- JSON Lines storage;
-- Markdown reports;
-- automated GitHub Actions execution;
-- automated repository persistence;
-- public-safe metadata only;
-- no production AI calls.
+- only one controlled sample source is configured;
+- only two domains are implemented;
+- remote-source behaviour has not yet been validated broadly;
+- explicit network timeout/retry policy is not yet production-hardened;
+- exact deduplication cannot detect differently worded versions of the same story;
+- records with missing publication timestamps are excluded from report-window eligibility;
+- ranking is provisional;
+- no entity or geographic enrichment exists;
+- no production source-health history exists;
+- GitHub Actions is not implemented;
+- automated commits are not implemented;
+- scheduled execution is not implemented;
+- real daily report quality has not yet been evaluated over time.
 
-**Still required before implementation:**
+These are visible limitations, not automatic development requirements.
 
-- initial source universe;
-- final configuration schemas;
-- provisional ranking formula;
-- initial test fixtures;
-- exact report template;
-- implementation roadmap.
+Each should be addressed only when required by the next validated workflow step.
 
-**Next document:**
+---
 
-- 
+# 25. Architectural Decision Rules
+
+Any proposed architectural change should answer:
+
+1. What observed problem does this solve?
+2. Is that problem currently validated?
+3. Can configuration or a deterministic rule solve it instead?
+4. What recurring cost does it add?
+5. What maintenance does it add?
+6. What new failure modes does it create?
+7. How will success be tested?
+8. Does it preserve public-repository safety?
+9. Does it preserve negligible daily manual work?
+10. Does it delay actual use of the system?
+
+The default answer to unnecessary infrastructure should be no.
+
+---
+
+# 26. Open Architectural Decisions
+
+The following decisions remain intentionally open.
+
+## Real-Source Set
+
+Determine the smallest credible source set for production-like validation.
+
+Owner: Phase 2.
+
+## Network Timeout
+
+Determine a bounded timeout appropriate for live RSS/Atom requests.
+
+Owner: Phase 2.
+
+## Retry Policy
+
+Determine whether any retry behaviour is necessary after observing live source failures.
+
+Owner: Phase 2.
+
+## Missing Publication Timestamp Policy
+
+Current behaviour excludes missing publication timestamps.
+
+Reconsider only if valuable real sources frequently omit the field.
+
+Owner: evidence from Phase 2 or Phase 4.
+
+## Collection Window
+
+Current CLI default is the previous 24 hours.
+
+Reconsider tolerance only if source publication behaviour causes systematic misses.
+
+Owner: evidence from live feeds.
+
+## Near-Duplicate Detection
+
+No implementation until exact deduplication proves insufficient.
+
+Owner: Phase 5 if justified.
+
+## Production Source Health History
+
+Current run summaries capture per-run operational state but not long-term source health.
+
+Add only if recurring source reliability becomes difficult to manage manually.
+
+## Automated Commit Strategy
+
+Final GitHub Actions commit behaviour must ensure:
+
+- outputs are validated first;
+- no empty commits;
+- one coherent commit per successful publication event;
+- critical failures do not publish misleading output.
+
+Owner: Phase 3.
+
+## Output Retention
+
+Repository-native daily history is currently intended.
+
+Retention or archival policy should be revisited only after real production growth is measurable.
+
+---
+
+# 27. Architecture Validation Gates
+
+## Gate A — Local Architecture
+
+Status: passed.
+
+Required:
+
+- local orchestration works;
+- deterministic processing works;
+- test coverage exists;
+- output is inspectable;
+- failures are visible.
+
+## Gate B — Real-Source Architecture
+
+Status: not yet passed.
+
+Required:
+
+- small live source set works reliably enough;
+- requests cannot hang indefinitely;
+- source metadata is usable;
+- report output is useful;
+- no critical external-source behaviour is unresolved.
+
+## Gate C — Automation Architecture
+
+Status: not yet passed.
+
+Required:
+
+- real-source architecture has passed;
+- manual GitHub Actions run works;
+- outputs are validated before persistence;
+- permissions are minimal;
+- failure states are visible;
+- no paid or AI dependency is introduced.
+
+## Gate D — Advanced Quality Architecture
+
+Status: not yet passed.
+
+Required:
+
+- real reports demonstrate a material limitation;
+- simpler deterministic adjustments are insufficient;
+- the new component has an explicit evaluation method.
+
+---
+
+# 28. Current Architecture Summary
+
+The Daily Intelligence System is currently a repository-native deterministic Python pipeline.
+
+Its implemented core is:
+
+```text
+collect
+→ normalize
+→ validate
+→ filter by publication window
+→ deduplicate
+→ classify
+→ rank
+→ store
+→ generate readable report
+→ generate run summary
+→ expose operational status
+```
+
+It runs locally through:
+
+```text
+python -m daily_intelligence.cli run
+```
+
+It has no recurring monetary cost and no production AI dependency.
+
+At Phase 1 closeout:
+
+- the complete local vertical slice is implemented;
+- 104 tests pass;
+- manual CLI execution is validated;
+- collection-window enforcement is validated;
+- degraded source handling is validated;
+- report operational visibility is validated;
+- run-level logging is validated.
+
+The next architectural objective is not additional sophistication.
+
+It is to validate this same architecture with a deliberately small set of real public feeds before introducing GitHub Actions automation.
+
+---
+
+# Changelog
+
+## 2026-08-11 — Phase 1 Architecture Baseline
+
+- Replaced the pre-implementation architecture with the validated local system architecture.
+- Added explicit orchestration and CLI components.
+- Added collection-window filtering as a first-class processing stage.
+- Recorded deterministic SHA-256 record identity.
+- Recorded exact URL/title deduplication.
+- Recorded current deterministic classification and ranking behaviour.
+- Recorded report selection and operational metadata behaviour.
+- Recorded run-summary and logging responsibilities.
+- Distinguished implemented, production-planned and deferred components.
+- Removed speculative modules that are not part of the current repository.
+- Reframed near-duplicate, entity, geography and content-type logic as evidence-driven future enhancements.
+- Defined real-source validation as the next architecture gate before GitHub Actions.
