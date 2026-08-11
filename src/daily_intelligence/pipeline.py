@@ -9,6 +9,11 @@ from daily_intelligence.collect import (
     SourceCollectionResult,
     collect_source,
 )
+
+from daily_intelligence.filter_window import (
+    filter_records_by_window,
+)
+
 from daily_intelligence.config import (
     DomainConfig,
     ReportConfig,
@@ -100,8 +105,13 @@ def run_pipeline(
         normalized_records
     )
 
+    window_records = filter_records_by_window(
+        validation_result.valid_records,
+        collection_window,
+    )
+
     deduplication_result = deduplicate_records(
-        validation_result.valid_records
+        window_records
     )
 
     processed_records = tuple(

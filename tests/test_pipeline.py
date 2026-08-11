@@ -41,7 +41,6 @@ COLLECTION_WINDOW = (
     STARTED_AT,
 )
 
-
 def test_pipeline_runs_controlled_fixture_end_to_end(
     tmp_path: Path,
 ) -> None:
@@ -278,3 +277,72 @@ def test_pipeline_preserves_successful_results_when_one_source_fails(
     assert stored_summary["status"] == "degraded"
     assert stored_summary["successful_sources"] == 1
     assert stored_summary["failed_sources"] == 1
+
+def test_pipeline_excludes_records_outside_collection_window(
+    tmp_path: Path,
+) -> None:
+    """Older publications do not enter the current report."""
+
+    records_path = tmp_path / "processed.jsonl"
+    report_path = tmp_path / "report.md"
+    summary_path = tmp_path / "run-summary.json"
+
+    current_window = (
+        datetime(
+            2026,
+            8,
+            10,
+            9,
+            0,
+            tzinfo=timezone.utc,
+        ),
+        datetime(
+            2026,
+            8,
+            11,
+            9,
+            0,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    result = run_pipeline(
+        sources_path=SOURCES_PATH,
+        domains_path=DOMAINS_PATH,
+        settings_path=SETTINGS_PATH,
+        records_path=records_path,
+        report_path=report_path,
+        run_summary_path=summary_path,
+        run_id="20260811T090000Z",
+        started_at=current_window[1],
+        completed_at=current_window[1],
+        collection_window=current_window,
+        report_date="2026-08-11",
+    )
+
+    assert len(result.validation_result.valid_records) == 1
+    assert result.deduplication_result.unique_records == ()
+    assert result.records == ()
+
+    stored_lines = records_path.read_text(
+        encoding="utf-8",
+    ).splitlines()
+
+    assert stored_lines == []
+
+    stored_report = report_path.read_text(
+        encoding="utf-8",
+    )
+
+    assert "Displayed items: 0" in stored_report
+    assert "Sample AI Release" not in stored_report
+    assert (
+        "No classified items were selected for this report."
+        in stored_report
+    )
+
+    assert result.run_summary.status == "success"
+    assert result.run_summary.raw_items == 1
+    assert result.run_summary.valid_items == 1
+    assert result.run_summary.duplicate_items == 0
+    assert result.run_summary.displayed_items == 0
