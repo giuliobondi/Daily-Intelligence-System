@@ -42,18 +42,44 @@ COLLECTION_WINDOW = (
     STARTED_AT,
 )
 
+def _write_sample_sources(tmp_path: Path) -> Path:
+    """Write the controlled single-source registry used by pipeline tests."""
+
+    sources_path = tmp_path / "sources.yaml"
+
+    sources_path.write_text(
+        """
+sources:
+  - id: sample_source
+    name: Sample Source
+    feed_url: tests/fixtures/sample_feed.xml
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - technology
+    language: en
+    geographic_scope:
+      - Global
+    active: true
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    return sources_path
 
 def test_pipeline_runs_end_to_end(
     tmp_path: Path,
 ) -> None:
     """The controlled fixture passes through the complete local pipeline."""
 
+    sources_path = _write_sample_sources(tmp_path)
     records_path = tmp_path / "processed.jsonl"
     report_path = tmp_path / "report.md"
     summary_path = tmp_path / "run-summary.json"
 
     result = run_pipeline(
-        sources_path=SOURCES_PATH,
+        sources_path=sources_path,
         domains_path=DOMAINS_PATH,
         settings_path=SETTINGS_PATH,
         records_path=records_path,
@@ -432,6 +458,7 @@ def test_pipeline_excludes_records_outside_collection_window(
 ) -> None:
     """Older publications do not enter the current report."""
 
+    sources_path = _write_sample_sources(tmp_path)
     records_path = tmp_path / "processed.jsonl"
     report_path = tmp_path / "report.md"
     summary_path = tmp_path / "run-summary.json"
@@ -456,7 +483,7 @@ def test_pipeline_excludes_records_outside_collection_window(
     )
 
     result = run_pipeline(
-        sources_path=SOURCES_PATH,
+        sources_path=sources_path,
         domains_path=DOMAINS_PATH,
         settings_path=SETTINGS_PATH,
         records_path=records_path,
@@ -553,6 +580,7 @@ def test_pipeline_emits_run_level_logs(
 ) -> None:
     """The pipeline exposes useful run-level operational logs."""
 
+    sources_path = _write_sample_sources(tmp_path)
     records_path = tmp_path / "processed.jsonl"
     report_path = tmp_path / "report.md"
     summary_path = tmp_path / "run-summary.json"
@@ -562,7 +590,7 @@ def test_pipeline_emits_run_level_logs(
         logger="daily_intelligence.pipeline",
     ):
         run_pipeline(
-            sources_path=SOURCES_PATH,
+            sources_path=sources_path,
             domains_path=DOMAINS_PATH,
             settings_path=SETTINGS_PATH,
             records_path=records_path,

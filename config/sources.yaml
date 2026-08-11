@@ -1,12 +1,81 @@
 sources:
-  - id: sample_source
-    name: Sample Source
-    feed_url: tests/fixtures/sample_feed.xml
+  - id: bbc_world
+    name: BBC News World
+    feed_url: https://feeds.bbci.co.uk/news/world/rss.xml?edition=uk
     source_type: rss
-    source_tier: 1
-    default_domains:
-      - technology
+    source_tier: 2
+    default_domains: []
     language: en
     geographic_scope:
       - Global
+    active: true
+
+  - id: bbc_business
+    name: BBC News Business
+    feed_url: https://feeds.bbci.co.uk/news/business/rss.xml?edition=uk
+    source_type: rss
+    source_tier: 2
+    default_domains: []
+    language: en
+    geographic_scope:
+      - Global
+    active: true
+
+  - id: ecb_press
+    name: European Central Bank
+    feed_url: https://www.ecb.europa.eu/rss/press.html
+    source_type: rss
+    source_tier: 1
+    default_domains: []
+    language: en
+    geographic_scope:
+      - European Union
+      - Euro Area
+    active: true
+
+  - id: ec_highlights
+    name: European Commission Highlighted News
+    feed_url: https://commission.europa.eu/node/29665/rss_en
+    source_type: rss
+    source_tier: 1
+    default_domains: []
+    language: en
+    geographic_scope:
+      - European Union
+    active: true
+
+  - id: istat_press_en
+    name: Istat Press Releases
+    feed_url: https://www.istat.it/en/documents/press-release/feed/
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - economics_macroeconomics
+    language: en
+    geographic_scope:
+      - Italy
+    active: true
+
+  - id: openai_news
+    name: OpenAI News
+    feed_url: https://openai.com/news/rss.xml
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - artificial_intelligence
+    language: en
+    geographic_scope:
+      - Global
+    active: true
+
+  - id: sifted_articles
+    name: Sifted
+    feed_url: https://sifted.eu/feed?post_type=article
+    source_type: rss
+    source_tier: 2
+    default_domains:
+      - startups_venture_capital
+    language: en
+    geographic_scope:
+      - Europe
     active: true

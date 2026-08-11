@@ -1,3 +1,4 @@
+````markdown
 # Daily Intelligence System — Product Requirements
 
 > **Purpose**
@@ -55,20 +56,26 @@ Interpretation remains the responsibility of the separate ChatGPT briefing layer
 
 # Product Status
 
-The local deterministic processing core is implemented and validated.
+The deterministic local processing core and the minimal real-source layer are implemented and validated.
 
-At Phase 1 closeout, the system can:
+At Phase 2 closeout, the system can:
 
-- load configuration;
-- collect RSS/Atom content from controlled sources;
+- load repository configuration;
+- collect real public RSS feeds;
+- collect controlled local feed fixtures;
+- use bounded remote HTTP requests;
+- send an explicit User-Agent where required;
+- preserve normal SSL verification;
 - isolate source-level failures;
-- normalise records;
+- distinguish successful, empty and failed sources;
+- normalise real feed entries;
 - validate required fields;
 - enforce a publication-time collection window;
 - reduce exact duplicates;
 - classify records deterministically;
+- support explicitly unclassified records;
 - assign deterministic relevance scores;
-- persist processed JSON Lines;
+- persist processed JSON Lines locally;
 - generate a bounded Markdown report;
 - generate a structured JSON run summary;
 - expose degraded-run warnings;
@@ -81,20 +88,41 @@ The validated local command is:
 python -m daily_intelligence.cli run
 ```
 
-At Phase 1 closeout:
+The active real-source configuration contains seven validated public RSS sources:
 
-> **104 automated tests pass.**
+- BBC News World;
+- BBC News Business;
+- European Central Bank;
+- European Commission Highlighted News;
+- Istat Press Releases;
+- OpenAI News;
+- Sifted.
+
+The implemented taxonomy currently contains seven active domains:
+
+- Global Politics and Geopolitics;
+- Economics and Macroeconomics;
+- Companies and Corporate Strategy;
+- Artificial Intelligence;
+- Technology and Software;
+- Startups and Venture Capital;
+- Europe and the European Union.
+
+At Phase 2 closeout:
+
+> **110 automated tests pass.**
 
 The product is not yet production-complete.
 
 The following MVP requirements remain pending:
 
-- a small real-source production set;
-- hardened remote-request behaviour;
 - GitHub Actions execution;
 - automated repository persistence;
 - scheduled daily execution;
-- production evaluation over time.
+- production failure and publication behaviour in GitHub Actions;
+- longitudinal production evaluation over repeated daily runs.
+
+The next product-development step is therefore automation, not additional classification or source expansion.
 
 ---
 
@@ -132,7 +160,7 @@ The user should not need to:
 - review raw logs unless a failure occurs;
 - make daily classification or ranking decisions.
 
-The current Phase 1 implementation is local and therefore still requires manual invocation.
+The current implementation still requires manual local invocation.
 
 Automatic daily execution remains a production MVP requirement.
 
@@ -150,11 +178,13 @@ Identify relevant items published by monitored sources during the configured tim
 
 Remove or suppress malformed records and obvious duplicates.
 
-More advanced near-duplicate handling should be added only if real reports demonstrate a material problem.
+More advanced near-duplicate handling should be added only if repeated real reports demonstrate a material problem.
 
 ## Job 3 — Organise Information
 
 Group stories into meaningful and configurable domains.
+
+The system should prefer leaving an item unclassified over assigning a misleading domain.
 
 ## Job 4 — Prioritise Attention
 
@@ -178,13 +208,13 @@ Under normal future production operation, the daily workflow should be:
 6. It classifies and ranks eligible records.
 7. It generates the daily report.
 8. It stores the report, processed records and run summary.
-9. It makes success or failure visible.
+9. It makes success, degradation or failure visible.
 10. The user opens the latest report and scans the most relevant items.
 11. The user follows only the links that justify deeper reading.
 
 The normal daily user interaction should require no configuration or data entry.
 
-The current local development workflow mirrors this processing path but still requires manual command execution.
+The current local development workflow mirrors this complete processing path but still requires manual command execution.
 
 ---
 
@@ -221,22 +251,41 @@ Each source entry should support, where relevant:
 - geographic scope;
 - active or inactive status.
 
+A source may explicitly have no default domain when the feed is too broad for a source-wide topical assumption.
+
 ### Acceptance Criteria
 
 - A new compatible source can be added through configuration without modifying core collection logic.
 - A source can be disabled without deleting it.
 - Invalid required source configuration produces a visible error.
 - Source configuration remains separate from collection logic.
+- Broad sources can rely entirely on article-level classification without being forced into a default topic.
 
 ### Current Status
 
-**Locally validated**
+**Implemented and real-source validated**
 
 The current implementation supports the required configurable source fields through `sources.yaml`.
 
-The active Phase 1 registry contains one controlled sample source.
+The active registry contains seven validated real public RSS sources.
 
-A production source universe has not yet been selected.
+Current source-default policy allows:
+
+```yaml
+default_domains: []
+```
+
+for broad heterogeneous feeds.
+
+Current active source defaults are intentionally narrow:
+
+- BBC News World → none;
+- BBC News Business → none;
+- European Central Bank → none;
+- European Commission Highlighted News → none;
+- Istat Press Releases → Economics and Macroeconomics;
+- OpenAI News → Artificial Intelligence;
+- Sifted → Startups and Venture Capital.
 
 ---
 
@@ -257,12 +306,22 @@ The MVP must collect only from permitted public structured sources, such as:
 - The MVP does not depend on browser automation.
 - The MVP does not depend on prohibited scraping.
 - The origin of every collected record is identifiable.
+- Public-source metadata can be stored safely in the public repository.
 
 ### Current Status
 
-**Locally validated for RSS/Atom-style collection**
+**Implemented and real-source validated for RSS**
 
-No production public-source set has yet been approved.
+Seven real public RSS sources were successfully collected through the actual project collector.
+
+The current source universe requires:
+
+- no paid API;
+- no browser automation;
+- no private credentials;
+- no prohibited scraping.
+
+Atom remains supported by the configuration and collector design but is not currently represented in the seven-source real registry.
 
 ---
 
@@ -281,9 +340,24 @@ A failure affecting one source should not automatically prevent successful sourc
 
 ### Current Status
 
-**Implemented and integration-tested**
+**Implemented and validated with fixtures and real network behaviour**
 
-A degraded run with one successful source and one failed source preserves successful results, records failure metadata, sets run status to `degraded`, exposes warnings in the Markdown report and preserves failure details in the JSON run summary.
+A degraded run with one successful source and one failed source:
+
+- preserves successful results;
+- records failure metadata;
+- sets run status to `degraded`;
+- exposes warnings in the Markdown report;
+- preserves failure details in the JSON run summary.
+
+Phase 2 also deliberately tested one valid real Istat source together with one invalid remote hostname.
+
+Observed behaviour matched the requirement:
+
+- Istat succeeded;
+- the invalid source failed with `CollectionError`;
+- successful output remained available;
+- the run became degraded rather than falsely successful.
 
 ---
 
@@ -300,14 +374,19 @@ The system must support automatic daily execution.
 - The production workflow runs without daily manual initiation.
 - The schedule is visible in repository configuration.
 - The workflow can also be started manually for testing or recovery.
+- Manual workflow execution is validated before scheduled execution is enabled.
 
 ### Current Status
 
 **Pending**
 
-Local one-command execution is implemented.
+Local one-command execution is implemented and real-source validated.
 
-GitHub Actions and scheduled execution are not yet implemented.
+GitHub Actions has not yet been implemented.
+
+The next implementation step is a manual `workflow_dispatch` workflow.
+
+Scheduled execution should be enabled only after that workflow is validated.
 
 ---
 
@@ -319,7 +398,7 @@ The system must support a defined publication window for selecting relevant item
 
 The current local CLI uses the previous 24 hours.
 
-The value may later be adjusted if live-source behaviour demonstrates a need.
+The value may later be adjusted if repeated production behaviour demonstrates a need.
 
 ### Acceptance Criteria
 
@@ -330,7 +409,7 @@ The value may later be adjusted if live-source behaviour demonstrates a need.
 
 ### Current Status
 
-**Implemented and validated**
+**Implemented and real-source validated**
 
 Current behaviour:
 
@@ -340,9 +419,11 @@ Current behaviour:
 - items before the start are excluded;
 - items after the end are excluded;
 - reversed windows are rejected;
-- missing publication timestamps are currently excluded from collection-window eligibility.
+- missing publication timestamps are excluded from collection-window eligibility.
 
-The missing-publication-time policy remains provisional pending real-source evidence.
+Phase 2 real-source runs showed that the current seven-source set provides usable publication timestamps for the implemented policy.
+
+No collection-window tolerance change was justified.
 
 ---
 
@@ -369,10 +450,65 @@ Author metadata may be added when source behaviour and the canonical record sche
 - Missing optional metadata does not necessarily stop processing.
 - Missing required metadata is handled explicitly.
 - Retrieval timestamps are recorded.
+- Real-source metadata remains usable after collection and normalisation.
 
 ### Current Status
 
-**Locally validated for the implemented record schema**
+**Implemented and real-source validated**
+
+Across the seven validated real feeds:
+
+- titles were usable;
+- article URLs were usable;
+- publication timestamps were usable in the observed sample;
+- source identifiers were preserved;
+- retrieval timestamps were recorded.
+
+Descriptions may legitimately be missing.
+
+Phase 2 observed:
+
+- all ECB entries in the compatibility sample lacking descriptions;
+- all Sifted entries in the compatibility sample lacking descriptions;
+- some OpenAI entries lacking descriptions.
+
+Missing descriptions did not block processing.
+
+---
+
+## FR-2.4 — Bounded Remote Collection
+
+**Priority:** MUST
+
+Remote source collection must not be able to wait indefinitely.
+
+Remote requests should use clear, normal public HTTP behaviour and should not weaken standard transport security.
+
+### Acceptance Criteria
+
+- Remote requests use an explicit bounded timeout.
+- Requests use an identifiable User-Agent where appropriate.
+- Ordinary HTTP and network failures are converted into visible source failures.
+- Standard SSL verification remains enabled.
+- A failed remote source does not automatically terminate unrelated successful sources.
+- The solution does not require a paid HTTP or automation service.
+
+### Current Status
+
+**Implemented and real-source validated**
+
+Current behaviour:
+
+- 10-second remote request timeout;
+- explicit User-Agent;
+- explicit Accept header;
+- normal SSL certificate verification;
+- ordinary redirect behaviour;
+- HTTP/network/timeout errors converted into `CollectionError`.
+
+The real-source set successfully collected through this behaviour.
+
+No retry logic is currently implemented because Phase 2 did not demonstrate a material need.
 
 ---
 
@@ -382,18 +518,33 @@ Author metadata may be added when source behaviour and the canonical record sche
 
 **Priority:** MUST
 
-Collected items must be converted into a consistent internal record format.
+Collected items must be converted into a consistent internal record format before later processing.
+
+The record should preserve:
+
+- original source identity;
+- original title;
+- normalised title;
+- original URL;
+- normalised URL;
+- publication timestamp where available;
+- retrieval timestamp;
+- optional description;
+- derived domains;
+- matched keywords;
+- relevance score;
+- score components;
+- deterministic record identifier.
 
 ### Acceptance Criteria
 
-- Records from different compatible sources use the same field names and data types.
-- Optional missing values are represented consistently.
+- The same logical fields are represented consistently.
 - Required fields are validated before later processing.
 - Derived metadata remains distinguishable from source-provided metadata.
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented, tested and real-source exercised**
 
 ---
 
@@ -412,7 +563,11 @@ Publication and retrieval times must be normalised to a consistent machine-reada
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented and real-source validated**
+
+All observed entries returned by the seven selected real feeds during compatibility validation provided usable parsed publication timestamps.
+
+No timestamp fallback mechanism was required.
 
 ---
 
@@ -431,7 +586,7 @@ Normalisation may include:
 
 ### Acceptance Criteria
 
-- Obvious tracking variations do not create separate normalised URLs.
+- Obvious tracking variations do not create separate normalised URLs where current rules recognise them.
 - The system does not invent a replacement URL.
 - The original publisher URL remains available.
 - The final report contains a usable direct link.
@@ -441,6 +596,10 @@ Normalisation may include:
 **Implemented and tested**
 
 The current normaliser removes selected tracking parameters and fragments while preserving the original article URL separately.
+
+Phase 2 real output showed that some publisher-specific BBC parameters such as `at_medium` and `at_campaign` remain.
+
+This is a known lower-priority limitation and is not currently blocking the MVP.
 
 ---
 
@@ -454,16 +613,22 @@ Malformed or incomplete records must be handled without corrupting the complete 
 
 - Invalid records are separated according to explicit rules.
 - The reason for invalidity is inspectable.
-- One malformed item does not automatically stop unrelated valid items.
+- One malformed item does not automatically stop unrelated valid items where the implemented processing boundary supports isolation.
 - Validation results distinguish valid and invalid records.
 
 ### Current Status
 
 **Implemented and tested at the validation layer**
 
-Per-entry normalisation exceptions are not yet broadly isolated during live-source orchestration.
+All observed entries returned by the seven selected feeds during Phase 2 compatibility validation normalised successfully.
 
-Unexpected normalisation failures remain critical until real-source evidence justifies a more granular recovery policy.
+No real-source evidence justified broader per-entry `NormalizationError` isolation.
+
+The current orchestration limitation remains visible:
+
+- an unexpected per-entry normalisation exception is not yet broadly isolated after a source collection succeeds.
+
+This should change only if a real source exposes the problem and a regression test can reproduce it.
 
 ---
 
@@ -484,7 +649,7 @@ The system must detect obvious duplicates using deterministic identifiers such a
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented, tested and exercised with real-source runs**
 
 Current order:
 
@@ -493,13 +658,15 @@ Current order:
 
 The first deterministic occurrence is retained.
 
+Real Phase 2 runs observed and removed exact duplicates.
+
 ---
 
 ## FR-4.2 — Similar Story Detection
 
 **Priority:** SHOULD
 
-The system may later identify likely duplicate or closely related items with materially similar titles when real reports demonstrate that exact deduplication is insufficient.
+The system may later identify likely duplicate or closely related items with materially similar titles when repeated real reports demonstrate that exact deduplication is insufficient.
 
 ### Acceptance Criteria
 
@@ -512,9 +679,11 @@ If implemented:
 
 ### Current Status
 
-**Deferred pending evidence**
+**Deferred pending production evidence**
 
-Near-duplicate detection is not a Phase 1 or Phase 2 prerequisite unless real-source reports show material repetition.
+Phase 2 did not justify near-duplicate detection.
+
+The current report became useful without it.
 
 ---
 
@@ -534,7 +703,7 @@ If implemented:
 
 ### Current Status
 
-**Deferred pending evidence**
+**Deferred pending production evidence**
 
 ---
 
@@ -552,19 +721,31 @@ The system must classify items using a configurable set of domains.
 - Domains can be changed through configuration.
 - Disabled domains do not participate in report selection.
 - The data model can support later taxonomy expansion.
+- The configured taxonomy can remain narrower than the complete target taxonomy.
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented and real-source validated**
 
-Current Phase 1 active domains:
+Current active implemented domains:
 
+- Global Politics and Geopolitics;
+- Economics and Macroeconomics;
+- Companies and Corporate Strategy;
+- Artificial Intelligence;
 - Technology and Software;
-- Artificial Intelligence.
+- Startups and Venture Capital;
+- Europe and the European Union.
 
 The full target taxonomy remains defined in `03 Information Taxonomy and Source Policy.md`.
 
-The current two-domain configuration is deliberately narrow and should not be mistaken for final production coverage.
+The following target domains remain deferred:
+
+- Financial Markets;
+- Italy;
+- Milan and Bocconi Ecosystem.
+
+The seven-domain implementation is sufficient for the current automation milestone.
 
 ---
 
@@ -589,12 +770,37 @@ Future inputs may include additional deterministic metadata if justified.
 - The system does not require an LLM.
 - Rules can be changed without rewriting the complete pipeline.
 - Keyword matching avoids obvious substring false positives where practical.
+- Source-wide defaults are not used where they systematically misclassify broad feeds.
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented, tested and refined from real report evidence**
 
-Current keyword matching is case-insensitive and uses word-boundary protection.
+Current keyword matching is:
+
+- case-insensitive;
+- word-boundary protected;
+- deterministic.
+
+Phase 2 showed that broad source defaults created misleading classifications and inflated relevance scores.
+
+The source-default policy was therefore tightened.
+
+Broad feeds may use:
+
+```yaml
+default_domains: []
+```
+
+The Global Politics keyword list was also expanded conservatively after testing candidate terms against real processed records.
+
+The evidence-based additions were:
+
+- `war`;
+- `conflict`;
+- `parliament`.
+
+Broader candidates such as `government`, `defence`, `president` and `prime minister` were tested and not added because they produced ambiguous or low-value matches.
 
 ---
 
@@ -636,12 +842,14 @@ The system must handle items that match no configured domain.
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented and real-source validated**
 
 Current policy:
 
 - unclassified records remain processed;
 - they are omitted from the main Markdown report by default.
+
+Phase 2 confirmed that this conservative policy is preferable to forcing broad feeds into weak source-default classifications.
 
 ---
 
@@ -653,7 +861,7 @@ Current policy:
 
 The system must calculate a deterministic relevance score for eligible items.
 
-The current Phase 1 formula is intentionally provisional.
+The current formula is intentionally provisional.
 
 ### Current Score Model
 
@@ -682,9 +890,13 @@ Current source-tier scores are:
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented, tested and real-source exercised**
 
-The formula should be revised only if real-report evaluation demonstrates systematic ranking problems.
+Phase 2 demonstrated that poor classification evidence can inflate ranking even when the formula itself is behaving correctly.
+
+The source-default issue was therefore corrected upstream rather than by prematurely changing score weights.
+
+The formula should be revised only if repeated production reports demonstrate systematic ranking problems.
 
 ---
 
@@ -723,14 +935,16 @@ The system must prevent the daily report from becoming an unbounded list.
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented and real-report validated**
 
 Current configured defaults:
 
 - maximum 5 items per domain;
 - maximum 30 items overall.
 
-These values remain provisional until real-use evaluation.
+Phase 2 real reports remained below the configured global maximum after conservative classification.
+
+These limits should remain unchanged until repeated automated use demonstrates a problem.
 
 ---
 
@@ -751,7 +965,7 @@ The system must persist processed article records required for inspection and hi
 
 ### Current Status
 
-**Locally implemented and tested**
+**Locally implemented, tested and real-output validated**
 
 Current format:
 
@@ -761,7 +975,11 @@ Current target-file behaviour:
 
 - deterministic overwrite.
 
-Production automated persistence is not yet implemented.
+Real JSONL output was generated and manually inspected during Phase 2.
+
+Automated production persistence is not yet implemented.
+
+Manual Phase 2 runtime artifacts were removed after validation rather than automatically treated as permanent repository history.
 
 ---
 
@@ -776,16 +994,19 @@ The system must preserve dated daily reports in production.
 - Each production report has a date-based repository location.
 - Previous production reports are not unintentionally overwritten.
 - The archive can be browsed without running code.
+- Automated production persistence has clear success and failure semantics.
 
 ### Current Status
 
-**Path model implemented locally; automated historical persistence pending**
+**Path model and local generation validated; automated historical persistence pending**
 
 The CLI currently targets:
 
 ```text
 reports/daily/YYYY/MM/YYYY-MM-DD.md
 ```
+
+Real Markdown reports were generated and inspected during Phase 2.
 
 Production GitHub persistence is not yet implemented.
 
@@ -826,7 +1047,7 @@ The MVP must generate a readable Markdown report.
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented, tested and real-output validated**
 
 ---
 
@@ -856,7 +1077,7 @@ The report header must include:
 
 ### Current Status
 
-**Implemented and integration-tested**
+**Implemented, integration-tested and validated on real runs**
 
 ---
 
@@ -871,15 +1092,18 @@ Displayed items must be grouped into domain sections.
 - Only domains containing selected records need to be displayed.
 - Cross-domain items are not repeated excessively.
 - Section placement is deterministic.
+- Misleading source-wide classification should not be used merely to populate sections.
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented and real-report validated**
 
 Current policy:
 
 - one primary section per story;
 - secondary domains shown as metadata.
+
+Phase 2 report review confirmed that empty sections are preferable to forcing irrelevant stories into a domain.
 
 ---
 
@@ -908,13 +1132,17 @@ A multi-source indicator may be added later if multi-source clustering is implem
 
 ### Current Status
 
-**Implemented and tested for current fields**
+**Implemented and validated for current fields**
 
 Current maximum description length:
 
 - 300 characters.
 
-Relevance score is currently displayed.
+Relevance score is displayed.
+
+Descriptions remain optional.
+
+Real Phase 2 reports rendered correctly when source descriptions were absent.
 
 ---
 
@@ -932,7 +1160,13 @@ Incomplete or degraded runs must be visible in the report.
 
 ### Current Status
 
-**Implemented and integration-tested**
+**Implemented and validated with real degraded execution**
+
+The deliberate Phase 2 degraded-source run produced:
+
+- `degraded` status;
+- visible failed-source warning;
+- successful valid-source content in the same report.
 
 ---
 
@@ -948,18 +1182,26 @@ The production workflow must run through GitHub Actions or an equally zero-cost 
 
 - The workflow file is version-controlled.
 - It supports manual execution.
-- It supports scheduled execution.
+- It supports scheduled execution after manual validation.
 - It does not call paid AI services.
 - It has an explicit timeout.
 - It uses minimum required permissions.
+- The workflow invokes the same validated deterministic pipeline rather than creating a separate processing path.
 
 ### Current Status
 
-**Pending**
+**Pending — next active implementation requirement**
 
-GitHub Actions has not yet been implemented.
+Phase 2 real-source readiness is complete.
 
-Real-source production readiness should be validated before automation begins.
+The next product-development step is:
+
+```text
+workflow_dispatch
+→ manual GitHub Actions validation
+→ output and commit inspection
+→ scheduled execution only after successful validation
+```
 
 ---
 
@@ -975,10 +1217,15 @@ Successful production runs must automatically preserve intended outputs.
 - Generated changes are committed or otherwise persisted through the approved workflow.
 - No-change runs do not create unnecessary commits.
 - Invalid outputs are not published as successful production results.
+- Persistence behaviour remains understandable from the repository history.
 
 ### Current Status
 
 **Pending**
+
+Local production-shaped paths and outputs are validated.
+
+Automated repository persistence has not yet been implemented.
 
 ---
 
@@ -994,10 +1241,15 @@ The user must be able to detect failed production runs.
 - Relevant logs identify the failing stage.
 - A failed workflow does not create a falsely successful report.
 - Degraded runs remain distinguishable from failed runs.
+- Source-level degradation does not automatically erase useful successful-source output.
 
 ### Current Status
 
-**Locally implemented at pipeline/report/run-summary level; production automation pending**
+**Implemented at pipeline/report/run-summary level; GitHub Actions behaviour pending**
+
+Local and real-network degraded behaviour is validated.
+
+Production workflow failure and publication semantics remain to be implemented.
 
 ---
 
@@ -1010,6 +1262,8 @@ The system may create a daily GitHub issue as an additional delivery channel aft
 ### Current Status
 
 **Deferred**
+
+Repository-native Markdown reports should be used first.
 
 ---
 
@@ -1042,13 +1296,15 @@ The system must track whether each configured source succeeds, returns no entrie
 
 ### Current Status
 
-**Implemented and tested**
+**Implemented, tested and real-source validated**
 
 Current statuses:
 
 - `success`;
 - `empty`;
 - `failed`.
+
+Phase 2 real-source runs successfully tracked seven active feeds.
 
 Long-term historical source-health tracking is not yet implemented.
 
@@ -1068,7 +1324,7 @@ A valid source containing no entries must be distinguished from a failed source.
 
 ### Current Status
 
-**Implemented at source-result and run-summary level**
+**Implemented and tested**
 
 ---
 
@@ -1089,10 +1345,20 @@ The system should support periodic review of sources that are:
 - Sources can be disabled through configuration.
 - Maintenance does not require changing core processing logic.
 - Low-value sources may be removed rather than supported through disproportionate technical complexity.
+- Source support should not expand merely to preserve a poor feed.
 
 ### Current Status
 
-**Configuration support implemented; real production maintenance process pending**
+**Configuration and real-source review process partially validated**
+
+Phase 2 demonstrated:
+
+- seven real sources can be maintained through configuration;
+- source-default quality can be reviewed without changing core collection logic;
+- poor classification evidence can be corrected through configuration;
+- network special handling should remain minimal.
+
+A longitudinal production maintenance process remains pending repeated automated runs.
 
 ---
 
@@ -1104,7 +1370,7 @@ The system should support periodic review of sources that are:
 
 Recurring monetary cost must remain zero.
 
-**Status:** Satisfied by current architecture.
+**Status:** Satisfied by current architecture and Phase 2 real-source implementation.
 
 ## NFR-1.2
 
@@ -1126,7 +1392,7 @@ The core system must not depend on limited promotional cloud credits.
 
 Normal production operation should require no daily manual execution.
 
-**Status:** Pending GitHub Actions.
+**Status:** Pending GitHub Actions and scheduled execution.
 
 ## NFR-2.2
 
@@ -1150,15 +1416,29 @@ The daily workflow should complete within a lightweight GitHub Actions runtime.
 
 The production threshold should be validated during automation.
 
+**Current evidence:** the seven-source real pipeline runs comfortably in local development and does not currently require paid infrastructure.
+
 ## NFR-3.2
 
 The system should avoid unnecessary repeated downloads and processing where practical.
+
+The current design performs one feed request per active source per run.
 
 ## NFR-3.3
 
 Production automation must use an explicit execution timeout.
 
 **Status:** Pending GitHub Actions.
+
+## NFR-3.4
+
+Individual remote source requests must be bounded.
+
+**Status:** Implemented.
+
+Current remote request timeout:
+
+- 10 seconds.
 
 ---
 
@@ -1168,7 +1448,7 @@ Production automation must use an explicit execution timeout.
 
 One source failure should not automatically invalidate successful source results.
 
-**Status:** Implemented and tested.
+**Status:** Implemented and validated with fixtures and real network behaviour.
 
 ## NFR-4.2
 
@@ -1180,7 +1460,7 @@ A failure in a critical processing stage must prevent false success.
 
 Repeated runs should not create uncontrolled duplicate records or reports.
 
-**Status:** Locally validated for target-file writes and deterministic report generation.
+**Status:** Locally validated for target-file writes, exact duplicate reduction and deterministic report generation.
 
 ## NFR-4.4
 
@@ -1189,6 +1469,12 @@ The system should behave predictably when no eligible stories are found.
 **Status:** Implemented and tested.
 
 The current report explicitly states when no classified items were selected.
+
+## NFR-4.5
+
+Remote collection should fail visibly rather than hanging indefinitely.
+
+**Status:** Implemented and real-source validated.
 
 ---
 
@@ -1206,19 +1492,33 @@ Dependencies should remain limited and documented.
 
 **Status:** Implemented.
 
-Current core dependencies are intentionally small.
+Current core dependencies remain intentionally small.
+
+Remote HTTP retrieval uses the Python standard library rather than introducing a new HTTP dependency.
 
 ## NFR-5.3
 
 Files and modules should have clear responsibilities.
 
-**Status:** Implemented in the current local architecture.
+**Status:** Implemented in the current architecture.
 
 ## NFR-5.4
 
 A future contributor should be able to understand how to add a source, run the project and inspect a failure.
 
-**Status:** Partially satisfied; canonical documentation is being refreshed and production-source workflow remains to be added.
+**Status:** Partially satisfied.
+
+Canonical project documentation has been reconciled with Phase 2.
+
+GitHub Actions production-operation instructions remain to be added during Phase 3.
+
+## NFR-5.5
+
+Source-specific complexity should remain proportionate to source value.
+
+**Status:** Established and exercised during Phase 2.
+
+The preferred response to an unstable or low-value source is removal or replacement before disproportionate custom handling.
 
 ---
 
@@ -1240,7 +1540,7 @@ Classification and ranking logic must be inspectable.
 
 Incomplete runs, missing metadata and failed sources must not be concealed.
 
-**Status:** Implemented locally.
+**Status:** Implemented locally and validated in a real degraded run.
 
 ## NFR-6.4
 
@@ -1249,6 +1549,14 @@ The system must distinguish feed-provided text from system-generated metadata.
 **Status:** Implemented by architecture and report behaviour.
 
 The system does not generate article summaries.
+
+## NFR-6.5
+
+Source-wide classification assumptions must remain visible in configuration.
+
+**Status:** Implemented.
+
+Broad sources may explicitly use no default domains.
 
 ---
 
@@ -1272,6 +1580,8 @@ Private emails, restricted newsletters and personal account information must not
 
 **Current Status:** All remain fixed architectural constraints.
 
+The current seven-source registry requires no credentials.
+
 ---
 
 # 8. Copyright and Source Compliance
@@ -1292,7 +1602,7 @@ The system must not bypass paywalls.
 
 Sources should be accessed through permitted public endpoints.
 
-**Current Status:** Satisfied by current controlled implementation and retained as production constraints.
+**Current Status:** Satisfied by the current real-source implementation and retained as production constraints.
 
 ---
 
@@ -1302,13 +1612,15 @@ Sources should be accessed through permitted public endpoints.
 
 The report should be scannable in approximately 10–15 minutes.
 
-**Status:** Requires real production evaluation.
+**Status:** Provisionally supported by Phase 2 real-report inspection; requires longitudinal production evaluation.
+
+The final Phase 2 real report contained 11 displayed items and was judged useful enough to justify automation.
 
 ## NFR-9.2
 
 The most relevant items should be easy to identify.
 
-**Status:** Current deterministic ranking and bounded report support this, but real-source evaluation is still required.
+**Status:** Current deterministic ranking and bounded report support this, but repeated production evaluation is still required.
 
 ## NFR-9.3
 
@@ -1321,6 +1633,12 @@ The report should remain readable on normal GitHub desktop and mobile views.
 The report should not require understanding the underlying code.
 
 **Status:** Satisfied by the current report design.
+
+## NFR-9.5
+
+The report should prefer a smaller credible output over a larger misleading one.
+
+**Status:** Established through Phase 2 real-report evaluation.
 
 ---
 
@@ -1376,11 +1694,27 @@ Short feed-provided description
 
 The system does not fabricate summaries.
 
+## Real-Report Validation
+
+Phase 2 validated report behaviour using the seven-source real registry.
+
+The first production-like report exposed misleading source-default classification.
+
+After conservative corrections:
+
+- broad source defaults were removed;
+- source-wide defaults were retained only for sufficiently narrow feeds;
+- a small Global Politics keyword correction was added after simulation against real records.
+
+The final Phase 2 validation report displayed 11 items across useful domain sections.
+
+The report was considered useful enough to proceed to automation without further tuning from a single day of data.
+
 ---
 
 # Current Product Decisions
 
-The following decisions were previously open and are now resolved for the current MVP implementation.
+The following decisions are resolved for the current MVP implementation.
 
 ## Relevance Score Display
 
@@ -1402,7 +1736,8 @@ This may be reconsidered later if it reduces readability.
 Rationale:
 
 - prevents weak classification from polluting the primary report;
-- preserves records for later taxonomy evaluation.
+- preserves records for later taxonomy evaluation;
+- Phase 2 demonstrated that under-classification is preferable to broad misleading defaults.
 
 ---
 
@@ -1416,6 +1751,24 @@ Rationale:
 
 - reduces repetition;
 - preserves cross-domain information.
+
+---
+
+## Source Defaults
+
+**Decision:** source defaults are optional classification evidence, not publisher categories.
+
+Broad sources may use:
+
+```yaml
+default_domains: []
+```
+
+Rationale:
+
+- broad defaults created real false-positive classifications;
+- assigned domains also affect ranking score;
+- source identity alone does not guarantee item-level relevance.
 
 ---
 
@@ -1445,7 +1798,7 @@ Descriptions are feed-provided text only.
 
 Boundaries are inclusive.
 
-The exact production tolerance may be changed only if real-source behaviour demonstrates a systematic need.
+Phase 2 did not demonstrate a need to change the current tolerance.
 
 ---
 
@@ -1453,7 +1806,38 @@ The exact production tolerance may be changed only if real-source behaviour demo
 
 **Current behaviour:** structurally valid records with `published_at=None` are excluded from collection-window eligibility.
 
-This is a conservative Phase 1 policy, not necessarily a permanent product rule.
+Phase 2 real-source validation did not expose a problem with this policy.
+
+---
+
+## Remote Request Timeout
+
+**Decision:** individual remote feed requests use a 10-second timeout.
+
+Rationale:
+
+- production collection must not hang indefinitely;
+- the value worked with the current seven-source real registry.
+
+---
+
+## Remote User-Agent
+
+**Decision:** remote collection uses an explicit User-Agent.
+
+Rationale:
+
+- real-source testing showed that some valid feeds rejected the previous bare request behaviour.
+
+---
+
+## Retry Behaviour
+
+**Decision:** no retry logic is currently implemented.
+
+Rationale:
+
+- the current real-source set did not demonstrate sufficient transient-failure evidence to justify the additional complexity.
 
 ---
 
@@ -1472,37 +1856,64 @@ The report currently displays:
 
 ---
 
+## Real-Source Set
+
+**Decision:** use the current seven-source registry for the first automation phase.
+
+Do not expand merely because additional feeds are available.
+
+Rationale:
+
+- the set is large enough to expose real network, metadata and classification behaviour;
+- it remains small enough for manual quality inspection;
+- further expansion should be driven by demonstrated coverage gaps.
+
+---
+
 # Remaining Open Product Decisions
 
 The following remain unresolved by design.
 
 ## Production Execution Time
 
-Choose only when GitHub Actions scheduling is implemented.
+Choose only after manual GitHub Actions execution is validated and scheduling is being implemented.
 
-## Production Source Universe
+## GitHub Actions Commit Behaviour
 
-Determine the smallest credible real-source set during Phase 2.
+Determine:
 
-Do not set an arbitrary large source target before quality is validated.
+- when outputs should be committed;
+- how no-change runs avoid empty commits;
+- how critical failures prevent invalid publication;
+- how degraded but usable runs should be handled.
 
-## Network Timeout Behaviour
+## GitHub Actions Permissions
 
-Determine during real-source validation.
+Use the minimum repository permissions required for validated output persistence.
 
-## Retry Behaviour
+## GitHub Actions Timeout
 
-Add only if live failures demonstrate that a bounded retry materially improves reliability.
+Set an explicit workflow-level execution timeout.
+
+## Scheduled Execution
+
+Enable only after `workflow_dispatch` works reliably.
+
+## Production Persistence Policy
+
+Determine the exact automated repository persistence behaviour during Phase 3.
+
+Manual Phase 2 runtime artifacts were deliberately removed after validation.
 
 ## Missing Publication Timestamp Policy
 
-Revisit only if useful real sources frequently omit publication timestamps.
+Revisit only if useful future sources frequently omit publication timestamps.
 
 ## Collection-Window Tolerance
 
 Current default is 24 hours.
 
-Reconsider only if real-source timing creates systematic missed stories.
+Reconsider only if repeated automated source timing creates systematic missed stories.
 
 ## Near-Duplicate Detection
 
@@ -1512,13 +1923,33 @@ Implement only if exact deduplication leaves material repeated coverage.
 
 Add only if clustering becomes useful.
 
+## Financial Markets Domain
+
+Implement only if repeated production reports demonstrate a meaningful coverage gap.
+
+## Italy Domain
+
+Implement only if topic classification plus source geography proves insufficient.
+
+## Milan and Bocconi Domain
+
+Implement only when a suitable structured public source or validated workflow exists.
+
 ## Opportunity-Specific Report Section
 
 Remain part of future taxonomy/report evaluation rather than current core behaviour.
 
 ## Publisher Concentration Controls
 
-Evaluate during real production use before adding ranking penalties or quotas.
+Evaluate during repeated production use before adding ranking penalties or quotas.
+
+## Ranking Weights
+
+Change only when repeated reports demonstrate systematic ordering problems.
+
+## Retry Behaviour
+
+Reconsider only if repeated automated runs demonstrate meaningful transient source failures.
 
 ---
 
@@ -1539,6 +1970,7 @@ When the production pipeline runs:
 
 - valid sources are collected;
 - source failures are recorded;
+- remote requests remain bounded;
 - records are normalised;
 - malformed records are handled according to explicit rules;
 - publication-window eligibility is enforced;
@@ -1561,45 +1993,55 @@ Then:
 - no normal daily manual step is required;
 - unchanged deterministic inputs produce consistent processing behaviour;
 - report length remains bounded;
-- invalid critical output is not published as successful.
+- invalid critical output is not published as successful;
+- degraded source-level failure does not automatically erase valid successful-source output;
+- no-change automation runs do not create unnecessary commits.
 
 ---
 
-# Local Phase 1 Acceptance Status
+# Phase 2 Acceptance Status
 
-The following parts of the MVP acceptance scenario have already been validated locally:
+The following parts of the production MVP acceptance scenario are now validated locally with real structured sources:
 
 - configuration loading;
-- controlled source collection;
+- seven-source public RSS registry;
+- public source access without credentials;
+- bounded remote requests;
+- explicit User-Agent behaviour;
+- normal SSL verification;
+- real source collection;
 - structured source outcomes;
-- partial source failure;
+- real-network partial source failure;
 - record normalisation;
-- validation;
+- metadata validation;
 - publication-window filtering;
 - exact deduplication;
-- domain classification;
+- seven-domain classification;
+- conservative unclassified behaviour;
 - deterministic ranking;
-- JSONL persistence;
+- JSONL generation;
 - Markdown generation;
 - run-summary JSON;
 - degraded warnings;
 - deterministic report limits;
+- real report-quality inspection;
 - local CLI execution;
 - run-level logging;
 - full automated test suite.
 
-At Phase 1 closeout:
+At Phase 2 closeout:
 
-> **104 tests pass.**
+> **110 tests pass.**
 
-Still required before full production MVP acceptance:
+The following remain required before full production MVP acceptance:
 
-- live real-source validation;
-- network hardening where needed;
-- GitHub Actions;
+- GitHub Actions execution;
+- manual `workflow_dispatch` validation;
 - automated repository persistence;
+- production commit behaviour;
+- production failure/publication behaviour;
 - scheduled daily execution;
-- initial production-use evaluation.
+- initial longitudinal production-use evaluation.
 
 ---
 
@@ -1645,7 +2087,8 @@ After approximately two weeks of stable automated use, review:
 - Were major relevant developments missed?
 - Were any intended domains consistently empty?
 - Were some domains overrepresented?
-- Was the source universe too narrow or unnecessarily broad?
+- Was the seven-source universe too narrow or unnecessarily broad?
+- Do any of the three deferred target domains need implementation?
 
 ## Noise
 
@@ -1653,19 +2096,22 @@ After approximately two weeks of stable automated use, review:
 - Was promotional content overrepresented?
 - Did exact duplicate reduction work adequately?
 - Did repeated coverage justify near-duplicate logic?
+- Did any source default create systematic false positives?
 
 ## Classification
 
 - Were items placed in useful domains?
 - Were too many relevant items unclassified?
 - Were secondary-domain tags useful?
-- Did the two-domain Phase 1 logic generalise cleanly when taxonomy expanded?
+- Did the seven-domain taxonomy provide enough practical coverage?
+- Did any keyword create repeated false positives?
 
 ## Ranking
 
 - Did high-value developments appear near the top?
 - Did source-tier scoring overwhelm actual relevance?
 - Did keyword matches inflate weak items?
+- Did domain count inflate weak items?
 - Should ranking weights be changed?
 
 ## Operations
@@ -1674,6 +2120,8 @@ After approximately two weeks of stable automated use, review:
 - Were source failures visible?
 - Was maintenance acceptably low?
 - Did any source require disproportionate support?
+- Were degraded runs still useful?
+- Did no-change runs avoid unnecessary commits?
 - Did the system remain at zero recurring cost?
 
 Further product development should be based on this review rather than on assumed needs.
@@ -1700,13 +2148,14 @@ Implementation completion status belongs primarily in `04 Development Roadmap an
 
 # Current Requirement Status Summary
 
-## Locally Validated
+## Implemented and Validated
 
 - FR-1.1 — Configurable Source Registry
-- FR-1.2 — Public Structured Sources for controlled RSS/Atom inputs
+- FR-1.2 — Public Structured Sources
 - FR-1.3 — Partial Source Failure
 - FR-2.2 — Configurable Collection Window
-- FR-2.3 — Metadata Retrieval for implemented schema
+- FR-2.3 — Metadata Retrieval
+- FR-2.4 — Bounded Remote Collection
 - FR-3.1 — Standard Record Format
 - FR-3.2 — Timestamp Normalisation
 - FR-3.3 — URL Normalisation
@@ -1736,7 +2185,7 @@ Implementation completion status belongs primarily in `04 Development Roadmap an
 - FR-9.1 — GitHub Actions Execution
 - FR-9.2 — Automated Persistence
 - FR-9.3 — Production Failure Visibility
-- FR-10.3 — Source Maintenance with real production sources
+- FR-10.3 — Longitudinal Source Maintenance
 
 ## Deferred Pending Evidence
 
@@ -1749,33 +2198,64 @@ Implementation completion status belongs primarily in `04 Development Roadmap an
 
 # Current Status
 
-**Status:** Product requirements reconciled with completed Phase 1 implementation
+**Status:** Product requirements reconciled with completed Phase 2 real-source validation
 
-**Phase 1 local requirements status:**
+**Phase 2 requirements status:**
 
 - deterministic local vertical slice complete;
+- seven-source real public RSS registry validated;
+- network request hardening complete;
+- real metadata and timestamp behaviour validated;
+- exact deduplication exercised on real data;
+- seven-domain taxonomy operational;
+- source-default classification corrected from real report evidence;
+- conservative keyword refinement completed;
+- real report generation and quality review completed;
+- degraded real-network source failure validated;
 - operational report behaviour complete;
-- collection-window enforcement complete;
-- degraded-source handling complete;
 - local observability complete;
-- 104 tests passing.
+- 110 tests passing.
 
 **Production MVP still requires:**
 
-- minimal real-source validation;
-- network production-readiness;
 - GitHub Actions;
+- manual `workflow_dispatch` validation;
 - automated persistence;
+- production commit and publication behaviour;
 - scheduled execution;
-- real-use evaluation.
+- repeated production-use evaluation.
 
 **Next product-development focus:**
 
-> Validate the smallest credible real-source run before automating the pipeline.
+> Run the validated real-source pipeline through the smallest safe GitHub Actions `workflow_dispatch` workflow, validate outputs and persistence, and only then enable scheduled execution.
 
 ---
 
 # Changelog
+
+## 2026-08-11 — Phase 2 Requirements Reconciliation
+
+- Reconciled product requirements with the validated seven-source real-source implementation.
+- Updated FR-1.1 to reflect the active seven-source configurable registry and optional empty default domains.
+- Updated FR-1.2 to reflect successful public real-source RSS validation.
+- Updated FR-1.3 to include deliberate real-network degraded-source validation.
+- Added FR-2.4 for bounded remote collection because this became a concrete production requirement during real-source testing.
+- Recorded the implemented 10-second remote timeout and explicit User-Agent requirement.
+- Recorded that normal SSL verification remains enabled.
+- Updated metadata and timestamp requirements with real-source evidence.
+- Recorded the seven implemented active domains.
+- Recorded conservative source-default behaviour and evidence-based classification refinement.
+- Recorded real exact-deduplication behaviour.
+- Updated report requirements with real-output validation.
+- Recorded the current seven-source production-like set as sufficient for the automation phase.
+- Updated source-maintenance requirements with Phase 2 evidence.
+- Updated non-functional reliability and maintainability requirements for real networking.
+- Replaced Phase 1 acceptance status with Phase 2 real-source acceptance status.
+- Updated the requirement-status summary from local-only validation to real-source validation where justified.
+- Recorded 110 passing automated tests.
+- Made GitHub Actions `workflow_dispatch` the next active product requirement.
+- Preserved scheduled execution and automated persistence as production MVP requirements.
+- Kept near-duplicate logic, multi-source clustering and delivery features deferred pending evidence.
 
 ## 2026-08-11 — Phase 1 Requirements Reconciliation
 
@@ -1800,3 +2280,4 @@ Implementation completion status belongs primarily in `04 Development Roadmap an
 - Defined Markdown report requirements.
 - Defined automation, source-health, privacy and copyright constraints.
 - Defined end-to-end MVP acceptance criteria.
+````

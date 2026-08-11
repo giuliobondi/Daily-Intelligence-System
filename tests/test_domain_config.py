@@ -18,11 +18,24 @@ def test_load_valid_domain_configuration() -> None:
 
     domains = load_domains(CONFIG_PATH)
 
-    assert len(domains) == 2
+    assert len(domains) == 7
 
-    technology = domains[0]
+    assert tuple(domain.id for domain in domains) == (
+        "global_politics_geopolitics",
+        "economics_macroeconomics",
+        "companies_corporate_strategy",
+        "artificial_intelligence",
+        "technology",
+        "startups_venture_capital",
+        "europe_eu",
+    )
 
-    assert technology.id == "technology"
+    technology = next(
+        domain
+        for domain in domains
+        if domain.id == "technology"
+    )
+
     assert technology.name == "Technology and Software"
     assert technology.keywords == (
         "software",
@@ -34,12 +47,17 @@ def test_load_valid_domain_configuration() -> None:
     )
     assert technology.active is True
 
-    artificial_intelligence = domains[1]
+    artificial_intelligence = next(
+        domain
+        for domain in domains
+        if domain.id == "artificial_intelligence"
+    )
 
-    assert artificial_intelligence.id == "artificial_intelligence"
-    assert artificial_intelligence.name == "Artificial Intelligence"
+    assert (
+        artificial_intelligence.name
+        == "Artificial Intelligence"
+    )
     assert artificial_intelligence.active is True
-
 
 def test_missing_domain_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete domain entry fails with a clear error."""

@@ -1,13 +1,42 @@
 domains:
-  - id: technology
-    name: Technology and Software
+  - id: global_politics_geopolitics
+    name: Global Politics and Geopolitics
     keywords:
-      - software
-      - cloud
-      - cybersecurity
-      - developer
-      - open source
-      - api
+      - sanctions
+      - ceasefire
+      - trade restriction
+      - diplomatic agreement
+      - geopolitical
+      - foreign policy
+      - war
+      - conflict
+      - parliament
+    active: true
+
+  - id: economics_macroeconomics
+    name: Economics and Macroeconomics
+    keywords:
+      - inflation
+      - gdp
+      - unemployment
+      - interest rates
+      - monetary policy
+      - fiscal policy
+      - public debt
+      - economic forecast
+    active: true
+
+  - id: companies_corporate_strategy
+    name: Companies and Corporate Strategy
+    keywords:
+      - acquisition
+      - merger
+      - restructuring
+      - divestment
+      - market entry
+      - bankruptcy
+      - earnings guidance
+      - strategic plan
     active: true
 
   - id: artificial_intelligence
@@ -19,4 +48,41 @@ domains:
       - large language model
       - foundation model
       - model release
+    active: true
+
+  - id: technology
+    name: Technology and Software
+    keywords:
+      - software
+      - cloud
+      - cybersecurity
+      - developer
+      - open source
+      - api
+    active: true
+
+  - id: startups_venture_capital
+    name: Startups and Venture Capital
+    keywords:
+      - startup
+      - venture capital
+      - funding round
+      - series a
+      - accelerator
+      - incubator
+      - venture fund
+      - portfolio company
+    active: true
+
+  - id: europe_eu
+    name: Europe and the European Union
+    keywords:
+      - european union
+      - european commission
+      - european parliament
+      - european central bank
+      - euro area
+      - european council
+      - eu regulation
+      - single market
     active: true

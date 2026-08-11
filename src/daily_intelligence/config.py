@@ -57,6 +57,7 @@ _REPORT_REQUIRED_FIELDS = {
     "max_description_length",
 }
 
+
 @dataclass(frozen=True)
 class DomainConfig:
     """Validated configuration for one information domain."""
@@ -66,6 +67,7 @@ class DomainConfig:
     keywords: tuple[str, ...]
     active: bool
 
+
 @dataclass(frozen=True)
 class RankingConfig:
     """Validated configuration for provisional relevance scoring."""
@@ -74,6 +76,7 @@ class RankingConfig:
     domain_match_score: int
     keyword_match_score: int
 
+
 @dataclass(frozen=True)
 class ReportConfig:
     """Validated configuration for Markdown report generation."""
@@ -81,6 +84,7 @@ class ReportConfig:
     max_items_per_domain: int
     max_total_items: int
     max_description_length: int
+
 
 def load_sources(path: str | Path) -> list[SourceConfig]:
     """Load and validate all source entries from a YAML file."""
@@ -118,6 +122,7 @@ def load_sources(path: str | Path) -> list[SourceConfig]:
 
     return sources
 
+
 def load_domains(path: str | Path) -> list[DomainConfig]:
     """Load and validate all domain entries from a YAML file."""
 
@@ -153,6 +158,7 @@ def load_domains(path: str | Path) -> list[DomainConfig]:
     ]
 
     return domains
+
 
 def load_ranking(path: str | Path) -> RankingConfig:
     """Load and validate provisional ranking configuration."""
@@ -211,7 +217,11 @@ def load_ranking(path: str | Path) -> RankingConfig:
         keyword_match_score=keyword_match_score,
     )
 
-def _validate_source(raw_source: Any, index: int) -> SourceConfig:
+
+def _validate_source(
+    raw_source: Any,
+    index: int,
+) -> SourceConfig:
     """Validate one source entry and return a SourceConfig object."""
 
     if not isinstance(raw_source, dict):
@@ -242,21 +252,32 @@ def _validate_source(raw_source: Any, index: int) -> SourceConfig:
 
     source_tier = raw_source["source_tier"]
 
-    if not isinstance(source_tier, int) or isinstance(source_tier, bool):
+    if not isinstance(source_tier, int) or isinstance(
+        source_tier,
+        bool,
+    ):
         raise ConfigurationError(
-            f"Source entry {index} field 'source_tier' must be an integer."
+            f"Source entry {index} field 'source_tier' "
+            "must be an integer."
         )
 
     if source_tier not in {1, 2, 3, 4}:
         raise ConfigurationError(
-            f"Source entry {index} field 'source_tier' must be between 1 and 4."
+            f"Source entry {index} field 'source_tier' "
+            "must be between 1 and 4."
         )
 
     default_domains = _require_string_list(
-        raw_source, "default_domains", index
+        raw_source,
+        "default_domains",
+        index,
+        allow_empty=True,
     )
+
     geographic_scope = _require_string_list(
-        raw_source, "geographic_scope", index
+        raw_source,
+        "geographic_scope",
+        index,
     )
 
     active = raw_source["active"]
@@ -278,7 +299,11 @@ def _validate_source(raw_source: Any, index: int) -> SourceConfig:
         active=active,
     )
 
-def _validate_domain(raw_domain: Any, index: int) -> DomainConfig:
+
+def _validate_domain(
+    raw_domain: Any,
+    index: int,
+) -> DomainConfig:
     """Validate one domain entry and return a DomainConfig object."""
 
     if not isinstance(raw_domain, dict):
@@ -317,6 +342,7 @@ def _validate_domain(raw_domain: Any, index: int) -> DomainConfig:
         active=active,
     )
 
+
 def _require_non_empty_string(
     raw_source: dict[str, Any],
     field: str,
@@ -337,24 +363,39 @@ def _require_string_list(
     raw_source: dict[str, Any],
     field: str,
     index: int,
+    *,
+    allow_empty: bool = False,
 ) -> list[str]:
-    """Require one field to contain a list of non-empty strings."""
+    """Require one field to contain a valid list of strings."""
 
     value = raw_source[field]
 
-    if not isinstance(value, list) or not value:
+    if not isinstance(value, list):
+        raise ConfigurationError(
+            f"Source entry {index} field {field!r} "
+            "must be a list."
+        )
+
+    if not value and not allow_empty:
         raise ConfigurationError(
             f"Source entry {index} field {field!r} "
             "must be a non-empty list."
         )
 
-    if not all(isinstance(item, str) and item.strip() for item in value):
+    if not all(
+        isinstance(item, str) and item.strip()
+        for item in value
+    ):
         raise ConfigurationError(
             f"Source entry {index} field {field!r} "
             "must contain only non-empty strings."
         )
 
-    return [item.strip() for item in value]
+    return [
+        item.strip()
+        for item in value
+    ]
+
 
 def _validate_source_tier_scores(
     value: Any,
@@ -398,10 +439,12 @@ def _require_non_negative_integer(
         or value < 0
     ):
         raise ConfigurationError(
-            f"Ranking field {field!r} must be a non-negative integer."
+            f"Ranking field {field!r} "
+            "must be a non-negative integer."
         )
 
     return value
+
 
 def load_report(path: str | Path) -> ReportConfig:
     """Load and validate report configuration."""
@@ -417,7 +460,8 @@ def load_report(path: str | Path) -> ReportConfig:
         ) from error
     except yaml.YAMLError as error:
         raise ConfigurationError(
-            f"Settings configuration contains invalid YAML: {config_path}"
+            f"Settings configuration contains invalid YAML: "
+            f"{config_path}"
         ) from error
 
     if not isinstance(data, dict):
@@ -454,6 +498,7 @@ def load_report(path: str | Path) -> ReportConfig:
             "max_description_length",
         ),
     )
+
 
 def _require_positive_integer(
     value: Any,
