@@ -177,3 +177,104 @@ def test_pipeline_runs_controlled_fixture_end_to_end(
     assert stored_summary["raw_items"] == 1
     assert stored_summary["valid_items"] == 1
     assert stored_summary["displayed_items"] == 1
+
+
+def test_pipeline_preserves_successful_results_when_one_source_fails(
+    tmp_path: Path,
+) -> None:
+    """One failed source degrades the run without losing successful results."""
+
+    sources_path = tmp_path / "sources.yaml"
+    sources_path.write_text(
+        "sources:\n"
+        "  - id: sample_source\n"
+        "    name: Sample Source\n"
+        "    feed_url: tests/fixtures/sample_feed.xml\n"
+        "    source_type: rss\n"
+        "    source_tier: 1\n"
+        "    default_domains:\n"
+        "      - technology\n"
+        "    language: en\n"
+        "    geographic_scope:\n"
+        "      - Global\n"
+        "    active: true\n"
+        "  - id: failing_source\n"
+        "    name: Failing Source\n"
+        "    feed_url: tests/fixtures/missing.xml\n"
+        "    source_type: rss\n"
+        "    source_tier: 2\n"
+        "    default_domains:\n"
+        "      - technology\n"
+        "    language: en\n"
+        "    geographic_scope:\n"
+        "      - Global\n"
+        "    active: true\n",
+        encoding="utf-8",
+    )
+
+    records_path = tmp_path / "processed.jsonl"
+    report_path = tmp_path / "report.md"
+    summary_path = tmp_path / "run-summary.json"
+
+    result = run_pipeline(
+        sources_path=sources_path,
+        domains_path=DOMAINS_PATH,
+        settings_path=SETTINGS_PATH,
+        records_path=records_path,
+        report_path=report_path,
+        run_summary_path=summary_path,
+        run_id="20260806T090000Z",
+        started_at=STARTED_AT,
+        completed_at=COMPLETED_AT,
+        collection_window=COLLECTION_WINDOW,
+        report_date="2026-08-06",
+    )
+
+    assert len(result.collection_results) == 2
+
+    results_by_source = {
+        collection_result.source_id: collection_result
+        for collection_result in result.collection_results
+    }
+
+    assert results_by_source["sample_source"].status == "success"
+    assert results_by_source["sample_source"].items_received == 1
+
+    assert results_by_source["failing_source"].status == "failed"
+    assert results_by_source["failing_source"].items_received == 0
+    assert (
+        "Local feed file not found"
+        in results_by_source["failing_source"].error_message
+    )
+
+    assert len(result.records) == 1
+    assert result.records[0].title == "Sample AI Release"
+
+    assert result.run_summary.status == "degraded"
+    assert result.run_summary.active_sources == 2
+    assert result.run_summary.successful_sources == 1
+    assert result.run_summary.failed_sources == 1
+    assert result.run_summary.raw_items == 1
+    assert result.run_summary.displayed_items == 1
+
+    assert len(result.run_summary.warnings) == 1
+    assert result.run_summary.warnings[0].startswith(
+        "Source failing_source failed:"
+    )
+
+    stored_report = report_path.read_text(
+        encoding="utf-8",
+    )
+
+    assert "Sample AI Release" in stored_report
+    assert "Displayed items: 1" in stored_report
+
+    stored_summary = json.loads(
+        summary_path.read_text(
+            encoding="utf-8",
+        )
+    )
+
+    assert stored_summary["status"] == "degraded"
+    assert stored_summary["successful_sources"] == 1
+    assert stored_summary["failed_sources"] == 1
