@@ -1,7 +1,9 @@
 """Tests for the Daily Intelligence command-line entry point."""
 
+import logging
 from pathlib import Path
 from unittest.mock import patch
+
 
 from daily_intelligence.cli import main
 
@@ -17,8 +19,16 @@ def test_cli_run_invokes_pipeline_with_repository_defaults() -> None:
         patch(
             "daily_intelligence.cli.run_pipeline"
         ) as mocked_run_pipeline,
+        patch(
+            "daily_intelligence.cli.logging.basicConfig"
+        ) as mocked_basic_config,
     ):
         main()
+
+        mocked_basic_config.assert_called_once_with(
+            level=logging.INFO,
+            format="%(levelname)s %(name)s: %(message)s",
+        )
 
     mocked_run_pipeline.assert_called_once()
 

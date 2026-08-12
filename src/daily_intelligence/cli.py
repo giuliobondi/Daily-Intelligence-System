@@ -1,5 +1,6 @@
 """Command-line entry point for the Daily Intelligence pipeline."""
 
+import logging
 from argparse import ArgumentParser
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -9,6 +10,11 @@ from daily_intelligence.pipeline import run_pipeline
 
 def main() -> None:
     """Run the local pipeline from the command line."""
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s %(name)s: %(message)s",
+    )
 
     parser = ArgumentParser(
         description="Run the Daily Intelligence pipeline."
