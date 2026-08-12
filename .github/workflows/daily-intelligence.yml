@@ -2,6 +2,13 @@ name: Daily Intelligence
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "30 7 * * *"
+      timezone: "Europe/Rome"
+
+concurrency:
+  group: daily-intelligence-production
+  cancel-in-progress: false
 
 permissions:
   contents: write
