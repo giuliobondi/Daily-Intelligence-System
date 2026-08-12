@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   run-pipeline:
@@ -29,3 +29,41 @@ jobs:
 
       - name: Run production pipeline
         run: python -m daily_intelligence.cli run
+
+      - name: Validate generated outputs
+        shell: bash
+        run: |
+          report_date="$(date -u +%F)"
+          year="$(date -u +%Y)"
+          month="$(date -u +%m)"
+
+          records_path="data/processed/${year}/${month}/${report_date}.jsonl"
+          summary_path="data/runs/${year}/${month}/${report_date}.json"
+          report_path="reports/daily/${year}/${month}/${report_date}.md"
+
+          test -s "$records_path"
+          test -s "$summary_path"
+          test -s "$report_path"
+
+          echo "Validated records: $records_path"
+          echo "Validated summary: $summary_path"
+          echo "Validated report: $report_path"
+
+      - name: Commit generated outputs
+        shell: bash
+        run: |
+          git add \
+            data/processed \
+            data/runs \
+            reports/daily
+
+          if git diff --cached --quiet; then
+            echo "No output changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "data: update daily intelligence outputs"
+          git push
