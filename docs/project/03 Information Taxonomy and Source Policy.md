@@ -1,9 +1,8 @@
-````markdown
 # Daily Intelligence System — Information Taxonomy and Source Policy
 
 > **Purpose**
 >
-> This document defines what information the Daily Intelligence System should collect, how that information should be classified, which sources are acceptable, and which rules govern source selection, storage and public presentation.
+> This document defines what information the Daily Intelligence System should collect, how that information should be classified, which sources are acceptable, and which rules govern source selection, accessibility, storage and public presentation.
 >
 > It is the quality-control framework for the information entering the system.
 >
@@ -11,13 +10,13 @@
 >
 > **Primary Question**
 >
-> > *What information should the system collect, from which sources, and under which classification and quality rules?*
+> > *What information should the system collect, from which sources, and under which classification, accessibility and quality rules?*
 >
 > ---
 >
 > **Update Frequency**
 >
-> Update when monitored domains, source-selection rules, metadata requirements or source-governance policies materially change.
+> Update when monitored domains, source-selection rules, accessibility assumptions, metadata requirements or source-governance policies materially change.
 
 ---
 
@@ -38,7 +37,7 @@ The system should provide broad but structured awareness of developments that ma
 
 The objective is not maximum coverage.
 
-The objective is to identify a manageable set of high-value items from transparent and credible sources.
+The objective is to identify a manageable set of high-value items from transparent, credible and operationally suitable sources.
 
 Information quality should be evaluated through:
 
@@ -49,21 +48,25 @@ Information quality should be evaluated through:
 5. diversity;
 6. transparency;
 7. accessibility;
-8. suitability for automated collection.
+8. metadata richness;
+9. suitability for automated collection;
+10. maintenance burden.
 
-The system should prefer a smaller set of high-quality sources and useful items over broad but noisy coverage.
+The system should prefer a smaller set of high-quality and useful sources over broad but noisy coverage.
+
+A technically compatible source is not automatically a good production source.
+
+A source should create useful intelligence, not merely produce valid feed records.
 
 ---
 
 # Current Implementation Status
 
-The full taxonomy and source policy in this document define the intended information model.
+The deterministic information-processing model is implemented and production-automated.
 
-The current implementation deliberately remains narrower than the complete target model.
+The current production configuration contains:
 
-At Phase 2 closeout, the implemented configuration contains:
-
-- seven active validated public RSS sources;
+- seven active public RSS sources;
 - seven active topic domains;
 - deterministic title and description keyword rules;
 - optional source-default domains;
@@ -71,13 +74,17 @@ At Phase 2 closeout, the implemented configuration contains:
 - exact duplicate reduction;
 - a previous-24-hours publication window;
 - explicit handling of unclassified records;
+- scheduled GitHub Actions execution;
+- automated output persistence;
+- source-level failure isolation;
+- degraded-run reporting;
 - no tracked-entity configuration;
 - no article-level geographic classification;
 - no content-type classification;
 - no near-duplicate clustering;
 - no multi-source story clustering.
 
-The current active real-source registry contains:
+The current active source registry contains:
 
 1. BBC News World;
 2. BBC News Business;
@@ -103,11 +110,23 @@ The following target domains remain unimplemented:
 - Italy;
 - Milan and Bocconi Ecosystem.
 
-This seven-source, seven-domain configuration is sufficient for the first production-automation phase.
+The seven-source, seven-domain configuration successfully proved:
 
-It should not be interpreted as the final information universe.
+- real-source collection;
+- deterministic processing;
+- GitHub automation;
+- failure isolation;
+- automated persistence.
 
-Source and taxonomy expansion should continue only when repeated real reports demonstrate a meaningful coverage or quality gap.
+It should no longer be interpreted as sufficient evidence that the current information universe is optimal.
+
+Production use has now demonstrated meaningful source and coverage limitations.
+
+The current information-quality priority is therefore:
+
+> **Correct and expand the production source and domain universe before implementing richer report-context logic.**
+
+The first current-source review should include Sifted because production use exposed a concrete accessibility problem.
 
 ---
 
@@ -115,9 +134,9 @@ Source and taxonomy expansion should continue only when repeated real reports de
 
 ## Configurable
 
-Domains, keywords, source tiers and other future classification signals should be maintained through configuration rather than embedded throughout core processing code.
+Domains, keywords, source tiers and other classification signals should be maintained through configuration rather than embedded throughout core processing code.
 
-Configuration should expand only when the corresponding processing behaviour is actually needed.
+Configuration should expand only when corresponding processing behaviour or information value is justified.
 
 ---
 
@@ -146,7 +165,7 @@ Current policy:
 
 This avoids unnecessary repetition while preserving cross-domain information.
 
-The primary-domain selection method may later become more sophisticated if real usage demonstrates a need.
+The primary-domain selection method may later become more sophisticated if production evidence demonstrates a need.
 
 ---
 
@@ -181,9 +200,9 @@ Unclassified records:
 - remain available for evaluation;
 - are omitted from the main report by default.
 
-Phase 2 real-report review confirmed that this principle is preferable to forcing broad feeds into publisher-level topic categories.
+Real-report review confirmed that this principle is preferable to forcing broad feeds into publisher-level topic categories.
 
-A high relevant-unclassified rate during production evaluation should trigger taxonomy review.
+A high rate of relevant unclassified records should trigger taxonomy review.
 
 ---
 
@@ -191,28 +210,32 @@ A high relevant-unclassified rate during production evaluation should trigger ta
 
 The target taxonomy should preserve awareness across several strategically useful domains without trying to classify every possible news topic.
 
-The system should not become a generic global news taxonomy.
+The system should not become a generic global-news taxonomy.
 
 ---
 
 ## Independent Dimensions
 
-Topic, geography, source tier and content type are conceptually separate dimensions.
+Topic, geography, source tier, accessibility and content type are conceptually separate dimensions.
 
 For example, an item might eventually be described as:
 
 ```text
 topic: Artificial Intelligence
 geography: European Union
-source tier: Tier 1
-content type: Official Announcement
+source tier: Tier 2
+reader access: Bocconi Direct
+automation access: Public RSS
+content type: News Reporting
 ```
 
 Only topic classification and source tier are currently implemented at article level.
 
 Source-level geographic scope exists in configuration.
 
-Article-level geographic classification and content type remain future optional dimensions.
+Accessibility is currently a source-policy evaluation dimension rather than an implemented article field.
+
+Article-level geographic classification and content type remain optional future dimensions.
 
 ---
 
@@ -220,11 +243,9 @@ Article-level geographic classification and content type remain future optional 
 
 The following ten domains define the intended strategic coverage.
 
-They are target information categories.
-
 Seven are currently implemented.
 
-Three remain deferred until real usage demonstrates a need.
+Three are now candidates for active reconsideration during the source/domain expansion phase.
 
 ---
 
@@ -278,13 +299,13 @@ Not every conceptual indicator should automatically become an implemented keywor
 
 **Implemented**
 
-The current configured keyword list is deliberately conservative.
+The configured keyword list remains deliberately conservative.
 
-During Phase 2, real BBC World records exposed a recall gap.
+Real BBC World records previously exposed a recall gap.
 
-Candidate keywords were simulated against the actual processed sample before configuration was changed.
+Candidate keywords were simulated against actual processed records before configuration was changed.
 
-The following terms were added because they recovered clearly relevant political or geopolitical stories without observed false positives in that sample:
+The following terms were added:
 
 - war;
 - conflict;
@@ -299,7 +320,7 @@ Broader candidates such as:
 
 were tested but not added because they produced ambiguous or low-value matches.
 
-This domain should continue to expand from observed classification errors rather than by copying the entire conceptual indicator list into configuration.
+This domain should continue to expand from observed errors rather than from copying the entire conceptual indicator list into configuration.
 
 ---
 
@@ -351,11 +372,9 @@ Developments affecting economic conditions, policy, growth, employment, inflatio
 
 **Implemented**
 
-The current keyword list remains intentionally small and deterministic.
+Istat Press Releases currently has this domain as a source default because the selected feed is sufficiently narrow for the default to represent genuine source-wide topical evidence.
 
-Istat Press Releases currently has this domain as a source default because the selected feed is sufficiently narrow for the default to be treated as genuine source-wide topical evidence.
-
-BBC Business does not receive an Economics default because Phase 2 showed that the feed contains many business and general-interest stories that are not meaningfully macroeconomic.
+BBC Business does not receive an Economics default because the feed contains many business and general-interest stories that are not meaningfully macroeconomic.
 
 ---
 
@@ -403,13 +422,20 @@ Major developments affecting listed securities, capital markets, asset allocatio
 
 ### Current Status
 
-**Not yet implemented**
+**Candidate for implementation during the active source/domain review**
 
-The domain remains part of the target taxonomy.
+This domain was not required for the original seven-source automation baseline.
 
-Phase 2 did not demonstrate that it was necessary for the first automation milestone.
+The source/domain expansion phase should now determine:
 
-Implement only when repeated real reports show that meaningful financial-market developments are being missed or badly classified.
+- whether financial-market intelligence is materially underrepresented;
+- which public structured sources can support the domain;
+- whether official or high-quality reporting sources provide useful context;
+- whether implementation would create excessive daily noise.
+
+Do not activate the domain merely because financial markets are strategically relevant.
+
+Suitable source coverage and classification rules must exist first.
 
 ---
 
@@ -460,9 +486,9 @@ Important company actions and industry developments that reveal changes in strat
 
 **Implemented**
 
-This domain relies on content evidence rather than broad source defaults in the current real-source registry.
+This domain relies on content evidence rather than broad source defaults in the current registry.
 
-Phase 2 showed that assigning BBC Business or OpenAI a blanket Companies and Corporate Strategy default inflated classifications and scores for unrelated stories.
+Assigning BBC Business or OpenAI blanket Corporate Strategy defaults previously inflated classifications and scores for unrelated stories.
 
 The current policy therefore avoids those broad defaults.
 
@@ -501,22 +527,13 @@ Developments concerning AI models, products, research, infrastructure, regulatio
 
 **Implemented**
 
-Current configured keywords include concepts such as:
-
-- artificial intelligence;
-- AI;
-- machine learning;
-- large language model;
-- foundation model;
-- model release.
-
-The current list is intentionally small and provisional.
-
 OpenAI News has Artificial Intelligence as its single source default because the selected feed has a sufficiently strong source-wide topical relationship to AI.
 
 OpenAI does not receive automatic Technology or Corporate Strategy defaults.
 
 Those additional domains require content evidence.
+
+The active source-expansion phase should evaluate whether OpenAI News provides too narrow a publisher perspective and whether additional independent AI sources are justified.
 
 ---
 
@@ -551,20 +568,11 @@ Major developments in software, cloud infrastructure, cybersecurity, data system
 
 **Implemented**
 
-Current configured keywords include concepts such as:
-
-- software;
-- cloud;
-- cybersecurity;
-- developer;
-- open source;
-- API.
-
-The current list is intentionally small and provisional.
-
 No current real source receives Technology as a blanket source default.
 
 Technology should be assigned from content evidence unless a future source is sufficiently narrow to justify a source-wide default.
+
+Source expansion should evaluate whether current technology coverage is too dependent on BBC Business and OpenAI-related items.
 
 ---
 
@@ -612,15 +620,42 @@ Developments affecting startup formation, financing, scaling, exits and venture-
 
 ### Current Status
 
-**Implemented**
+**Implemented — source coverage under active review**
 
 Sifted currently has Startups and Venture Capital as its single source default.
 
-This reflects the selected feed's sufficiently narrow startup and venture-capital focus.
+The topical default remains logically appropriate.
 
-Sifted does not automatically receive Technology or Companies and Corporate Strategy.
+However, Sifted itself is now under source-policy review because production use exposed an accessibility problem.
 
-Those domains require content evidence.
+At least one selected report item required Sifted Pro access.
+
+Sifted feed entries have also been observed to provide limited descriptive context for some items.
+
+This creates a poor user experience when:
+
+```text
+thin report entry
+→ click required for basic understanding
+→ linked article unavailable without Sifted Pro
+```
+
+The appropriate response is not automatically to scrape the restricted article.
+
+The source should instead be evaluated against alternatives on:
+
+- topical quality;
+- public metadata richness;
+- public or user-accessible follow-up;
+- uniqueness of reporting;
+- automation suitability;
+- maintenance cost.
+
+Sifted should remain classified as:
+
+> **Active source under review**
+
+until the source-expansion phase reaches a deliberate keep, replace or disable decision.
 
 ---
 
@@ -649,29 +684,15 @@ Major European institutional, economic, political, regulatory and industrial dev
 - routine institutional communications;
 - political commentary without new policy or evidence.
 
-### Example Indicators
-
-- European Union;
-- European Commission;
-- European Parliament;
-- European Central Bank;
-- euro area;
-- European Council;
-- EU regulation;
-- European industry;
-- single market.
-
 ### Current Status
 
 **Implemented**
 
 Neither the European Central Bank feed nor the European Commission Highlighted News feed receives Europe/EU as a blanket source default.
 
-Phase 2 demonstrated why source identity alone should not imply item importance or topical relevance.
+Source identity alone should not imply item importance or topical relevance.
 
-For example, a routine ECB concert announcement should not automatically enter an Economics or Europe section merely because the publisher is the ECB.
-
-Europe/EU classification therefore relies on content evidence unless a future source is narrow enough to justify otherwise.
+For example, a routine institutional item should not automatically enter an Economics or Europe section merely because the publisher is a European institution.
 
 ---
 
@@ -679,7 +700,7 @@ Europe/EU classification therefore relies on content evidence unless a future so
 
 ### Scope
 
-Italian developments with economic, political, technological, financial or career relevance.
+Italian developments with economic, political, technological, financial or professional relevance.
 
 ### Include
 
@@ -715,11 +736,20 @@ Italian developments with economic, political, technological, financial or caree
 
 ### Current Status
 
-**Not yet implemented**
+**Candidate for implementation during the active source/domain review**
 
-Istat currently contributes through Economics and Macroeconomics while its source-level `geographic_scope` records Italy.
+Istat currently contributes Italian macroeconomic evidence while its source-level `geographic_scope` records Italy.
 
-A separate Italy topic domain should be implemented only if real reports demonstrate that geography metadata plus existing topic domains are insufficient.
+The source-expansion phase should determine whether the current setup misses strategically relevant Italian:
+
+- business;
+- finance;
+- public policy;
+- technology;
+- startup;
+- regulatory developments.
+
+Potential sources should be evaluated before deciding whether Italy requires a distinct topic domain rather than geographic metadata alone.
 
 ---
 
@@ -750,37 +780,32 @@ High-value opportunities, events and developments connected to Milan, Bocconi Un
 - events with unclear participants or weak relevance;
 - opportunities requiring excessive time without meaningful output.
 
-### Example Indicators
-
-- Bocconi;
-- B4i;
-- Milan;
-- student association;
-- career event;
-- research assistant;
-- competition;
-- hackathon;
-- accelerator;
-- innovation programme;
-- public lecture.
-
 ### Current Status
 
-**Not yet implemented**
+**Candidate for reconsideration, not automatically approved**
 
-Phase 2 source research did not identify a sufficiently strong, stable public structured source that justified adding this domain to the current production-like configuration.
+Earlier source research did not identify a sufficiently strong and stable public structured source to justify implementing this domain.
 
-Do not compensate for the absence of a suitable structured source with scraping, manual copy-and-paste or a dedicated complex ingestion system.
+The current source/domain strategy phase should reconsider it because the broader intelligence requirements are now being reviewed.
+
+Do not compensate for poor source availability with:
+
+- authenticated scraping;
+- private email ingestion;
+- daily copy-and-paste;
+- a separate complex ingestion system.
+
+If suitable public structured sources do not exist, the domain may remain outside the automated system.
 
 ---
 
 # Geographic Classification
 
-Geography remains a target information dimension but is not currently implemented at article level in the processing pipeline.
+Geography remains a target information dimension but is not currently implemented at article level.
 
-Source configuration currently preserves `geographic_scope`.
+Source configuration preserves `geographic_scope`.
 
-Potential article-level geographic tags include:
+Potential future article-level geographic tags include:
 
 - Global;
 - European Union;
@@ -800,7 +825,7 @@ Examples:
 - an Italian implementation of an EU regulation may receive Italy and European Union;
 - a Milan startup funding round may receive Milan and Italy.
 
-Article-level geographic classification should be introduced only if real use shows that topic domains plus source-level geography are insufficient for prioritisation or browsing.
+Article-level geographic classification should be introduced only if source/domain expansion demonstrates that topic domains plus source-level geography are insufficient for prioritisation or browsing.
 
 Geography should remain conceptually independent from topic domains.
 
@@ -828,7 +853,7 @@ Potential future types include:
 
 This dimension should not be implemented merely because it appears in the target information model.
 
-Add it only if production report quality or ranking materially benefits from it.
+Add it only if report quality or ranking materially benefits.
 
 ---
 
@@ -836,7 +861,14 @@ Add it only if production report quality or ranking materially benefits from it.
 
 Source tier represents evidentiary role and expected reliability.
 
-It does not guarantee that every item from the source is important or correct.
+It does not guarantee:
+
+- importance;
+- accessibility;
+- metadata richness;
+- report usefulness.
+
+These dimensions must be evaluated separately.
 
 The current ranking system uses source tier as one deterministic input.
 
@@ -881,8 +913,6 @@ Tier 1 sources should be prioritised for factual grounding.
 
 They should not automatically outrank every other item regardless of relevance.
 
-Phase 2 directly confirmed this principle: a Tier 1 official source can publish an item that is operationally valid but strategically irrelevant.
-
 ---
 
 ## Tier 2 — High-Quality Reporting
@@ -903,13 +933,22 @@ Established journalistic or specialist reporting organisations that provide orig
 - some content may be paywalled;
 - metadata availability varies;
 - different publications have different geographic and editorial biases;
-- specialist publications may have narrower coverage.
+- specialist publications may have narrower coverage;
+- public feeds may expose much less context than the linked article.
 
 ### Policy
 
-Tier 2 sources are part of the current real-source universe.
+Tier 2 status does not imply automatic production eligibility.
 
-The system should store only permitted metadata and short feed-provided descriptions.
+A Tier 2 source must still pass:
+
+- automation suitability;
+- metadata richness;
+- accessibility;
+- maintenance;
+- public-repository compatibility.
+
+Sifted is the current concrete example of why source tier and production suitability must remain separate.
 
 ---
 
@@ -963,7 +1002,7 @@ Aggregators, community platforms, social-media accounts, forums and similar disc
 
 ### Policy
 
-Tier 4 sources are outside the current production-like scope unless a specific structured source proves unusually valuable.
+Tier 4 sources remain outside the current production scope unless a specific structured source proves unusually valuable.
 
 A Tier 4 source should not be the sole evidence supporting an important item.
 
@@ -971,7 +1010,7 @@ A Tier 4 source should not be the sole evidence supporting an important item.
 
 # Current Source-Tier Scoring
 
-The current provisional ranking configuration assigns:
+The current ranking configuration assigns:
 
 ```text
 Tier 1 = 4 points
@@ -989,11 +1028,314 @@ Current scoring also includes:
 
 These weights remain provisional.
 
-Phase 2 showed that misleading domain assignment can distort relevance score even when the ranking formula itself is functioning correctly.
+Previous real-report work showed that misleading classification evidence can distort scores even when the ranking formula is functioning correctly.
 
-The preferred response is to fix bad classification evidence before changing score weights.
+The preferred response is:
 
-Ranking weights should be reconsidered only after repeated automated reports provide longitudinal evidence.
+> fix misleading upstream evidence before compensating with downstream ranking complexity.
+
+---
+
+# Two-Axis Source Suitability Model
+
+Production source evaluation must distinguish two separate questions.
+
+## Axis 1 — Automation Suitability
+
+> **Can the Daily Intelligence System safely, legally and reliably ingest this source?**
+
+Evaluate:
+
+- public structured endpoint;
+- official feed or API;
+- automation permission;
+- absence of required private credentials;
+- metadata quality;
+- timestamp quality;
+- technical reliability;
+- public-repository compatibility;
+- copyright constraints;
+- maintenance burden.
+
+## Axis 2 — Reader Accessibility
+
+> **Can the user actually read or investigate the linked source when deeper reading is useful?**
+
+Evaluate:
+
+- public web access;
+- direct institutional publisher access;
+- SearchLib access;
+- academic database access;
+- other legitimate institutional access;
+- additional personal paid subscription required;
+- unclear or inconsistent access.
+
+These axes are independent.
+
+Examples:
+
+```text
+Source A
+Automation: suitable public RSS
+Reader access: free public web
+→ strong production candidate
+```
+
+```text
+Source B
+Automation: suitable public RSS
+Reader access: Bocconi direct subscription
+→ potentially strong production candidate
+```
+
+```text
+Source C
+Automation: suitable public RSS
+Reader access: requires extra paid subscription
+Public feed context: rich
+→ potentially usable, review carefully
+```
+
+```text
+Source D
+Automation: suitable public RSS
+Reader access: requires extra paid subscription
+Public feed context: very thin
+→ weak production candidate
+```
+
+```text
+Source E
+Reader access: Bocconi database
+Automation: authenticated database only
+→ useful research source, not production-ingestion source
+```
+
+This distinction should govern the upcoming source-expansion work.
+
+---
+
+# Reader Accessibility Categories
+
+The user's Bocconi research established four access modes that should not be treated as equivalent.
+
+These categories describe personal reading access.
+
+They do not automatically define production automation eligibility.
+
+---
+
+## 🟢 Direct Publisher Access
+
+Bocconi provides institutional access that allows use of the publisher's normal website and, in several cases, official app.
+
+Confirmed important examples include:
+
+- Financial Times;
+- Wall Street Journal;
+- New York Times;
+- The Economist;
+- Il Sole 24 Ore.
+
+Corriere della Sera is a special case because Bocconi provides archive/current-edition access without confirming unrestricted normal premium-site access.
+
+### Product Implication
+
+Direct institutional access can make a source highly valuable for manual follow-up.
+
+It does not permit the Daily Intelligence System to authenticate into the publisher automatically unless a separate licence or endpoint explicitly permits that use.
+
+---
+
+## 🟡 SearchLib Access
+
+Bocconi provides digital journal access through SearchLib.
+
+Examples identified include:
+
+- Foreign Affairs;
+- Harvard Business Review;
+- Time;
+- Economia & Management.
+
+### Product Implication
+
+These sources may be highly valuable for manual research.
+
+SearchLib availability does not automatically mean:
+
+- publisher-site credentials exist;
+- RSS feeds expose premium article content;
+- automated collection is permitted.
+
+---
+
+## 🟠 Academic Database Access
+
+Bocconi provides full-text or research access through systems including:
+
+- Factiva;
+- Nexis Uni;
+- Business Source Ultimate.
+
+Professional information platforms also include:
+
+- Bloomberg Terminal;
+- LSEG Workspace;
+- FactSet;
+- S&P Capital IQ Pro;
+- Aida.
+
+These resources can expose a much larger publication universe.
+
+### Product Implication
+
+Database access is primarily a manual research layer.
+
+It must not be interpreted as permission to:
+
+- scrape database results;
+- bulk-download licensed articles;
+- redistribute full text;
+- export restricted material into the public repository;
+- automate authenticated access without explicit licence permission.
+
+---
+
+## 🔵 Public Web Access
+
+The source can be read without Bocconi credentials.
+
+Examples may include:
+
+- BBC;
+- official institutions;
+- many public company or government sources;
+- publications whose relevant content is freely accessible.
+
+### Product Implication
+
+Public reading accessibility is favourable but still does not by itself prove that automated scraping is permitted.
+
+Prefer structured public feeds or official APIs.
+
+---
+
+## 🔴 Additional Paid / Not Confirmed
+
+The user does not currently have confirmed direct access through Bocconi or the public web.
+
+Examples from the current research include direct premium access to publications such as:
+
+- Bloomberg.com;
+- Reuters.com Premium;
+- Washington Post;
+- Politico Pro;
+- Barron's;
+- CNBC Pro;
+- Business Insider Premium;
+- Wired premium;
+- MIT Technology Review.
+
+Some of their content may still exist within institutional databases.
+
+That database availability must not be confused with direct publisher access.
+
+---
+
+# Three-Layer Information Access Model
+
+The source policy should distinguish three operational layers.
+
+---
+
+## Layer 1 — Automated Public Intelligence Sources
+
+These are the only sources used continuously by the production pipeline.
+
+Examples:
+
+- public RSS feeds;
+- public Atom feeds;
+- official public APIs;
+- official institutional releases;
+- public company feeds;
+- public structured metadata;
+- other endpoints explicitly permitting the required automation.
+
+Requirements:
+
+- no private credentials;
+- no paid API requirement;
+- no authenticated premium scraping;
+- public-repository-compatible metadata;
+- acceptable maintenance burden.
+
+This layer drives:
+
+```text
+collect
+→ normalize
+→ deduplicate
+→ classify
+→ rank
+→ report
+```
+
+---
+
+## Layer 2 — Bocconi Premium Reading Layer
+
+These sources may be used manually for deeper reading when an important report item justifies it.
+
+Examples include:
+
+- Financial Times;
+- Wall Street Journal;
+- New York Times;
+- The Economist;
+- Il Sole 24 Ore;
+- Foreign Affairs;
+- Harvard Business Review;
+- other legitimate Bocconi-accessible publications.
+
+These sources may influence:
+
+- preferred follow-up reading;
+- source-selection decisions;
+- manual verification;
+- deeper understanding.
+
+They are not automatically production-ingestion sources.
+
+---
+
+## Layer 3 — Research and Database Layer
+
+These resources support targeted deeper investigations.
+
+Examples include:
+
+- Factiva;
+- Nexis Uni;
+- Business Source Ultimate;
+- Bloomberg Terminal;
+- LSEG Workspace;
+- FactSet;
+- S&P Capital IQ Pro;
+- Aida.
+
+Use cases include:
+
+- reconstructing events;
+- company research;
+- historical coverage;
+- source comparison;
+- market research;
+- industry investigation.
+
+They are not part of daily automated ingestion by default.
 
 ---
 
@@ -1011,7 +1353,11 @@ The publisher has identifiable ownership, authorship or institutional responsibi
 
 ## Originality
 
-The source provides primary information, original reporting or meaningful specialist analysis.
+The source provides:
+
+- primary information;
+- original reporting;
+- meaningful specialist analysis.
 
 ## Structured Access
 
@@ -1022,9 +1368,20 @@ The source provides:
 - official API;
 - another explicitly approved structured endpoint.
 
+## Automation Permission
+
+The required automated retrieval must be compatible with:
+
+- the source endpoint;
+- relevant terms;
+- licensing;
+- public-repository use.
+
+Personal access alone is insufficient.
+
 ## Timeliness
 
-Publication timestamps are available and reasonably reliable.
+Publication timestamps should be available and reasonably reliable.
 
 Because the current system filters using `published_at`, timestamp quality is particularly important.
 
@@ -1032,55 +1389,76 @@ Because the current system filters using `published_at`, timestamp quality is pa
 
 Titles and URLs must be sufficiently complete for automated processing.
 
-Descriptions are useful but may be absent.
+Descriptions or other public context should be evaluated as a product-quality dimension.
 
-Phase 2 confirmed that some valid feeds omit descriptions entirely or for individual entries.
+Missing descriptions may remain technically valid.
 
-## Public Accessibility
+They are no longer considered automatically harmless.
 
-The relevant metadata can be accessed without private credentials.
+A source with systematically thin metadata may be a poor fit for a report expected to provide sufficient context.
+
+## Reader Accessibility
+
+Follow-up access should be evaluated explicitly.
+
+Possible categories include:
+
+- public web;
+- Bocconi direct;
+- Bocconi SearchLib;
+- Bocconi database;
+- additional paid subscription;
+- unknown.
+
+Restricted follow-up is not automatically disqualifying if the public structured metadata already provides enough lawful intelligence value.
 
 ## Stability
 
-The endpoint is sufficiently stable for low-maintenance automated collection.
+The endpoint should be sufficiently stable for low-maintenance automated collection.
 
 ## Value-to-Noise Ratio
 
-A meaningful proportion of output is relevant to the project.
+A meaningful proportion of output should be relevant to the project.
 
 ## Diversity Contribution
 
-The source adds useful:
+The source should ideally add useful:
 
 - geographic;
 - institutional;
 - industry;
 - technical;
 - evidentiary;
+- editorial;
 - perspective diversity.
 
 ## Public Repository Compatibility
 
-Permitted metadata and links can be stored safely in a public repository.
+Permitted metadata and links must be safe to store publicly.
 
 ## Operational Compatibility
 
-The source should work with the bounded current collector without disproportionate special handling.
+The source should work with the bounded collector without disproportionate special handling.
 
-A source that requires excessive exception logic should normally be reconsidered before the collector is made more complex.
+## Context Contribution
+
+The source should contribute enough public structured context to support the intended report experience.
+
+This criterion becomes increasingly important as richer-report requirements are designed.
 
 ---
 
-# Source Exclusion Criteria
+# Source Exclusion or Replacement Criteria
 
-A source should be rejected, disabled or removed when one or more of the following materially apply:
+A source should be rejected, disabled, replaced or removed when one or more of the following materially apply:
 
 - it requires prohibited scraping;
 - it requires paid API access for core operation;
-- it requires private account access;
+- it requires private account access for automated collection;
+- its licence does not permit the intended automated use;
 - it republishes content without meaningful added value;
 - it produces excessive promotional material;
-- its publication timestamps are unusable for the collection-window policy;
+- its publication timestamps are unusable;
 - it repeatedly generates malformed or misleading records;
 - it has weak or unclear ownership;
 - it primarily publishes unsupported rumours;
@@ -1088,73 +1466,184 @@ A source should be rejected, disabled or removed when one or more of the followi
 - its content falls outside monitored priorities;
 - its endpoint is too unstable for the value provided;
 - it creates copyright or privacy risk;
-- maintaining it requires disproportionate manual intervention.
+- maintaining it requires disproportionate manual intervention;
+- its public structured metadata is consistently too thin;
+- selected links are repeatedly inaccessible and the report cannot provide enough public context;
+- an alternative source offers materially better accessibility, metadata or reliability.
 
-A low-quality source should normally be removed rather than supported through increasingly complex code.
+A low-value source should normally be replaced rather than supported through increasingly complex source-specific code.
 
 ---
 
-# Current Production-Like Source Universe
+# Source Evaluation Scorecard
 
-The previous planning range of approximately 20–30 sources should not be treated as an implementation target.
+During the active source-expansion phase, each candidate should be reviewed against a common scorecard.
 
-Phase 2 validated a deliberately small seven-source set.
+The scorecard does not need to become application code.
 
-The current source universe is sufficient for the first GitHub Actions automation milestone.
+A structured manual review is sufficient.
+
+Evaluate:
+
+```text
+Source name
+Primary domain contribution
+Source tier
+Publisher type
+Public RSS/Atom available?
+Official free API available?
+Automation permitted?
+Private credentials required?
+Publication timestamps reliable?
+Description/context richness
+Public article accessibility
+Bocconi direct access
+Bocconi SearchLib access
+Bocconi database access
+Unique coverage contribution
+Overlap with existing sources
+Expected noise
+Expected publication frequency
+Expected maintenance
+Public-repository compatibility
+Recommended status
+```
+
+Possible recommendations:
+
+```text
+Approve
+Approve for controlled test
+Monitor
+Retain
+Replace
+Disable
+Reject
+Research further
+```
+
+Do not compress all of these properties into one numerical score unless later evidence shows that a score improves decision quality.
+
+---
+
+# Current Production Source Universe
+
+The current source universe contains seven active feeds.
+
+It is now a **baseline under review**, not a final production set.
 
 ## Active Sources
 
-| Source ID | Source | Tier | Default Domains | Language | Geographic Scope |
-|---|---|---:|---|---|---|
-| `bbc_world` | BBC News World | 2 | None | English | Global |
-| `bbc_business` | BBC News Business | 2 | None | English | Global |
-| `ecb_press` | European Central Bank | 1 | None | English | European Union; Euro Area |
-| `ec_highlights` | European Commission Highlighted News | 1 | None | English | European Union |
-| `istat_press_en` | Istat Press Releases | 1 | Economics and Macroeconomics | English | Italy |
-| `openai_news` | OpenAI News | 1 | Artificial Intelligence | English | Global |
-| `sifted_articles` | Sifted | 2 | Startups and Venture Capital | English | Europe |
+| Source ID | Source | Tier | Default Domains | Language | Geographic Scope | Current Policy Status |
+|---|---|---:|---|---|---|---|
+| `bbc_world` | BBC News World | 2 | None | English | Global | Active |
+| `bbc_business` | BBC News Business | 2 | None | English | Global | Active |
+| `ecb_press` | European Central Bank | 1 | None | English | EU; Euro Area | Active |
+| `ec_highlights` | European Commission Highlighted News | 1 | None | English | European Union | Active |
+| `istat_press_en` | Istat Press Releases | 1 | Economics and Macroeconomics | English | Italy | Active |
+| `openai_news` | OpenAI News | 1 | Artificial Intelligence | English | Global | Active |
+| `sifted_articles` | Sifted | 2 | Startups and Venture Capital | English | Europe | Active — Under Review |
 
 All current active sources:
 
-- are public;
+- use public RSS;
 - require no paid API;
-- require no private credentials;
-- expose structured RSS metadata;
-- were successfully collected through the actual project collector during Phase 2;
-- exposed usable publication timestamps in the tested sample.
+- require no private credentials for collection;
+- were successfully collected through the project collector;
+- expose usable publication timestamps in tested production runs.
 
-## Why These Sources Are Useful
+These facts establish technical compatibility.
 
-The current set is not merely a prestige list.
+They do not establish permanent product suitability.
 
-Each source contributes a different information or system-testing role.
+---
 
-| Source | Primary Role |
-|---|---|
-| BBC News World | Broad international reporting and geopolitical relevance filtering |
-| BBC News Business | Broad business reporting and content-based classification |
-| European Central Bank | Primary institutional evidence and authority-versus-importance testing |
-| European Commission Highlighted News | Primary European policy and institutional material |
-| Istat Press Releases | Primary Italian statistical and macroeconomic releases |
-| OpenAI News | Primary AI company announcements and source-bias awareness |
-| Sifted | European startup and venture-capital specialist coverage |
+# Current Source Roles
 
-The set includes:
+| Source | Primary Current Role | Current Review Consideration |
+|---|---|---|
+| BBC News World | Broad international reporting | Evaluate relevance yield and geopolitical coverage |
+| BBC News Business | Broad business reporting | Evaluate company/economic signal and noise |
+| European Central Bank | Primary monetary-policy and institutional evidence | Retain authority while avoiding routine low-value material |
+| European Commission Highlighted News | Primary EU policy evidence | Evaluate relevance density |
+| Istat Press Releases | Primary Italian economic/statistical evidence | Evaluate role in broader Italy coverage |
+| OpenAI News | Primary OpenAI/AI company information | Evaluate publisher concentration and independent AI coverage gap |
+| Sifted | European startup and VC specialist coverage | Review paywall/accessibility and thin public metadata |
 
-- primary institutional sources;
-- primary company information;
-- general reporting;
-- business reporting;
-- specialist startup reporting;
-- European coverage;
-- Italian economic coverage;
-- AI coverage.
+The source-expansion phase should compare candidate sources against these existing roles rather than simply adding more feeds.
 
-It is small enough for human inspection while spanning several source roles.
+---
 
-## Expansion Rule
+# Sifted Review
 
-Do not expand this set merely because more feeds exist.
+Sifted is the first current source requiring explicit production-policy review.
+
+## Why It Was Added
+
+Sifted contributes:
+
+- European startup coverage;
+- venture-capital coverage;
+- specialist reporting;
+- a perspective absent from official institutional sources.
+
+Its source default:
+
+```text
+Startups and Venture Capital
+```
+
+remains logically appropriate for the selected feed.
+
+## Problem Observed
+
+A production-selected Sifted article required a Sifted Pro subscription.
+
+The current report entry did not contain enough context to remove the need for click-through.
+
+Sifted entries have also been observed with missing or limited descriptions.
+
+This creates a potential failure of the intended reading workflow.
+
+## Current Decision
+
+Do not automatically remove Sifted.
+
+Do not build a paywall bypass.
+
+Do not scrape Sifted Pro article bodies.
+
+Instead evaluate:
+
+- how frequently selected Sifted links require Pro access;
+- how rich its public RSS fields actually are;
+- whether the feed provides additional structured fields not currently used;
+- how much unique startup/VC information it contributes;
+- whether the user can access relevant content through another legitimate route;
+- whether an alternative public specialist source provides better metadata or accessibility.
+
+Possible outcomes:
+
+```text
+Keep
+Keep with revised report handling
+Replace
+Disable
+```
+
+The decision should be evidence-based.
+
+---
+
+# Source Expansion Policy
+
+There is no target number of sources.
+
+The previous idea of approximately 20–30 sources should not be treated as an implementation objective.
+
+The correct number is:
+
+> the smallest source universe that provides strong coverage, useful diversity and manageable maintenance.
 
 Add a source only when it solves a demonstrated:
 
@@ -1163,9 +1652,51 @@ Add a source only when it solves a demonstrated:
 - geographic gap;
 - domain gap;
 - source-diversity problem;
+- accessibility problem;
+- metadata-richness problem;
 - opportunity-detection gap.
 
-A smaller high-quality source universe remains preferable to a large unreviewed list.
+Source expansion should not become source accumulation.
+
+---
+
+# Source Expansion Workflow
+
+The immediate source-expansion workflow should be:
+
+```text
+Career Agent
+→ define desired information universe
+→ identify priority domains and candidate publications
+
+Development project
+→ evaluate technical and policy eligibility
+→ inspect public structured endpoints
+→ inspect metadata richness
+→ inspect accessibility
+→ inspect overlap
+→ test controlled collection
+→ inspect generated report contribution
+→ approve or reject
+```
+
+The Career Agent owns:
+
+- strategic information priorities;
+- professional relevance;
+- desired source mix;
+- source/domain ideas.
+
+This Development project owns:
+
+- automation suitability;
+- feed/API validation;
+- licence and access boundaries;
+- metadata quality;
+- collector compatibility;
+- tests;
+- production configuration;
+- maintenance assessment.
 
 ---
 
@@ -1177,7 +1708,7 @@ They are not publisher categories.
 
 A source should receive a default domain only when essentially every item in the selected feed can reasonably be treated as belonging to that topic.
 
-This distinction is critical because the current ranking system gives points for every assigned domain and the first assigned domain determines primary report placement.
+This distinction is important because the current ranking system gives points for every assigned domain and the first assigned domain determines primary report placement.
 
 ## Broad Sources
 
@@ -1187,7 +1718,7 @@ Broad heterogeneous feeds should normally use:
 default_domains: []
 ```
 
-Current broad sources with no defaults are:
+Current broad sources with no defaults:
 
 - BBC News World;
 - BBC News Business;
@@ -1200,7 +1731,7 @@ It means source identity alone is insufficient evidence to classify every indivi
 
 ## Narrow Sources
 
-Current narrow source defaults are:
+Current narrow source defaults:
 
 - Istat Press Releases → Economics and Macroeconomics;
 - OpenAI News → Artificial Intelligence;
@@ -1208,23 +1739,17 @@ Current narrow source defaults are:
 
 No current source receives multiple blanket defaults.
 
-Additional domains must come from content evidence.
+Additional domains require content evidence.
 
-## Phase 2 Evidence
+## Production Evidence
 
-The first real report used broader source defaults.
+Earlier broader source defaults caused:
 
-That produced misleading results including:
+- unrelated BBC Business items to appear under Economics;
+- routine ECB material to appear under Economics and Europe/EU;
+- inflated relevance scores caused by source defaults rather than article evidence.
 
-- unrelated BBC Business items appearing under Economics;
-- an ECB concert announcement appearing under Economics and Europe/EU;
-- inflated relevance scores caused by default domains rather than article content.
-
-The correction was to permit explicitly empty `default_domains` and remove weak defaults from broad feeds.
-
-This materially improved report precision.
-
-The rule going forward is:
+The rule remains:
 
 > use a source default only when it represents a genuine source-wide topical guarantee.
 
@@ -1248,11 +1773,11 @@ geographic_scope
 active
 ```
 
-These fields are sufficient for the current deterministic pipeline.
+These fields remain sufficient for the current deterministic pipeline.
 
 `source_type` currently represents feed protocol.
 
-Supported values are:
+Supported values:
 
 ```text
 rss
@@ -1263,7 +1788,7 @@ It is not a descriptive publisher category.
 
 ## Default-Domain Validation
 
-`default_domains` remains a required configuration field but may be explicitly empty.
+`default_domains` remains a required configuration field but may be empty.
 
 Example:
 
@@ -1271,13 +1796,33 @@ Example:
 default_domains: []
 ```
 
-This is intentional.
-
 `geographic_scope` remains required and non-empty.
+
+## Accessibility Metadata
+
+Accessibility information is now useful for source governance.
+
+However, fields such as:
+
+```text
+reader_access
+bocconi_access
+automation_permission
+metadata_richness
+review_status
+```
+
+should not automatically be added to `sources.yaml`.
+
+First determine whether storing these properties in production configuration creates operational value.
+
+A policy document or source-review table may be sufficient.
+
+Avoid turning descriptive research metadata into runtime configuration without a processing need.
 
 ## Potential Future Metadata
 
-Fields such as the following may be added only if required:
+Fields such as:
 
 ```text
 homepage_url
@@ -1286,6 +1831,8 @@ notes
 date_added
 date_reviewed
 ```
+
+may be added only if required by maintenance.
 
 Operational data such as:
 
@@ -1296,13 +1843,11 @@ failure_count
 
 should generally be generated by the system rather than manually maintained.
 
-Do not expand the source schema merely to make it more descriptive.
-
 ---
 
 # Article Metadata Policy
 
-The current canonical article record preserves important source-provided and derived fields including:
+The current canonical article record preserves source-provided and derived fields including:
 
 ```text
 record_id
@@ -1320,12 +1865,18 @@ relevance_score
 score_components
 ```
 
-The exact Python model remains the implementation source of truth.
+The Python model remains the implementation source of truth.
 
-Potential future fields such as:
+Potential richer-report fields should not be documented as implemented until the richer-report design phase determines what is needed.
+
+Possible future fields may include:
 
 ```text
 author
+source_categories
+public_summary
+public_content_excerpt
+canonical_url
 geographies
 content_type
 matched_entities
@@ -1333,7 +1884,7 @@ duplicate_cluster_id
 related_source_count
 ```
 
-should not be documented as implemented until the corresponding behaviour exists.
+Any new source-content field must preserve provenance.
 
 ---
 
@@ -1348,21 +1899,19 @@ A structurally valid current record normally requires:
 
 Publication timestamp is not required for structural validity.
 
-However, current reporting-window policy requires a usable `published_at` value for inclusion in the reporting window.
-
-This distinction is intentional.
+However, the current collection-window policy requires a usable `published_at` value for inclusion.
 
 A record may therefore be:
 
-- valid;
-- stored in validation results;
+- structurally valid;
+- available in validation results;
 - excluded from current report processing because publication time is unavailable.
 
 ---
 
 # Publication Timestamp Policy
 
-Current behaviour is conservative.
+Current behaviour remains conservative.
 
 If `published_at` is missing:
 
@@ -1371,19 +1920,50 @@ If `published_at` is missing:
 - retrieval time is not treated as confirmed publication time;
 - the record is excluded from collection-window eligibility.
 
-Phase 2 validation found usable publication timestamps across all observed entries from the seven selected real feeds.
+The current production feeds generally expose usable publication timestamps.
 
-Therefore no timestamp fallback logic was added.
-
-This policy should be revisited only if valuable future sources systematically omit usable publication timestamps.
+No timestamp fallback is justified yet.
 
 ---
 
-# Description Policy
+# Reporting-Window Timing Policy
 
-Only short descriptions already provided through permitted feeds or public metadata should be stored and displayed.
+The current production CLI uses:
 
-The system should not extract full article bodies during the MVP.
+```text
+actual run start - 24 hours
+through
+actual run start
+```
+
+Both boundaries are inclusive.
+
+Scheduled production use has exposed an important limitation:
+
+GitHub Actions may start a scheduled workflow substantially later than the configured cron time.
+
+Therefore:
+
+```text
+scheduler delay
+→ later actual run start
+→ shifted 24-hour publication window
+→ potentially different report composition
+```
+
+This has become an evidence-based information-quality question.
+
+A future deterministic reporting cutoff may be preferable.
+
+No change should be made solely from one sparse report.
+
+Continue collecting evidence before changing window semantics.
+
+---
+
+# Description and Public Context Policy
+
+The current implementation stores short descriptions provided through public feeds.
 
 Current report configuration truncates descriptions to:
 
@@ -1391,17 +1971,41 @@ Current report configuration truncates descriptions to:
 300 characters
 ```
 
-Descriptions are optional.
+Descriptions remain optional for structural validity.
 
-Phase 2 confirmed that:
+Production evidence has changed the interpretation of missing descriptions.
 
-- ECB entries may omit descriptions;
-- Sifted entries may omit descriptions;
-- some OpenAI entries may omit descriptions.
+Previously:
 
-Missing descriptions do not invalidate a record.
+> missing description = acceptable optional metadata
 
-The system must not fabricate article summaries.
+Now:
+
+> missing description = technically valid but potentially important product-quality limitation
+
+A source with consistently missing or very short descriptions may be a poor fit for the future richer-report requirement.
+
+## Current Rule
+
+The system may store:
+
+- public feed descriptions;
+- public structured summaries;
+- other permitted public metadata.
+
+It must not fabricate source text.
+
+## Future Richer Context
+
+The richer-report design phase should investigate, in order:
+
+1. richer fields already present in RSS/Atom;
+2. public structured metadata;
+3. official free APIs;
+4. permitted public-page metadata or extraction only where clearly justified;
+5. more complex solutions only if simpler mechanisms are insufficient.
+
+Do not assume full-article ingestion is required.
 
 ---
 
@@ -1413,20 +2017,9 @@ A separate normalised URL is used for deterministic identity and duplicate handl
 
 Current normalisation removes selected tracking parameters and fragments.
 
-Publisher-specific tracking parameters may still remain in some URLs.
+Some publisher-specific parameters may remain.
 
-Phase 2 exposed BBC parameters such as:
-
-```text
-at_medium
-at_campaign
-```
-
-in real output.
-
-This is a known lower-priority limitation.
-
-Do not expand URL cleaning until the remaining parameters materially affect:
+Further URL cleaning should be implemented only if remaining parameters materially affect:
 
 - deduplication;
 - report readability;
@@ -1438,7 +2031,7 @@ Do not expand URL cleaning until the remaining parameters materially affect:
 
 ## Current Classification Inputs
 
-The implemented classifier currently uses:
+The classifier currently uses:
 
 1. source default domains;
 2. title keywords;
@@ -1446,7 +2039,7 @@ The implemented classifier currently uses:
 
 Keyword matching is deterministic, case-insensitive and protected by word-boundary behaviour.
 
-## Current Multi-Domain Behaviour
+## Multi-Domain Behaviour
 
 A record may receive multiple domains.
 
@@ -1455,7 +2048,7 @@ For report display:
 - one domain becomes primary;
 - additional domains are displayed as secondary metadata.
 
-## Current Unclassified Behaviour
+## Unclassified Behaviour
 
 Unclassified records:
 
@@ -1464,9 +2057,7 @@ Unclassified records:
 
 This is intentional.
 
-Phase 2 showed that broad source defaults can improve apparent recall while damaging precision.
-
-The current policy therefore prefers leaving a record unclassified when evidence is weak.
+The system should prefer missing a classification over confidently presenting a misleading one.
 
 ## Potential Future Inputs
 
@@ -1479,7 +2070,7 @@ Future deterministic classification may use:
 - keyword groups;
 - stronger context rules.
 
-These should be introduced only when repeated real classification errors demonstrate a need.
+These should be introduced only when real classification errors demonstrate a need.
 
 ---
 
@@ -1493,16 +2084,16 @@ Keyword lists should be:
 - conservative;
 - tested against real examples.
 
-Avoid overly broad terms that create large numbers of false positives.
+Avoid broad terms that create large numbers of false positives.
 
 Ambiguous terms may require:
 
 - multiple-word phrases;
 - source context;
 - exclusions;
-- combinations of terms.
+- combinations.
 
-Examples of potentially ambiguous terms include:
+Examples of ambiguous terms include:
 
 - model;
 - market;
@@ -1514,29 +2105,30 @@ Examples of potentially ambiguous terms include:
 - president;
 - prime minister.
 
-Keyword complexity should grow from observed errors, not from speculative taxonomy design.
+Keyword complexity should grow from observed errors.
 
-## Evidence-Driven Keyword Procedure
+---
+
+# Evidence-Driven Keyword Procedure
 
 When a recall problem is observed:
 
 1. identify specific relevant unclassified records;
 2. propose a small candidate keyword set;
 3. simulate matches against real processed records;
-4. inspect both intended and unintended matches;
-5. add only terms with an acceptable precision trade-off;
+4. inspect intended and unintended matches;
+5. add only terms with acceptable precision;
 6. rerun the report;
-7. stop tuning when output becomes useful enough for the current phase.
+7. inspect output quality;
+8. stop when the result is good enough.
 
-Phase 2 followed this procedure for Global Politics.
-
-The result was the addition of:
+This procedure produced the existing Global Politics additions:
 
 - war;
 - conflict;
 - parliament.
 
-The procedure should remain the standard for future keyword changes.
+It remains the default procedure for taxonomy changes.
 
 ---
 
@@ -1570,15 +2162,13 @@ priority
 active
 ```
 
-An entity registry should remain small and purpose-driven.
-
-The system should not build a large entity database without a validated ranking or classification need.
+Do not build a large entity registry without a validated classification or ranking need.
 
 ---
 
 # Ranking Policy
 
-The ranking system should prioritise practical relevance to the user.
+The ranking system should prioritise practical relevance.
 
 It should remain:
 
@@ -1607,49 +2197,28 @@ source_tier_score
 
 Score components are stored.
 
-## Phase 2 Ranking Lesson
+## Upstream Evidence Rule
 
-The first real report initially contained inflated scores caused by weak source defaults.
+If weak source defaults or classification rules inflate scores:
 
-The ranking formula itself behaved as designed.
+> fix the upstream evidence before changing ranking weights.
 
-The bad input evidence came from classification.
+## Potential Future Factors
 
-The correction was therefore made by removing weak default domains rather than by changing score weights.
-
-This establishes a useful rule:
-
-> fix misleading upstream evidence before compensating with downstream ranking complexity.
-
-## Potential Future Positive Factors
-
-Only if justified by repeated real reports:
+Only if justified:
 
 - domain priority;
 - geography priority;
 - tracked entities;
 - content type;
 - recency;
-- independent multi-source coverage.
+- independent multi-source coverage;
+- source accessibility;
+- metadata richness.
 
-## Potential Future Negative Factors
+Accessibility or metadata richness should not be added to the ranking formula merely because they matter to source selection.
 
-Only if justified by observed quality problems:
-
-- promotional content;
-- missing metadata;
-- repeated syndicated coverage;
-- source-specific quality penalties.
-
-## Source Tier Is Not Importance
-
-A Tier 1 source may publish a routine low-value update.
-
-A lower-tier source may publish highly relevant specialist reporting.
-
-Source quality should therefore remain only one component of relevance.
-
-Phase 2 directly validated this distinction.
+Source eligibility may be the simpler place to address those problems.
 
 ---
 
@@ -1659,42 +2228,29 @@ Duplicate reduction should reduce repetition without discarding genuinely distin
 
 ## Current Exact Duplicate Rules
 
-Implemented exact duplicate checks use:
+Implemented checks use:
 
 1. normalised URL;
 2. normalised title.
 
 The first deterministic occurrence is retained.
 
-Phase 2 real runs observed exact duplicates and confirmed that the current implementation provides useful reduction.
-
 ## Near Duplicates
 
 Near-duplicate detection is not currently implemented.
 
-Examples of potential future near duplicates include:
+Possible future examples:
 
 - minor headline variations;
 - syndicated copies;
 - multiple outlets reporting the same announcement;
-- slightly updated versions of the same story.
+- updated versions of the same story.
 
-Near-duplicate clustering should be added only if repeated automated reports demonstrate material repeated coverage.
-
-## Related but Distinct Items
-
-Items should remain separate when they represent materially different information.
-
-Examples:
-
-- a company earnings release;
-- later independent analysis of those earnings;
-- a regulatory investigation;
-- a separate acquisition announcement.
+Add near-duplicate logic only if repeated production reports show a material problem.
 
 ## Conservative Principle
 
-False merging is more harmful than modest repeated coverage during early production.
+False merging is more harmful than modest repeated coverage.
 
 When uncertain, preserve separate records.
 
@@ -1704,7 +2260,7 @@ When uncertain, preserve separate records.
 
 The current system does not create story clusters or related-source counts.
 
-If real usage demonstrates that the same important event frequently appears across multiple independent sources, future clustering may preserve:
+If real use demonstrates a need, future clustering may preserve:
 
 - primary record;
 - related record IDs;
@@ -1712,9 +2268,7 @@ If real usage demonstrates that the same important event frequently appears acro
 - source diversity;
 - publication range.
 
-Multi-source coverage should not automatically increase relevance unless the system can distinguish independent reporting from syndicated duplication.
-
-Do not add story clustering during the automation phase merely because several real sources are now active.
+Multi-source coverage should not automatically increase relevance unless independent reporting can be distinguished from syndication.
 
 ---
 
@@ -1729,27 +2283,28 @@ The target system should support:
 
 ## Current Implementation
 
-The current seven-source real registry uses English-language feeds.
+The current seven-source registry uses English-language feeds.
 
 Istat is collected through its English press-release feed.
 
-Therefore Phase 2 does not constitute full bilingual validation.
+Full bilingual taxonomy behaviour has not yet been validated.
+
+## Future Italian Sources
+
+Source/domain expansion may introduce Italian-language sources.
+
+When this happens:
+
+- classification examples must include Italian;
+- relevant keyword lists may include Italian terms;
+- original source titles should remain preserved;
+- translation should not become a hidden production dependency.
 
 ## Translation
 
-The core MVP should not depend on automated translation.
-
-Original titles and descriptions should be preserved.
-
-## Classification
-
-Keyword configuration may include both English and Italian when an Italian-language source is introduced and validated.
-
-## Report Presentation
+The core system should not depend on automated translation.
 
 Original source language should be preserved.
-
-The system should not fabricate translations.
 
 ---
 
@@ -1763,28 +2318,35 @@ Diversity should be reviewable across:
 - source tiers;
 - geographies;
 - primary versus secondary evidence;
-- general versus specialist coverage.
+- general versus specialist coverage;
+- domains.
 
 The system does not need artificial quotas.
 
-A highly relevant publisher may legitimately appear several times.
+A highly relevant source may legitimately appear several times.
 
-Potential future evaluation metrics include:
+## Production Evidence
+
+Scheduled production has produced at least one report that was substantially shorter and more concentrated than previous reports.
+
+The run itself was technically healthy.
+
+This demonstrates:
+
+> technical source success does not guarantee adequate information diversity.
+
+The observation is sufficient to justify monitoring:
 
 - displayed share by publisher;
-- displayed share by source tier;
-- displayed share by geography;
-- displayed share by domain.
+- displayed share by domain;
+- unusually sparse reports;
+- repeated empty domains.
 
-These metrics should be added only if concentration becomes a practical quality issue.
+It is not yet sufficient to justify automatic concentration penalties or quotas.
 
-## Current Position
+## Source-Expansion Implication
 
-The seven-source set is deliberately diverse enough to begin automation but has not yet been evaluated over a sustained period.
-
-A single day's output should not drive publisher quotas or concentration penalties.
-
-Source diversity should be assessed during the initial production-evaluation period after scheduled automation is stable.
+The next source expansion should seek diversity because coverage improves—not because a numeric quota requires more publishers.
 
 ---
 
@@ -1792,7 +2354,7 @@ Source diversity should be assessed during the initial production-evaluation per
 
 Milan and Bocconi opportunity monitoring requires particularly strong selectivity.
 
-An opportunity should be considered relevant when it offers meaningful:
+An opportunity should be relevant when it offers meaningful:
 
 - learning;
 - networking;
@@ -1802,7 +2364,7 @@ An opportunity should be considered relevant when it offers meaningful:
 - competition exposure;
 - startup or innovation access.
 
-Potential opportunity metadata may include:
+Potential metadata may include:
 
 ```text
 opportunity_name
@@ -1815,79 +2377,120 @@ application_url
 source_url
 ```
 
-The MVP does not require a separate opportunity database.
+The core system does not currently require a separate opportunity database.
 
-Opportunity records may later use the normal article-record model if the relevant source metadata fits the pipeline.
-
-A dedicated report section should be added only if real usage demonstrates value.
-
-No suitable structured Milan/Bocconi source was added during Phase 2 merely to complete the target taxonomy.
+A dedicated opportunity workflow should be added only if suitable public structured sources and repeated user value justify it.
 
 ---
 
 # Copyright and Public-Repository Policy
 
-The repository may store and display:
+The repository may store and display, when permitted:
 
 - headlines;
 - source names;
 - direct links;
 - timestamps;
 - short feed-provided descriptions;
+- public structured summaries;
+- other permitted public metadata;
 - system-generated classifications;
 - system-generated scores;
-- run and source-health metadata.
+- run metadata;
+- source-health metadata.
 
 The repository must not store or display:
 
-- complete articles;
+- complete copyrighted articles;
 - substantial copied passages;
 - paywalled article bodies;
+- authenticated premium article bodies;
 - private newsletter text;
 - private email content;
+- licensed database full text;
 - unauthorised copyrighted material;
 - credentials;
 - authentication tokens.
 
 When uncertainty exists:
 
-> store less content and preserve the original source link.
+> store less content and preserve provenance and the original source link.
 
-The current seven-source registry satisfies the public-repository boundary through public structured metadata.
+---
+
+# Bocconi Licence Boundary
+
+Bocconi institutional access materially expands what the user may personally read.
+
+It does not automatically expand what the production pipeline may retrieve.
+
+The production system must never:
+
+- embed Bocconi credentials;
+- automate OpenAthens authentication;
+- scrape authenticated FT, WSJ, NYT, Economist or Il Sole 24 Ore content merely because the user can read it;
+- scrape Factiva;
+- scrape Nexis Uni;
+- scrape Business Source Ultimate;
+- bulk-download licensed database content;
+- ingest Bloomberg Terminal content automatically;
+- ingest LSEG Workspace content automatically;
+- redistribute restricted full text into the public repository.
+
+A premium publication may still become a production source if it separately provides:
+
+- a public feed;
+- an official free API;
+- public structured metadata;
+- another automation-permitted endpoint.
+
+The production eligibility decision must be based on that public interface, not the user's subscription.
 
 ---
 
 # Source Lifecycle
 
-A source may move through the following states conceptually.
+A source may move conceptually through the following states.
 
 ## Candidate
 
 Identified but not yet evaluated.
 
-## Approved
+## Approved for Test
 
-Passes source-policy review and is ready for testing.
+Passes preliminary source-policy review and is ready for controlled technical validation.
 
 ## Active
 
-Enabled in the production source configuration.
+Enabled in production.
 
 ## Monitoring
 
-Remains active or temporarily disabled while reliability or quality concerns are reviewed.
+Remains active or temporarily disabled while a reliability or quality concern is reviewed.
 
 ## Disabled
 
-Retained in configuration history but not collected.
+Retained in history/configuration but not collected.
 
 ## Removed
 
-No longer retained because it is clearly unsuitable or obsolete.
+No longer retained because it is obsolete or clearly unsuitable.
 
-Not every lifecycle state needs to become a field in `sources.yaml`.
+Not every lifecycle state needs to become a runtime `sources.yaml` field.
 
 Use configuration complexity only when it creates operational value.
+
+## Current Example
+
+Sifted is conceptually:
+
+```text
+Active
++
+Monitoring / Under Review
+```
+
+Its exact status does not need a new configuration field yet.
 
 ---
 
@@ -1895,121 +2498,109 @@ Use configuration complexity only when it creates operational value.
 
 Before adding a production source, ask:
 
-1. Which real coverage gap does it fill?
-2. Is it primary, journalistic or specialist?
-3. Is the endpoint public and permitted?
-4. Is the endpoint stable?
-5. Does it provide usable timestamps?
-6. Does it provide usable URLs?
-7. Is the metadata sufficient for the current pipeline?
-8. Does it significantly duplicate existing sources?
-9. Is its signal-to-noise ratio acceptable?
-10. Does it add meaningful diversity?
-11. Can its metadata be stored safely in a public repository?
-12. Will supporting it create disproportionate maintenance?
-13. Does it work with the current bounded collector without special-case infrastructure?
-14. Does it justify any source default, or should `default_domains` remain empty?
+1. What information gap does it solve?
+2. Which domain or evidentiary role does it add?
+3. Does it provide stable structured public access?
+4. Is automated retrieval permitted?
+5. Does it require private credentials?
+6. Are timestamps reliable?
+7. How rich are its public descriptions or metadata?
+8. Can the user open the linked content?
+9. If the article is restricted, is enough public context available anyway?
+10. Does Bocconi provide legitimate personal follow-up access?
+11. Does it duplicate a current source?
+12. Is it primary evidence, reporting, specialist analysis or discovery?
+13. How noisy is the feed?
+14. How frequently does it publish?
+15. Does it improve geographic or domain coverage?
+16. Does it require special collector logic?
+17. What maintenance cost does it add?
+18. Can permitted metadata be stored in the public repository?
+19. How will the source be tested?
+20. What existing source could it replace rather than simply supplement?
 
-A source should not be added merely because it is prestigious or well known.
+A source should not be added because:
 
-During the automation and initial-evaluation phases, a new source should normally require evidence that the current seven-source set misses something materially useful.
-
----
-
-# Disabling or Removing a Source
-
-A source should be reviewed when it:
-
-- fails repeatedly;
-- changes endpoint format;
-- becomes mostly promotional;
-- creates excessive repetition;
-- stops publishing relevant information;
-- becomes inaccessible without private credentials;
-- creates copyright concerns;
-- requires excessive special-case handling;
-- adds little value relative to maintenance cost.
-
-Disabling should often be preferred before permanent removal because it preserves decision history.
-
-Source instability should not automatically trigger increasingly complex retry or scraping logic.
-
-Replacing a weak source may be the simpler solution.
+- it is prestigious;
+- it is popular;
+- it exists;
+- the user can personally access it;
+- increasing source count appears sophisticated.
 
 ---
 
-# Source Evaluation Metrics
+# Reviewing an Existing Source
 
-During initial production evaluation, review sources using:
+Review an active source when:
 
-| Metric | Question |
-|---|---|
-| Availability | How often did collection succeed? |
-| Relevance | How much collected material matched monitored needs? |
-| Display Rate | How often did the source contribute displayed items? |
-| Originality | Did it add information not already available elsewhere? |
-| Duplication | How often did it repeat other sources? |
-| Metadata Quality | Were titles, URLs and timestamps reliable? |
-| Strategic Value | Did it improve awareness or opportunity detection? |
-| Maintenance Cost | Did it require recurring manual intervention? |
-| Default-Domain Quality | Does any configured source default remain valid across the feed? |
-| Classification Contribution | Does the source produce useful classified items without excessive noise? |
+- repeated collection failures occur;
+- its feed changes materially;
+- its metadata quality degrades;
+- relevant timestamps disappear;
+- it produces excessive noise;
+- its items are systematically unclassified;
+- it dominates the report without corresponding value;
+- linked content becomes inaccessible;
+- feed descriptions are too thin for the intended report;
+- an alternative source becomes clearly better;
+- maintenance becomes disproportionate.
 
-No single metric should determine source quality.
+The review should result in an explicit decision:
 
-A source can be reliable but low-value.
-
-A source can also be strategically valuable but operationally expensive.
-
-Both dimensions matter.
+```text
+Retain unchanged
+Retain with configuration correction
+Monitor
+Replace
+Disable
+Remove
+```
 
 ---
 
-# Real-Source Validation Findings
+# Source Replacement Principle
 
-Phase 2 produced several source-policy findings that should remain explicit.
+Adding a new source is not always the correct response to weak coverage.
 
-## All Seven Sources Were Technically Compatible
+Prefer:
 
-All selected feeds were successfully collected through the actual project collector.
+```text
+weak current source
+→ identify limitation
+→ compare alternatives
+→ replace when appropriate
+```
 
-All observed returned entries normalised successfully.
+over:
 
-All observed entries had usable publication timestamps.
+```text
+weak current source
+→ keep indefinitely
+→ add more sources
+→ increase noise and maintenance
+```
 
-Missing descriptions were acceptable because descriptions are optional.
+A smaller, stronger registry is preferable to source accumulation.
 
-## Feed Size Alone Is Not a Blocker
+---
 
-The OpenAI feed returned more than one thousand entries during validation.
+# Source Health
 
-This did not require special pagination or feed-size logic because the existing publication-window filter reduced the eligible set to a manageable number.
+Current run summaries provide per-run source health.
 
-Do not optimise large-feed handling without evidence of a practical execution or maintenance problem.
+Available source statuses:
 
-## Source Tier Does Not Imply Relevance
+```text
+success
+empty
+failed
+```
 
-A high-authority source may publish routine or irrelevant items.
+This is sufficient for current operations.
 
-The ECB concert announcement demonstrated this clearly.
+Long-term source-health history should be implemented only if repeated maintenance work demonstrates value.
 
-Source tier should remain evidentiary input, not a guarantee of report placement.
-
-## Broad Defaults Harm Precision
-
-Broad source defaults forced unrelated stories into report sections and inflated scores.
-
-This led to the current default-domain policy.
-
-## Conservative Classification Is Acceptable
-
-After removing broad defaults, many BBC World items remained unclassified.
-
-Manual review showed that some of those omissions were appropriate and some represented a narrow recall gap.
-
-A small keyword correction recovered clearly relevant political stories without returning to broad forced classification.
-
-This is the preferred pattern.
+Do not add source-health infrastructure merely because production automation now exists.
 
 ---
 
@@ -2017,33 +2608,11 @@ This is the preferred pattern.
 
 Technical pipeline stability and information-quality stability are separate.
 
-Phase 2 established that:
+The system is now technically production-operational.
 
-- the real-source pipeline is technically viable;
-- the current seven-domain taxonomy can produce a useful report;
-- classification remains intentionally provisional;
-- the full ten-domain taxonomy is not yet quality-validated;
-- one day's report is insufficient to optimise ranking, source diversity or taxonomy coverage.
+Information quality is the active development concern.
 
-The next meaningful taxonomy evaluation should occur after automated execution produces repeated real reports.
-
-Use a manually reviewed sample containing examples such as:
-
-- multiple topic domains;
-- primary and secondary sources;
-- multi-domain stories;
-- ambiguous keywords;
-- relevant unclassified items;
-- exact duplicates;
-- possible near duplicates;
-- promotional content;
-- malformed or incomplete metadata;
-- source concentration;
-- repeated publisher patterns.
-
-When Italian-language sources are later introduced, include bilingual examples as well.
-
-Evaluate:
+Use real production records and reports to evaluate:
 
 - classification accuracy;
 - false-positive classifications;
@@ -2054,15 +2623,101 @@ Evaluate:
 - report usefulness;
 - report concentration;
 - source-default quality;
-- ranking order.
+- ranking order;
+- accessibility;
+- metadata richness;
+- source overlap;
+- missing strategic domains.
 
-Do not build a large artificial validation dataset before repeated real-source examples exist.
+When Italian-language sources are introduced, include bilingual examples.
+
+Do not build a large artificial validation dataset before sufficient real examples exist.
+
+---
+
+# Source Expansion Validation Strategy
+
+For each candidate source:
+
+## Step 1 — Policy Review
+
+Confirm:
+
+- purpose;
+- domain contribution;
+- source tier;
+- public access mechanism;
+- automation eligibility;
+- likely accessibility;
+- likely metadata richness.
+
+## Step 2 — Technical Probe
+
+Inspect:
+
+- feed/API availability;
+- HTTP behaviour;
+- redirects;
+- timestamps;
+- descriptions;
+- entry counts;
+- malformed records;
+- expected request requirements.
+
+## Step 3 — Controlled Collector Test
+
+Run through the actual collector.
+
+Do not rely only on opening the URL manually.
+
+## Step 4 — Normalisation Test
+
+Confirm returned entries normalise correctly.
+
+## Step 5 — Sample Classification Review
+
+Inspect:
+
+- expected domains;
+- unclassified rate;
+- obvious false positives;
+- source-default suitability.
+
+## Step 6 — Report Contribution
+
+Generate or simulate report contribution.
+
+Evaluate:
+
+- usefulness;
+- noise;
+- repetition;
+- source concentration;
+- context richness.
+
+## Step 7 — Maintenance Decision
+
+Ask:
+
+- did the source solve the intended gap?
+- is the value worth recurring maintenance?
+- should it replace an existing source?
+
+## Step 8 — Production Approval
+
+Only after validation:
+
+- update configuration;
+- update tests;
+- inspect diff;
+- rerun full suite;
+- run real pipeline;
+- inspect report;
+- commit.
 
 ---
 
 # Current Resolved Information Decisions
-
-The following decisions are implemented for the current MVP core.
 
 ## Current Implemented Domains
 
@@ -2074,17 +2729,15 @@ The following decisions are implemented for the current MVP core.
 - Startups and Venture Capital;
 - Europe and the European Union.
 
-The full ten-domain taxonomy remains the target.
-
 ---
 
-## Deferred Target Domains
+## Domains Under Active Reconsideration
 
 - Financial Markets;
 - Italy;
 - Milan and Bocconi Ecosystem.
 
-These are not required before GitHub Actions automation.
+They remain unimplemented until the source/domain strategy provides suitable evidence.
 
 ---
 
@@ -2100,19 +2753,25 @@ These are not required before GitHub Actions automation.
 
 ---
 
-## Source Defaults
+## Source Under Explicit Review
 
-**Decision:** defaults are optional topical evidence, not mandatory publisher categories.
+- Sifted.
+
+---
+
+## Source Defaults
 
 Current defaults:
 
-- BBC News World → none;
-- BBC News Business → none;
-- European Central Bank → none;
-- European Commission Highlighted News → none;
-- Istat Press Releases → Economics and Macroeconomics;
-- OpenAI News → Artificial Intelligence;
-- Sifted → Startups and Venture Capital.
+```text
+BBC News World                → none
+BBC News Business             → none
+European Central Bank         → none
+European Commission           → none
+Istat Press Releases          → Economics and Macroeconomics
+OpenAI News                   → Artificial Intelligence
+Sifted                        → Startups and Venture Capital
+```
 
 ---
 
@@ -2120,15 +2779,11 @@ Current defaults:
 
 **Decision:** supported.
 
-Records may receive multiple domains.
-
 ---
 
 ## Primary Report Placement
 
 **Decision:** each story appears once.
-
-The first assigned eligible domain becomes the primary report section.
 
 Additional domains are shown as secondary metadata.
 
@@ -2136,7 +2791,7 @@ Additional domains are shown as secondary metadata.
 
 ## Unclassified Records
 
-**Decision:** preserved in processed data but omitted from the main report by default.
+**Decision:** preserved in processed data but omitted from the main report.
 
 ---
 
@@ -2149,8 +2804,6 @@ Additional domains are shown as secondary metadata.
 ## Score Components
 
 **Decision:** stored for transparency.
-
-They are not currently shown in full in the Markdown report.
 
 ---
 
@@ -2170,6 +2823,8 @@ They are not currently shown in full in the Markdown report.
 
 **Current configured maximum:** 300 characters.
 
+This value may change during richer-report design.
+
 ---
 
 ## Exact Duplicate Policy
@@ -2183,9 +2838,9 @@ They are not currently shown in full in the Markdown report.
 
 ## Collection Window
 
-**Current CLI default:** previous 24 hours.
+**Current CLI default:** previous 24 hours relative to actual execution.
 
-Boundaries are inclusive.
+A fixed reporting cutoff is now an open design question.
 
 ---
 
@@ -2199,249 +2854,416 @@ Do not replace missing publication time with retrieval time.
 
 ## Global Politics Keyword Refinement
 
-**Current evidence-based additions:**
+Current evidence-based additions:
 
 - war;
 - conflict;
 - parliament.
 
-These were added only after testing candidate terms against real processed records.
+---
+
+## Personal Institutional Access
+
+**Decision:** Bocconi access affects manual reading value, not automatic ingestion permission.
+
+---
+
+## Premium Sources
+
+**Decision:** a paywall does not automatically exclude a source.
+
+Instead ask:
+
+- is the public structured metadata useful enough?
+- can the user access the article legitimately?
+- is a better accessible source available?
+- does the source add unique value?
 
 ---
 
 # Open Information Decisions
 
-The following remain intentionally unresolved.
+## Sifted
 
-## Future Source Expansion
+Determine whether to:
+
+- retain;
+- replace;
+- disable;
+- retain only if richer public feed fields can be used.
+
+---
+
+## Future Source Universe
 
 No fixed source-count target.
 
-Add sources only when the current seven-source universe demonstrates a real coverage or quality gap.
+The Career Agent should define strategic priorities.
 
-## Full Keyword Lists
+This project should determine technical eligibility.
 
-Continue expanding gradually from real classification errors.
+---
 
 ## Financial Markets Domain
 
-Implement only if repeated real reports demonstrate missed market intelligence that cannot be handled adequately through current domains.
+Evaluate during the active source/domain expansion phase.
+
+---
 
 ## Italy Domain
 
-Implement only if topic classification plus source geography proves insufficient.
+Evaluate during the active source/domain expansion phase.
+
+---
 
 ## Milan and Bocconi Domain
 
-Implement only when a suitable structured public source or validated workflow exists.
+Evaluate only if suitable public structured sources exist.
 
-## Domain Priority Weights
+---
 
-Not currently implemented.
+## Additional AI Sources
 
-Add only if report ordering needs them.
+Evaluate whether OpenAI News creates excessive single-publisher dependence.
 
-## Tracked Entities
+---
 
-Not currently implemented.
+## Additional European Sources
 
-## Geographic Classification
+Evaluate whether current EU institutional coverage is too narrow or too official-source-heavy.
 
-Not currently implemented at article level.
+---
 
-## Content-Type Classification
+## Italian Sources
 
-Not currently implemented.
+Evaluate whether stronger Italian political, business and financial coverage is required.
 
-## Near-Duplicate Threshold
+Bocconi access to Il Sole 24 Ore and other publications may make some sources valuable for manual follow-up, but production eligibility still depends on public automation-compatible endpoints.
 
-No threshold exists because near-duplicate detection is not implemented.
-
-## Multi-Source Story Clustering
-
-Deferred pending repeated real repetition.
+---
 
 ## Publisher Concentration Controls
 
-Evaluate only after automated reports show a concentration problem.
+Continue observing production reports.
 
-## Missing Publication Timestamp Fallback
+Do not add quotas from a single sparse day.
 
-Reconsider only if valuable real sources systematically omit timestamps.
+---
 
-## Opportunity-Specific Report Behaviour
+## Metadata-Richness Threshold
 
-Evaluate only after suitable structured opportunity sources exist.
+The richer-report design phase should determine what minimum public context a source needs.
+
+No fixed character threshold exists yet.
+
+---
+
+## Domain Priority Weights
+
+Not implemented.
+
+Add only if report ordering demonstrates a need.
+
+---
+
+## Tracked Entities
+
+Not implemented.
+
+---
+
+## Geographic Classification
+
+Not implemented at article level.
+
+---
+
+## Content-Type Classification
+
+Not implemented.
+
+---
+
+## Near-Duplicate Threshold
+
+No threshold exists.
+
+---
+
+## Multi-Source Story Clustering
+
+Deferred.
+
+---
 
 ## Source-Health History
 
-Current run summaries provide per-run status.
+Per-run status remains sufficient.
 
-Long-term history should be added only if automated source maintenance requires it.
+---
 
 ## Ranking Weights
 
-Current weights remain provisional.
-
-Change only after repeated report review shows systematic ordering problems.
+Remain provisional.
 
 ---
 
 # Information Quality Decision Rules
 
-Before adding a taxonomy rule, source field or classification dimension, ask:
+Before adding a source, taxonomy rule, metadata field or classification dimension, ask:
 
-1. What observed information-quality problem does it solve?
+1. What observed problem does it solve?
 2. How often does the problem occur?
-3. Does the problem materially reduce report usefulness?
-4. Can a source change solve it instead?
-5. Can a simpler keyword or configuration adjustment solve it?
-6. What false positives or false negatives could the change create?
-7. How will the improvement be evaluated?
-8. Does the change increase recurring maintenance?
-9. Does the change preserve explainability?
-10. Is the change necessary before the system can be used?
+3. Does it materially reduce report usefulness?
+4. Can replacing a weak source solve it?
+5. Can a simpler configuration change solve it?
+6. Does the source provide enough lawful public context?
+7. Can the user access deeper reading if needed?
+8. What false positives or false negatives could the change create?
+9. How will the improvement be evaluated?
+10. What recurring maintenance does it create?
+11. Does it preserve explainability?
+12. Does it preserve zero recurring monetary cost?
+13. Does it preserve credential safety?
+14. Does it preserve copyright/public-repository safety?
+15. Is the change necessary now?
 
-The default should be to preserve the simpler current rule until evidence justifies more complexity.
+The default is not always to preserve the current configuration.
 
-Phase 2 provides the model:
+Now that production evidence exists, weak sources should be corrected or replaced when justified.
+
+The preferred pattern remains:
 
 ```text
-observe real report problem
+observe real problem
 → isolate the cause
-→ test the smallest deterministic correction
+→ compare the simplest solutions
+→ test the smallest justified change
 → rerun
-→ inspect report quality
-→ stop when good enough for the current phase
+→ inspect information quality
+→ stop when the improvement is sufficient
 ```
 
 ---
 
 # Current Information-Policy Limitations
 
-The following limitations are known and accepted at the current stage:
+Known current limitations include:
 
 - seven of ten target domains are implemented;
-- the current source universe contains seven real sources;
-- all current real feeds are English-language feeds;
-- full bilingual taxonomy behaviour is not yet validated;
+- the source universe contains only seven active sources;
+- all current automated feeds are English-language;
+- full bilingual behaviour is unvalidated;
 - Financial Markets is not implemented;
 - Italy is not implemented as a topic domain;
-- Milan and Bocconi is not implemented;
+- Milan/Bocconi is not implemented;
 - article-level geography is not implemented;
 - content type is not implemented;
 - entity tracking is not implemented;
 - near-duplicate detection is not implemented;
 - multi-source story clustering is not implemented;
-- source diversity has not yet been evaluated longitudinally;
+- source-health history remains per-run;
 - ranking weights remain provisional;
-- keyword lists remain intentionally conservative;
-- some relevant records may remain unclassified;
-- publisher-specific tracking parameters may remain in some normalised URLs;
-- source-health history is per-run rather than longitudinal.
+- keyword lists remain conservative;
+- some relevant records remain unclassified;
+- public descriptions vary substantially by source;
+- some Sifted articles may require Sifted Pro;
+- the current report may therefore contain items that are difficult to understand or access;
+- source concentration can vary materially by day;
+- the rolling collection window depends on actual scheduled execution time;
+- personal Bocconi access is not represented in runtime source configuration.
 
-These limitations define the current maturity level.
+These limitations define the current information-quality maturity.
 
-They do not imply that all corresponding features should be implemented next.
+They do not imply that every corresponding feature should be implemented.
 
-The next priority is automation, not taxonomy expansion.
+The immediate priority is:
+
+> correct and expand sources and domains first.
+
+---
+
+# Current Information-Quality Priorities
+
+Priorities are currently ordered as follows.
+
+## 1. Correct Weak Existing Sources
+
+Beginning with Sifted.
+
+Evaluate:
+
+- accessibility;
+- metadata richness;
+- unique value;
+- alternatives.
+
+## 2. Expand Source Coverage Deliberately
+
+Use Career Agent strategy followed by Development-project technical review.
+
+## 3. Reconsider Deferred Domains
+
+Especially:
+
+- Financial Markets;
+- Italy;
+- Milan/Bocconi.
+
+## 4. Improve Source Diversity
+
+Address genuine coverage gaps without artificial quotas.
+
+## 5. Design Richer Report Context
+
+Only after the revised source universe is understood.
+
+## 6. Revisit Ranking or Advanced Classification
+
+Only if source correction and richer context do not solve the dominant problems.
 
 ---
 
 # Current Status
 
-**Status:** Phase 2 real-source taxonomy and source policy validated; ready for Phase 3 automation
+**Status:** Phase 3 automation complete; source/domain correction and expansion active.
 
 **Implemented and validated:**
 
-- seven active real public RSS sources;
+- seven active public RSS sources;
 - seven active topic domains;
 - configurable domains;
 - optional source-default domains;
-- deterministic title/description keyword classification;
+- deterministic title/description classification;
 - multiple domains;
 - primary report placement;
 - secondary-domain metadata;
-- explicit unclassified handling;
+- unclassified handling;
 - deterministic source-tier scoring;
 - exact URL/title deduplication;
-- 24-hour publication-window filtering;
-- feed-description truncation;
+- previous-24-hours filtering;
 - public-safe metadata policy;
 - real-source timestamp compatibility;
-- real-source metadata compatibility;
-- conservative broad-source default policy;
-- evidence-based keyword refinement;
-- source-level failure isolation.
+- source-level failure isolation;
+- scheduled production execution;
+- automated repository persistence.
 
-**Currently controlled / provisional:**
+**Current source-policy findings:**
 
-- seven-source universe;
+- technical compatibility does not guarantee product suitability;
+- accessibility must be evaluated explicitly;
+- metadata richness matters for report usefulness;
+- a paywalled destination can materially reduce usefulness when feed context is thin;
+- Sifted is under review;
+- Bocconi substantially expands personal reading access;
+- institutional access does not authorize automated authenticated ingestion;
+- public automation suitability and personal reader accessibility are separate dimensions;
+- source concentration and sparse reports require observation;
+- the existing seven-source set should now be corrected and expanded.
+
+**Current controlled / provisional elements:**
+
+- seven-source registry;
 - seven-domain implemented subset;
 - keyword lists;
 - ranking weights;
 - report limits;
 - source-default assignments;
-- source diversity.
+- source diversity;
+- public-context richness;
+- collection-window anchoring.
 
-**Not yet implemented:**
+**Not implemented:**
 
 - full ten-domain coverage;
 - Financial Markets;
 - Italy topic classification;
-- Milan and Bocconi topic classification;
+- Milan/Bocconi topic classification;
 - tracked entities;
 - article-level geography;
 - content type;
 - near-duplicate clustering;
-- multi-source story clustering;
-- long-term source-health history.
+- multi-source clustering;
+- long-term source-health history;
+- richer-context generation.
 
 **Next information-quality milestone:**
 
-> Preserve the current source and taxonomy configuration through initial GitHub Actions automation, then evaluate repeated real reports before expanding quality logic.
+> Use the Career Agent to define the desired expanded source/domain universe, then evaluate each proposed source here for automation suitability, accessibility, metadata richness, reliability, overlap, maintenance and public-repository compatibility before changing production configuration.
+
+After the source/domain universe is corrected:
+
+> begin the dedicated richer-report design phase.
 
 ---
 
 # Changelog
+
+## 2026-08-14 — Source Accessibility, Bocconi Access and Expansion Policy
+
+- Reconciled the source policy with completed Phase 3 production automation.
+- Changed the current priority from preserving the seven-source automation baseline to correcting and expanding the source/domain universe.
+- Recorded that technical feed compatibility does not guarantee product usefulness.
+- Added metadata richness as an explicit source-quality dimension.
+- Added reader accessibility as an explicit source-quality dimension.
+- Added the two-axis distinction between automation suitability and reader accessibility.
+- Added public web, Bocconi Direct, SearchLib and Database access categories.
+- Recorded confirmed Bocconi direct access to Financial Times, Wall Street Journal, New York Times, The Economist and Il Sole 24 Ore.
+- Recorded Corriere della Sera as a special institutional archive-access case.
+- Recorded the role of Foreign Affairs, Harvard Business Review, Time and Economia & Management as institutional reading resources.
+- Recorded Factiva, Nexis Uni and Business Source Ultimate as research/database resources rather than automated production sources.
+- Recorded Bloomberg, LSEG Workspace, FactSet, Capital IQ Pro and Aida as professional research resources rather than automated production sources.
+- Added the three-layer model of automated public sources, Bocconi premium reading and research/database resources.
+- Explicitly prohibited using Bocconi credentials as production automation credentials.
+- Explicitly separated institutional reading rights from automated ingestion rights.
+- Added source-accessibility and public-context criteria to source inclusion and exclusion rules.
+- Added a standard source-evaluation scorecard.
+- Changed the seven-source universe from a production-automation baseline to a baseline under active review.
+- Marked Sifted as active but under explicit review.
+- Recorded the Sifted Pro accessibility problem.
+- Recorded limited Sifted feed descriptions as a related product-quality concern.
+- Added the source replacement principle.
+- Added the controlled source-expansion workflow separating Career Agent strategy from Development-project technical validation.
+- Changed Financial Markets, Italy and Milan/Bocconi from passively deferred domains to candidates for active reconsideration.
+- Recorded report concentration and sparse-output observations as source-diversity evidence.
+- Recorded scheduler-delay/report-window coupling as an information-quality consideration.
+- Preserved zero recurring cost, deterministic processing, copyright safety and public-repository constraints.
+- Deferred richer-report implementation until source/domain correction is complete and the richer-context requirement has been designed.
 
 ## 2026-08-11 — Phase 2 Real-Source Taxonomy and Source-Policy Validation
 
 - Replaced the one-sample-source implementation state with seven validated public RSS sources.
 - Expanded the implemented taxonomy from two to seven active domains.
 - Kept Financial Markets, Italy and Milan/Bocconi as deferred target domains.
-- Recorded the exact current active source universe.
-- Recorded source tiers, language and geographic scope for the seven-source set.
+- Recorded the exact active source universe.
+- Recorded source tiers, language and geographic scope.
 - Added the rule that source defaults represent genuine source-wide topical evidence rather than publisher categories.
-- Added support and policy for explicitly empty `default_domains`.
+- Added support for explicitly empty `default_domains`.
 - Removed broad defaults from BBC World, BBC Business, ECB and European Commission.
 - Restricted Istat to an Economics and Macroeconomics default.
 - Restricted OpenAI to an Artificial Intelligence default.
 - Restricted Sifted to a Startups and Venture Capital default.
-- Recorded the real-report false positives caused by broad source defaults.
+- Recorded false positives caused by broad source defaults.
 - Recorded `war`, `conflict` and `parliament` as evidence-based Global Politics keyword additions.
-- Recorded that `government`, `defence`, `president` and `prime minister` were tested but not added because of ambiguity or noise.
-- Confirmed real-source publication timestamps were usable across the observed seven-feed sample.
+- Recorded that `government`, `defence`, `president` and `prime minister` were tested but not added.
+- Confirmed real-source publication timestamps were usable.
 - Confirmed descriptions are optional and may legitimately be missing.
 - Recorded that the large OpenAI feed did not require special handling because collection-window filtering kept eligible output manageable.
-- Recorded the distinction between source tier and story importance using real report evidence.
-- Updated taxonomy validation from pre-production planning to repeated-real-report evaluation.
+- Recorded the distinction between source tier and story importance.
 - Preserved conservative classification, exact deduplication, copyright boundaries and public-repository safety.
-- Made automation, rather than further taxonomy expansion, the next project priority.
 
 ## 2026-08-11 — Phase 1 Taxonomy and Source-Policy Reconciliation
 
 - Distinguished the target ten-domain taxonomy from the implemented two-domain Phase 1 configuration.
 - Recorded current implemented classification behaviour.
-- Recorded current exact duplicate policy.
-- Recorded current ranking weights and source-tier scoring.
-- Recorded current report limits and description length.
+- Recorded exact duplicate policy.
+- Recorded ranking weights and source-tier scoring.
+- Recorded report limits and description length.
 - Recorded current collection-window and missing-publication-time policy.
-- Replaced the previous 20–30 source planning target with a smallest-credible-source strategy.
+- Replaced the earlier source-count planning target with a smallest-credible-source strategy.
 - Moved geography, entities, content type and near-duplicate clustering behind evidence from real reports.
-- Clarified that technical Phase 1 stability does not imply full taxonomy quality stability.
-- Updated the article metadata section to distinguish implemented fields from future possibilities.
-- Preserved the original source hierarchy, inclusion/exclusion policy, copyright boundaries and broader ten-domain strategic scope.
+- Clarified that technical stability does not imply information-quality stability.
+- Preserved the source hierarchy, inclusion/exclusion policy, copyright boundaries and broader strategic scope.
 
 ## Initial Information Taxonomy and Source Policy Baseline
 
@@ -2452,4 +3274,3 @@ The next priority is automation, not taxonomy expansion.
 - Defined source lifecycle and evaluation principles.
 - Defined classification, ranking and duplicate-reduction policy.
 - Defined copyright and public-repository boundaries.
-````
