@@ -3,7 +3,7 @@ name: Daily Intelligence
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 7 * * *"
+    - cron: "5 11 * * *"
       timezone: "Europe/Rome"
 
 concurrency:
