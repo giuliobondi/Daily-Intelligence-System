@@ -1,0 +1,22 @@
+{
+  "active_sources": 7,
+  "collection_window": [
+    "2026-08-14T05:01:54.126506+00:00",
+    "2026-08-15T05:01:54.126506+00:00"
+  ],
+  "completed_at": "2026-08-15T05:01:54.126506+00:00",
+  "displayed_items": 3,
+  "duplicate_items": 3,
+  "empty_sources": 0,
+  "failed_sources": 1,
+  "invalid_items": 0,
+  "raw_items": 1277,
+  "run_id": "20260815T050154Z",
+  "started_at": "2026-08-15T05:01:54.126506+00:00",
+  "status": "degraded",
+  "successful_sources": 6,
+  "valid_items": 1277,
+  "warnings": [
+    "Source ecb_press failed: Could not retrieve remote feed 'https://www.ecb.europa.eu/rss/press.html': timed out"
+  ]
+}
