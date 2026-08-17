@@ -8,14 +8,16 @@
 >
 > It is not the implementation-status tracker. Current phase, milestone and development sequencing belong in `04 Development Roadmap and Status.md`.
 >
-> ---
->
+> Source suitability, licensing decisions and source-audit conclusions belong in `03 Information Taxonomy and Source Policy.md`.
+
+---
+
 > **Primary Question**
 >
-> > *How is the Daily Intelligence System structured, how does information move through it, and which architectural decisions are fixed, implemented, planned or deferred?*
->
-> ---
->
+> *How is the Daily Intelligence System structured, how does information move through it, and which architectural decisions are fixed, implemented, planned or deferred?*
+
+---
+
 > **Architecture Principle**
 >
 > The system should remain a small deterministic information pipeline unless real usage demonstrates that additional complexity creates material value.
@@ -51,7 +53,9 @@ The architecture should therefore prefer:
 - tests for important deterministic behaviour;
 - replacement of weak sources before disproportionate source-specific complexity;
 - configuration-first source and domain changes where the existing pipeline already supports them;
-- conservative classification over forced coverage.
+- conservative classification over forced coverage;
+- reuse of the existing `ArticleRecord` pipeline before introducing new record models;
+- source-specific complexity only when information value justifies it.
 
 The architecture should avoid:
 
@@ -66,9 +70,12 @@ The architecture should avoid:
 - vector databases;
 - cloud infrastructure;
 - authenticated premium-news scraping;
+- authenticated Bocconi scraping;
 - private newsletter ingestion;
 - complex frontend applications;
-- machine-learning components without a validated need.
+- machine-learning components without a validated need;
+- source-specific parsing logic when a standard structured endpoint already works;
+- new processing paradigms introduced only to increase source count.
 
 ---
 
@@ -79,8 +86,8 @@ The core system is implemented as a repository-native deterministic production p
 The current architecture supports:
 
 - repository-native configuration loading;
-- seven active real public RSS sources;
-- eight active topic domains;
+- eight active real public RSS sources;
+- nine active topic domains;
 - RSS/Atom collection;
 - bounded remote HTTP retrieval;
 - explicit User-Agent and Accept headers;
@@ -110,43 +117,53 @@ The current architecture supports:
 - automated bot commits;
 - no-change commit protection;
 - critical-failure publication protection;
-- concurrency protection.
-
-The current automated test suite contains:
-
-> **110 passing tests.**
+- concurrency protection;
+- domains whose classification evidence comes entirely from validated source defaults;
+- empty domain keyword lists where explicitly permitted;
+- deterministic case-sensitive acronym handling.
 
 Phase 3 automation architecture is complete.
 
-Phase 4 has now demonstrated that the existing architecture can support meaningful source and taxonomy changes through configuration alone.
+Phase 4 has demonstrated two important architectural properties.
 
-The first validated Phase 4 architectural checkpoint replaced:
+First:
+
+> substantial source/domain expansion can usually be performed through configuration and existing pipeline components.
+
+Examples:
 
 ```text
 Sifted
 → Tech.eu
+
+7 domains
+→ 8 domains
+→ Financial Markets added
 ```
 
-and expanded the taxonomy:
+Second:
+
+> a new strategic macroarea can be implemented through the existing article pipeline even when lexical keywords are not the correct classification evidence.
+
+Example:
 
 ```text
-7 active domains
-→ 8 active domains
+Tech Europe Foundation
+→ standard RSS collection
+→ standard ArticleRecord
+→ source default
+→ Milan and Bocconi Ecosystem
 ```
-
-by adding Financial Markets.
-
-No application module required modification for those changes.
 
 The current architectural priority remains:
 
-> **continue improving the information layer through controlled source/domain changes, then design richer report context without weakening the zero-cost, deterministic and public-safe architecture.**
+> **continue improving the information layer through controlled source/domain changes, while avoiding new processing architectures until repeated evidence proves they are necessary.**
 
 ---
 
 # 3. High-Level Architecture
 
-The implemented data flow is:
+The implemented application flow is:
 
 ```text
 Configuration
@@ -182,6 +199,10 @@ GitHub trigger
 There is no separate production processing implementation.
 
 Local execution and GitHub Actions invoke the same application pipeline.
+
+This remains an important architectural constraint:
+
+> local validation should exercise the same code path used by scheduled production.
 
 ---
 
@@ -272,1055 +293,939 @@ The exact repository tree remains the source of truth if file names or directori
 
 ## 5.1 `models.py`
 
-Owns the canonical structured article record used across pipeline stages.
+Defines core immutable or structured data models used across the pipeline.
 
-The article model preserves both original and derived metadata so deterministic processing remains auditable.
+Important conceptual models include:
 
-Current important fields include:
+- source configuration;
+- domain configuration;
+- raw collected item;
+- normalised article record;
+- source collection outcome;
+- validation result;
+- run summary structures.
 
-- source identifier;
-- original title;
-- normalised title;
-- original article URL;
-- normalised URL;
-- publication timestamp;
-- retrieval timestamp;
-- description;
-- assigned domains;
-- matched keywords;
-- relevance score;
-- score components;
-- deterministic record identifier.
+The article remains the core production record type.
 
-The article record is enriched as it moves through the pipeline rather than replaced by unrelated stage-specific formats.
-
-Future richer-report fields should extend this model only when an explicit processing need exists.
-
-Do not add fields merely to mirror every property exposed by every feed.
+Do not introduce a separate event, opportunity or statistical record model without a validated requirement.
 
 ---
 
 ## 5.2 `config.py`
 
-Owns configuration loading and validation.
+Loads and validates repository configuration.
 
-It reads repository configuration and exposes typed configuration objects used by processing modules.
+Responsibilities include:
 
-Current configuration types include:
+- source registry loading;
+- domain registry loading;
+- settings loading;
+- required-field validation;
+- type validation;
+- source/default-domain references;
+- configuration error reporting.
 
-- source configuration;
-- domain configuration;
-- ranking configuration;
-- report configuration.
+Current architecture supports:
 
-Configuration remains separate from business logic so changing:
-
-- sources;
-- source defaults;
-- domain keywords;
-- active domains;
-- score weights;
-- report limits;
-
-does not require modifying core processing code.
-
-### Source Validation Behaviour
-
-Source configuration currently requires:
-
-- non-empty source identifier;
-- non-empty source name;
-- non-empty feed location;
-- supported source type;
-- valid source tier;
-- `default_domains` list;
-- non-empty language;
-- non-empty geographic scope;
-- boolean activation state.
-
-`default_domains` may be an explicitly empty list:
-
-```yaml
-default_domains: []
+```text
+SourceConfig.default_domains
 ```
 
-This is intentional architecture.
+including:
 
-A broad source should not receive a default merely because the publisher is associated with a topic.
+```text
+empty tuple/list
+```
 
-The Tech.eu replacement validated this architecture directly.
+for sources with no automatic domain evidence.
 
-### Domain Validation Behaviour
+Current architecture also supports:
 
-Domain configuration currently requires:
+```text
+DomainConfig.keywords
+```
 
-- unique domain identifier;
-- non-empty name;
-- keyword list;
-- boolean activation state.
+being empty.
 
-The addition of Financial Markets required only configuration and corresponding test updates.
+This was deliberately enabled for domains whose classification evidence may come entirely from validated source defaults.
 
-No processing-module change was necessary.
+Current example:
 
-This validates the intended architecture:
+```text
+Milan and Bocconi Ecosystem
+keywords: []
+```
 
-> taxonomy expansion should normally be configuration-first.
+This does not mean all domains should omit keywords.
+
+It means:
+
+> empty keyword sets are a supported configuration state when source identity provides better evidence than invented lexical rules.
+
+Source configuration and domain configuration remain separate from processing logic.
 
 ---
 
 ## 5.3 `collect.py`
 
-Owns source retrieval and feed parsing.
+Collects configured RSS/Atom sources.
 
-Remote flow:
+Responsibilities include:
 
-```text
-feed URL
-→ urllib Request
-→ explicit User-Agent
-→ explicit Accept header
-→ 10-second timeout
-→ standard TLS verification
-→ redirects
-→ feedparser
-→ structured collection result
-```
+- public HTTP/HTTPS retrieval;
+- explicit request headers;
+- bounded timeout;
+- redirect handling;
+- feed parsing;
+- raw item extraction;
+- source-level result reporting;
+- source-level failure isolation.
 
-Each source produces a structured result such as:
+Current remote retrieval policy includes:
 
 ```text
-success
-empty
-failed
+timeout = 10 seconds
+standard TLS verification
+explicit User-Agent
+explicit Accept header
 ```
 
-Expected source-level network failures are isolated.
+Retry logic is not implemented.
 
-Current implementation does not include:
+Do not add retries until repeated production evidence shows that transient failures are materially harming report quality.
 
-- retry logic;
-- rate-limit scheduling;
-- browser automation;
-- authenticated retrieval;
-- source-specific premium-content handling.
-
-Add those only if real evidence justifies them.
-
-### Source-Replacement Validation
-
-Tech.eu was tested through the actual collector before configuration change.
-
-Observed:
-
-```text
-status: success
-20 items received
-```
-
-Sifted was also technically collectible.
-
-Therefore its replacement was not an HTTP compatibility decision.
-
-It was an information-quality decision.
+A source failure should normally degrade the run rather than crash the entire pipeline.
 
 ---
 
 ## 5.4 `normalize.py`
 
-Owns transformation from feedparser entries into canonical article records.
+Converts collected feed entries into a consistent article schema.
 
-Normalisation preserves:
+Responsibilities include:
 
-- source identity;
-- title;
-- article URL;
-- publication time;
-- description where available;
-- retrieval time.
+- field extraction;
+- title cleanup;
+- URL cleanup;
+- timestamp normalisation;
+- description handling;
+- deterministic record identity;
+- source metadata preservation.
 
-URLs and titles are normalised for later identity/deduplication.
+Publication timestamps are converted to timezone-aware UTC datetimes.
 
-Publication timestamps are timezone-aware.
+Record identity remains deterministic.
 
-### Metadata Evidence from Phase 4
+Normalisation should not perform:
 
-The Tech.eu vs Sifted comparison showed:
-
-```text
-Tech.eu:
-20/20 tested records had descriptions
-
-Sifted:
-0/24 tested records had descriptions
-```
-
-Both normalised successfully.
-
-This demonstrates that:
-
-> normalisation validity and product metadata quality are separate architectural concerns.
-
-The model can accept a missing description, while source policy may still reject the source because that omission materially harms the report.
+- semantic classification;
+- summarisation;
+- enrichment;
+- translation;
+- entity extraction.
 
 ---
 
 ## 5.5 `validate.py`
 
-Owns structural record validation.
+Rejects structurally unusable normalised records.
 
-Validation checks that downstream processing receives records with required fields.
+Validation currently checks required fields and record integrity.
 
-Invalid records remain distinguishable from valid records.
+Validation is intentionally structural rather than semantic.
 
-Current architecture does not treat missing optional description as structural invalidity.
+A record can be structurally valid but later remain unclassified.
 
-That remains correct.
-
-Source-quality policy decides whether repeated missing descriptions make a source unsuitable.
+That is acceptable.
 
 ---
 
 ## 5.6 `filter_window.py`
 
-Owns publication-time eligibility.
+Applies the publication-time eligibility window.
 
-Current collection window:
-
-```text
-actual run timestamp - 24 hours
-through
-actual run timestamp
-```
-
-Eligibility is based on:
+Current default:
 
 ```text
-published_at
+previous 24 hours relative to actual execution time
 ```
 
-not retrieval time.
+Records without usable publication timestamps are excluded.
 
-Records without publication timestamps are excluded from window eligibility.
+The pipeline does not silently substitute retrieval time.
 
-Both boundaries remain inclusive.
+This preserves deterministic temporal semantics.
 
-The window uses timezone-aware datetimes.
+Known limitation:
+
+GitHub Actions scheduling can start materially later than the nominal schedule, so the rolling 24-hour window moves with actual execution.
+
+A fixed reporting cutoff remains an open future design decision.
+
+Do not redesign the window without repeated evidence of meaningful information loss.
 
 ---
 
 ## 5.7 `deduplicate.py`
 
-Owns exact duplicate reduction.
+Performs exact deterministic duplicate reduction.
 
-Current deterministic evidence:
+Current keys:
 
-1. normalised URL;
-2. normalised title.
+1. normalized URL;
+2. normalized title.
 
-The first deterministic occurrence is retained.
+First deterministic occurrence is retained.
 
-Near-duplicate or same-story clustering remains deferred.
+Near-duplicate or semantic clustering is not implemented.
 
-Do not add fuzzy matching unless repeated production evidence demonstrates material report duplication.
+Italian Tech Alliance testing exposed a plausible future use case where multiple press-clipping entries may describe the same underlying event.
+
+That is not yet sufficient to justify architectural expansion.
 
 ---
 
 ## 5.8 `classify.py`
 
-Owns deterministic topic classification.
+Assigns topic domains using deterministic evidence.
 
-Current classification evidence:
+Current evidence classes:
 
-```text
-source defaults
-+
-configured keyword matches against title and description
-```
+1. configured source defaults;
+2. configured keyword matches against title and description.
 
-An article may belong to multiple domains.
+Multi-domain classification is supported.
 
-An article may remain unclassified.
-
-That is an intentional state.
+Unclassified records remain valid.
 
 ### Source Defaults
 
-Source defaults are applied only when the selected source/feed provides genuine source-wide topical evidence.
+A source default acts as explicit classification evidence.
 
-Current production defaults:
+Examples:
 
 ```text
-BBC News World                → none
-BBC News Business             → none
-European Central Bank         → none
-European Commission           → none
-Istat Press Releases          → Economics and Macroeconomics
-OpenAI News                   → Artificial Intelligence
-Tech.eu                       → none
+Istat
+→ Economics and Macroeconomics
+
+OpenAI News
+→ Artificial Intelligence
+
+Tech Europe Foundation
+→ Milan and Bocconi Ecosystem
 ```
 
-Tech.eu was explicitly tested with a Startups/VC default.
+Broad heterogeneous sources may have no defaults.
 
-That produced misleading assignments to:
+Examples:
 
-- corporate M&A;
-- AI stories;
-- European industrial-policy stories;
-- broader fintech/business stories.
+```text
+BBC World
+BBC Business
+ECB
+European Commission
+Tech.eu
+```
 
-The final architecture therefore uses:
+### Keyword Case Semantics
+
+Current deterministic convention:
+
+```text
+configured keyword containing only lowercase characters
+→ case-insensitive match
+
+configured keyword containing uppercase characters
+→ case-sensitive match
+```
+
+The motivating example is:
+
+```text
+AI
+```
+
+Using lowercase:
+
+```text
+ai
+```
+
+caused false Artificial Intelligence classifications in Italian-language content because `ai` is an ordinary Italian word.
+
+The case convention preserved historical English AI recall while removing false Italian matches.
+
+This simple rule is preferred to introducing:
+
+- language detection;
+- NLP;
+- stemming;
+- machine learning.
+
+### Empty-Keyword Domains
+
+A domain may contain:
 
 ```yaml
-default_domains: []
+keywords: []
 ```
 
-for Tech.eu.
+and still be classifiable through a source default.
 
-### Classification Precision Rule
-
-Prefer:
+Current example:
 
 ```text
-unclassified
+Milan and Bocconi Ecosystem
 ```
 
-over:
-
-```text
-weak or misleading domain assignment
-```
-
-A high unclassified count is not automatically an architecture defect.
-
-A 17 August 2026 run produced:
-
-```text
-30 unique records
-26 unclassified
-4 displayed
-```
-
-Manual inspection showed that most of the 26 excluded records were correctly outside the intended report scope.
-
-Therefore the correct validation question is:
-
-> Which high-value stories are being missed?
-
-not:
-
-> What percentage of all records are classified?
-
-### Keyword Architecture
-
-Keyword matching remains deliberately simple and inspectable.
-
-Current Phase 4 evidence-backed changes include:
-
-```text
-Global Politics and Geopolitics
-+ tariffs
-
-Companies and Corporate Strategy
-+ acquired
-
-Startups and Venture Capital
-+ early-stage fund
-+ funding market
-- startup
-```
-
-The removal of generic `startup` is architecturally important.
-
-It demonstrated that a broad lexical signal can create:
-
-```text
-weak semantic evidence
-→ domain assignment
-→ additional domain score
-→ additional keyword score
-→ low-value report promotion
-```
-
-The architecture therefore requires candidate keyword testing against real records before configuration changes.
-
-### Keyword Variant Limitation
-
-Testing acquisition variants also showed that closely related terms can independently match one record.
-
-Because the current score adds one point per matched keyword, naive synonym expansion can inflate relevance.
-
-Do not introduce stemming, NLP or a more complex matcher yet.
-
-The current response should be:
-
-```text
-select candidate terms conservatively
-→ simulate
-→ inspect
-```
+This is a general architectural capability but should remain a deliberate policy choice.
 
 ---
 
 ## 5.9 `rank.py`
 
-Owns deterministic relevance scoring.
+Computes deterministic relevance scores.
 
 Current formula:
 
 ```text
-relevance score
-=
 source-tier score
-+ domain-match score
-+ keyword-match score
++ 2 × assigned domains
++ 1 × matched keywords
 ```
 
 Current source-tier values:
 
 ```text
-Tier 1 → 4
-Tier 2 → 3
-Tier 3 → 2
-Tier 4 → 1
+Tier 1 = 4
+Tier 2 = 3
+Tier 3 = 2
+Tier 4 = 1
 ```
 
-Current additional weights:
+The ranking model is intentionally simple.
+
+Do not add:
+
+- machine learning;
+- semantic scoring;
+- source-specific penalties;
+- publisher-diversity penalties;
+- AI relevance scoring;
+
+until repeated report evidence shows that upstream source/classification correction is insufficient.
+
+### Important Interaction
+
+Classification evidence affects ranking.
+
+Therefore:
 
 ```text
-2 points per assigned domain
-1 point per matched keyword
+broad source default
+→ extra domain
+→ extra relevance score
+
+broad keyword
+→ extra keyword evidence
+→ extra relevance score
 ```
 
-Score components remain stored for transparency.
-
-The formula remains provisional.
-
-### Architectural Rule
-
-If weak evidence inflates score:
-
-> **fix source defaults or classification evidence before redesigning ranking.**
-
-Phase 4 reinforced this rule through:
-
-- Tech.eu source-default testing;
-- removal of generic `startup`;
-- conservative Financial Markets terms.
-
-No change to ranking weights was needed.
+This is why taxonomy changes require regression testing.
 
 ---
 
 ## 5.10 `storage.py`
 
-Owns processed-record persistence.
+Persists processed article records.
 
-Processed records are written as JSON Lines.
-
-Current path pattern:
+Current format:
 
 ```text
-data/processed/YYYY/MM/YYYY-MM-DD.jsonl
+JSON Lines
 ```
 
-The write model replaces the dated target deterministically during a run rather than continually appending.
+Current storage pattern is date-based and repository-native.
 
-This supports:
+Storage prioritises:
 
-- predictable reruns;
-- simple history;
-- bounded duplicate behaviour;
-- regression testing against stored production records.
+- transparency;
+- inspectability;
+- simple diffs;
+- no external database;
+- zero recurring cost.
 
-Stored records were directly useful during Phase 4.
+Historical processed records also function as a regression corpus for classification/taxonomy changes.
 
-Three historical JSONL files provided a:
-
-```text
-114-record regression corpus
-```
-
-for taxonomy validation.
-
-This confirms the value of repository-native processed-record history as a testing asset.
-
-No database is currently justified.
+Do not introduce a database until JSONL becomes a demonstrated limitation.
 
 ---
 
 ## 5.11 `report.py`
 
-Owns deterministic report selection and Markdown rendering.
+Selects and renders report items from processed records.
 
-Current report behaviour includes:
-
-- one primary section per story;
-- secondary domains shown as metadata;
-- source attribution;
-- publication timestamp;
-- relevance score;
-- direct article link;
-- feed-provided description where available;
-- bounded item counts.
-
-Current limits:
+Current report selection rules include:
 
 ```text
-maximum 5 items per domain
-maximum 30 items overall
-maximum description length 300 characters
+maximum items per primary domain = 5
+maximum total items              = 30
 ```
 
-These limits are configuration, not architecture constants.
+These are upper bounds, not quotas.
 
-### Current Limitation
+Eligible records must:
 
-The report still acts partly as an intelligence index.
+- be classified;
+- belong to an active domain;
+- have a valid primary domain.
 
-It may provide too little context to understand some developments without opening the source.
+Selection order is deterministic.
 
-Production use has validated the requirement:
+Current ordering uses:
 
-> provide enough lawful context for initial understanding while preserving the source for deeper reading.
+1. descending relevance score;
+2. descending publication timestamp;
+3. source tier;
+4. normalized title;
+5. record ID.
 
-The architectural method is not yet selected.
-
-Do not implement richer summarisation before the dedicated design phase establishes:
-
-- required context depth;
-- lawful source material;
-- metadata availability;
-- fallback behaviour;
-- report-length constraints;
-- treatment of premium-exception sources;
-- validation method.
-
-### Architecture Preference for Richer Context
-
-Evaluate mechanisms in this order:
+Primary placement is:
 
 ```text
-existing richer RSS/Atom fields
-→ public structured metadata
-→ official free APIs
-→ narrowly justified permitted public-page extraction
-→ more complex approaches only if necessary
+record.domains[0]
 ```
 
-Do not assume:
+Secondary domains are rendered as:
 
-- full article ingestion;
-- LLM summarisation;
-- authenticated premium-content retrieval;
+```text
+Also:
+```
 
-are required.
+A multi-domain story appears once.
+
+Report sections follow configured domain order.
+
+The report does not attempt semantic story clustering.
+
+Descriptions are currently truncated according to configuration.
+
+Current maximum:
+
+```text
+300 characters
+```
+
+This is a known product limitation and is intentionally deferred to the richer-report phase.
 
 ---
 
 ## 5.12 `run_summary.py`
 
-Owns structured operational metadata for one pipeline execution.
+Builds machine-readable operational run metadata.
 
-Current information includes:
+Current run summary tracks aggregate information such as:
 
-- run identifier;
-- start timestamp;
-- completion timestamp;
-- run status;
-- collection window;
 - active sources;
 - successful sources;
-- empty sources;
 - failed sources;
-- raw item count;
-- valid item count;
-- invalid item count;
-- duplicate item count;
-- displayed item count;
-- warnings.
+- empty sources;
+- raw items;
+- valid items;
+- invalid items;
+- duplicate items;
+- displayed items;
+- monitored window;
+- warnings;
+- run status.
+
+Per-source details are available through logging during execution.
+
+The current aggregate JSON summary does not persist a full per-source diagnostic registry.
+
+No long-term source-health database exists.
+
+Per-run logging and summaries remain sufficient for current needs.
+
+---
+
+## 5.13 `pipeline.py`
+
+Orchestrates the complete deterministic workflow.
+
+Current logical sequence:
+
+```text
+load configuration
+→ collect sources
+→ normalize
+→ validate
+→ filter collection window
+→ deduplicate
+→ classify
+→ rank
+→ persist processed records
+→ build run summary
+→ render report
+→ persist outputs
+```
+
+The pipeline:
+
+- isolates source failures;
+- preserves successful source output;
+- produces degraded status where appropriate;
+- fails clearly for critical configuration or pipeline errors;
+- writes operational logs.
+
+There is no parallel AI processing path.
+
+---
+
+## 5.14 `cli.py`
+
+Provides one-command local and production execution.
+
+Current production-equivalent command:
+
+```text
+python -m daily_intelligence.cli run
+```
+
+When required by local environment layout:
+
+```text
+PYTHONPATH=src python -m daily_intelligence.cli run
+```
+
+GitHub Actions executes the same application entry point.
+
+---
+
+# 6. Current Source Architecture
+
+Current active production sources:
+
+```text
+BBC News World
+BBC News Business
+European Central Bank
+European Commission Highlighted News
+Istat Press Releases
+OpenAI News
+Tech.eu
+Tech Europe Foundation
+```
+
+All current production collection routes use public structured RSS.
+
+No current source requires:
+
+- credentials;
+- paid APIs;
+- Bocconi authentication;
+- premium article retrieval.
+
+Current source architecture remains deliberately uniform:
+
+```text
+public structured feed
+→ standard collector
+→ standard normalizer
+→ ArticleRecord
+```
+
+No active source currently requires a custom parser or source-specific processing branch.
+
+---
+
+# 7. Current Domain Architecture
+
+Current active domains:
+
+```text
+Global Politics and Geopolitics
+Economics and Macroeconomics
+Companies and Corporate Strategy
+Artificial Intelligence
+Technology and Software
+Startups and Venture Capital
+Europe and the European Union
+Financial Markets
+Milan and Bocconi Ecosystem
+```
+
+Strategically approved but not yet implemented:
+
+```text
+Italy
+```
+
+Most domains use keyword evidence.
+
+Milan and Bocconi Ecosystem currently demonstrates a second valid architecture:
+
+```text
+validated narrow source
+→ source default
+→ domain
+```
+
+with no generic topic keywords required.
+
+---
+
+# 8. Configuration Architecture
+
+Configuration remains repository-native YAML.
+
+## Sources
+
+`config/sources.yaml` defines fields such as:
+
+```text
+id
+name
+feed_url
+source_type
+source_tier
+default_domains
+language
+geographic_scope
+active
+```
+
+## Domains
+
+`config/domains.yaml` defines:
+
+```text
+id
+name
+keywords
+active
+```
+
+Domain keyword lists may be empty.
+
+## Settings
+
+`config/settings.yaml` defines ranking and report settings.
+
+Current relevant values include:
+
+```text
+ranking:
+  source_tier_scores:
+    1: 4
+    2: 3
+    3: 2
+    4: 1
+  domain_match_score: 2
+  keyword_match_score: 1
+```
+
+and:
+
+```text
+report:
+  max_items_per_domain: 5
+  max_total_items: 30
+  max_description_length: 300
+```
+
+Configuration remains preferred over code changes when source/domain additions fit the current processing model.
+
+---
+
+# 9. Current Milan/Bocconi Architecture
+
+Milan/Bocconi is no longer only a planned architecture.
+
+The first production implementation is:
+
+```text
+Tech Europe Foundation News RSS
+→ collect
+→ normalize
+→ validate
+→ 24-hour filter
+→ deduplicate
+→ source-default classification
+→ rank
+→ standard ArticleRecord storage
+→ standard report
+```
+
+Current source configuration conceptually behaves as:
+
+```text
+Tech Europe Foundation
+Tier 1
+default domain:
+Milan and Bocconi Ecosystem
+```
+
+The domain currently contains:
+
+```yaml
+keywords: []
+```
+
+This architecture was chosen because TEF's information value comes from institutional identity, not because generic words such as:
+
+```text
+Milan
+Bocconi
+startup
+event
+```
+
+would provide sufficiently precise evidence.
+
+The implementation required only:
+
+- one new source configuration;
+- one new domain configuration;
+- general support for empty domain keyword lists;
+- configuration tests.
+
+It did **not** require:
+
+- event scraping;
+- Bocconi authentication;
+- a new opportunity data model;
+- a deadline engine;
+- a new ranking model;
+- source-specific collector logic.
+
+This is an important architectural precedent:
+
+> use the existing article pipeline for professional-ecosystem sources until article semantics become demonstrably insufficient.
+
+---
+
+# 10. Current Real Integration Evidence
+
+The TEF/Milan-Bocconi integration was tested with a full production-equivalent run.
+
+Observed result:
+
+```text
+8 active sources
+8 successful
+0 failed
+0 invalid
+
+1295 valid records
+40 inside the collection window
+37 unique
+29 unclassified
+8 displayed
+
+status: success
+```
+
+TEF itself collected:
+
+```text
+10 feed entries
+```
+
+No TEF records entered the processed 24-hour output because the feed entries were older than the monitored window.
+
+This was expected.
+
+The integration therefore validated:
+
+- eighth-source collection;
+- source-default configuration;
+- ninth-domain configuration;
+- normal pipeline execution;
+- output generation;
+- absence of stale TEF leakage.
+
+---
+
+# 11. Ranking and TEF Architecture
+
+Typical TEF baseline score:
+
+```text
+Tier 1
+= 4
+
+Milan/Bocconi domain
+= +2
+
+total
+= 6
+```
+
+A TEF story can receive additional domains and keyword matches if normal classifier evidence exists.
+
+One tested story reached a higher score because it also matched Companies and Technology.
+
+No special TEF ranking rule exists.
+
+No ranking change was required because:
+
+- TEF remains in its own primary report section;
+- report selection caps that section at five items;
+- current total report volumes remain well below the 30-item cap.
+
+Do not lower TEF's source tier merely to manipulate relevance scores.
+
+---
+
+# 12. Collection Architecture
+
+The collector should remain generic.
+
+Preferred source order:
+
+```text
+RSS / Atom
+→ official structured API
+→ other explicitly permitted structured public endpoint
+→ narrowly justified deterministic extraction
+```
+
+Avoid HTML scraping where a structured official source exists.
+
+For each new source:
+
+```text
+endpoint research
+→ direct technical probe
+→ production collector test
+→ normalizer test
+→ configuration integration
+```
+
+Do not add source-specific collector modules unless unavoidable and justified by source value.
+
+---
+
+# 13. Network and Failure Architecture
+
+Remote source retrieval can fail because of:
+
+- DNS/network errors;
+- HTTP errors;
+- TLS errors;
+- timeouts;
+- malformed feeds;
+- endpoint changes.
+
+Current architecture isolates failures at source level.
+
+A single failed source should not normally prevent:
+
+- successful-source processing;
+- report generation;
+- output persistence.
 
 Run status distinguishes:
 
 ```text
 success
 degraded
-failed
+failure
 ```
 
-where applicable.
+Critical configuration or orchestration failures remain blocking.
+
+Do not mask critical failures simply to publish a report.
 
 ---
 
-## 5.13 `pipeline.py`
+# 14. Degraded-Run Architecture
 
-Owns end-to-end orchestration.
+A degraded run is legitimate when:
 
-Current orchestration sequence:
+- one or more sources fail;
+- enough successful source data remains to produce a meaningful output;
+- the report and run summary expose the degraded state.
 
-1. load active sources;
-2. load domains;
-3. load ranking settings;
-4. load report settings;
-5. collect active sources;
-6. normalise successful source entries;
-7. validate records;
-8. filter records by publication window;
-9. deduplicate eligible records;
-10. classify and score unique records;
-11. determine report-selected records;
-12. write processed JSONL;
-13. build run summary;
-14. render Markdown report;
-15. write Markdown report;
-16. write JSON run summary;
-17. emit completion logging;
-18. return structured pipeline result.
+Degraded output is preferable to an invisible failure when partial information is still useful.
 
-The orchestrator remains intentionally thin.
-
-### Normalisation-Failure Boundary
-
-The pipeline currently normalises entries from successful sources directly.
-
-Broad per-entry `NormalizationError` isolation has not been introduced because production evidence has not justified it.
-
-If a future feed contains one malformed entry that terminates an otherwise usable source run:
-
-```text
-reproduce
-→ regression test
-→ smallest justified boundary change
-```
+The report must not imply that all sources succeeded when they did not.
 
 ---
 
-## 5.14 `cli.py`
+# 15. Automation Architecture
 
-Owns the command-line entry point.
+Production automation uses GitHub Actions.
 
-Current command:
-
-```text
-python -m daily_intelligence.cli run
-```
-
-The CLI:
-
-- configures standard-library logging;
-- creates the run timestamp;
-- creates the run identifier;
-- constructs the current previous-24-hours collection window;
-- derives repository output paths;
-- invokes the pipeline.
-
-GitHub Actions invokes the same CLI.
-
-### Local Installation Note
-
-Because the package uses a `src/` layout, source-based pytest execution can reflect newer repository code while:
+Current production workflow:
 
 ```text
-python -m daily_intelligence.cli
+.github/workflows/daily-intelligence.yml
 ```
 
-may execute a stale installed package.
-
-When CLI behaviour appears inconsistent with source changes:
+Supported triggers:
 
 ```text
-verify installation state first
+workflow_dispatch
+scheduled daily trigger
 ```
 
-before diagnosing an application bug.
+Current intended schedule:
 
-This remains a development-environment concern, not a production dependency.
+```text
+06:05 Europe/Rome
+```
+
+The workflow performs:
+
+```text
+checkout
+→ Python setup
+→ dependency installation
+→ full tests
+→ production CLI
+→ output validation
+→ git staging
+→ no-change check
+→ bot commit
+→ push
+```
+
+Automation consumes no AI credits.
 
 ---
 
-# 6. Configuration Architecture
+# 16. Scheduled-Execution Limitation
 
-Configuration is repository-native and human-readable.
+GitHub Actions scheduling is not guaranteed to start precisely at the configured minute.
 
-The goal is to separate changing information policy from stable processing code.
-
-Phase 4A validated this design strongly:
+Observed latency can shift the actual rolling report window because:
 
 ```text
-source replacement
-+
-keyword correction
-+
-new domain
+window end = actual execution time
+window start = execution time - 24h
 ```
 
-required changes only to:
+Current decision:
+
+> keep the simple rolling window until repeated real evidence shows that schedule latency causes meaningful information loss or inconsistent daily coverage.
+
+Possible future alternative:
 
 ```text
-config/sources.yaml
-config/domains.yaml
+fixed daily reporting cutoff
 ```
 
-plus configuration tests.
-
-No core processing module required modification.
+Not implemented.
 
 ---
 
-## 6.1 `sources.yaml`
+# 17. Persistence Architecture
 
-Current fields include:
+Current production outputs are committed back to the repository.
 
-- `id`;
-- `name`;
-- `feed_url`;
-- `source_type`;
-- `source_tier`;
-- `default_domains`;
-- `language`;
-- `geographic_scope`;
-- `active`.
-
-Current active registry:
-
-- BBC News World;
-- BBC News Business;
-- European Central Bank;
-- European Commission Highlighted News;
-- Istat Press Releases;
-- OpenAI News;
-- Tech.eu.
-
-The file remains the runtime source of truth for active production feeds.
-
-### Sifted Architectural Decision
-
-Sifted was removed from current production.
-
-The replacement decision was based on:
-
-```text
-same basic collection compatibility
-+
-substantially better Tech.eu metadata richness
-+
-better follow-up usability
-```
-
-Do not retain a technically compatible weak source merely because existing architecture can parse it.
-
-### Access Metadata
-
-Reader-accessibility properties should not automatically be added to `sources.yaml`.
-
-Examples:
-
-```text
-public web
-Bocconi direct
-SearchLib
-database
-extra paid subscription
-```
-
-These remain policy/audit dimensions for now.
-
-They should become runtime fields only if application behaviour genuinely requires them.
-
----
-
-## 6.2 `domains.yaml`
-
-Current fields include:
-
-- `id`;
-- `name`;
-- `keywords`;
-- `active`.
-
-Current active domains:
-
-- Global Politics and Geopolitics;
-- Economics and Macroeconomics;
-- Companies and Corporate Strategy;
-- Artificial Intelligence;
-- Technology and Software;
-- Startups and Venture Capital;
-- Europe and the European Union;
-- Financial Markets.
-
-Financial Markets is now implemented.
-
-Target domains still not implemented:
-
-- Italy;
-- Milan and Bocconi Ecosystem.
-
-### Italy
-
-Strategically approved.
-
-Implementation should remain configuration-first if suitable source evidence and keywords can support it.
-
-### Milan/Bocconi
-
-This is now a validated product requirement rather than merely a candidate.
-
-However, its likely inputs may include:
-
-- events;
-- programmes;
-- deadlines;
-- opportunities;
-- ecosystem news.
-
-The current `ArticleRecord` and pipeline should be reused if possible.
-
-Do not create a separate opportunity architecture until real source metadata demonstrates that the existing model is insufficient.
-
----
-
-## 6.3 `settings.yaml`
-
-Current settings define:
-
-- ranking weights;
-- report limits.
-
-Current ranking configuration includes:
-
-- source-tier scores;
-- domain-match score;
-- keyword-match score.
-
-Current report configuration includes:
-
-- maximum items per domain;
-- maximum total items;
-- maximum description length.
-
-Current values:
-
-```text
-maximum 5 items per domain
-maximum 30 items overall
-maximum description length 300 characters
-```
-
-These remain configurable defaults.
-
-No setting was changed during Phase 4A.
-
-That is intentional.
-
-The source and taxonomy problems were solved upstream instead of changing ranking/report settings.
-
----
-
-# 7. Data Model and Record Lifecycle
-
-A feed entry passes through:
-
-```text
-Raw feed entry
-→ normalised article record
-→ validated article record
-→ window-eligible article record
-→ unique article record
-→ classified article record
-→ scored article record
-→ stored processed record
-→ optional displayed report item
-```
-
-These states remain deliberately separate.
-
-Examples:
-
-- structurally valid record outside the reporting window;
-- unique record with no domain;
-- classified record not selected because of limits;
-- source with technically valid records but insufficient metadata quality.
-
-This separation improves:
-
-- testability;
-- counter interpretation;
-- failure isolation;
-- source evaluation;
-- future extension.
-
----
-
-# 8. Collection-Window Architecture
-
-Current CLI behaviour:
-
-```text
-actual run timestamp - 24 hours
-through
-actual run timestamp
-```
-
-Both boundaries are inclusive.
-
-Eligibility uses `published_at`.
-
-## Observed Production Limitation
-
-GitHub Actions scheduled runs may start materially later than the configured cron trigger.
-
-Because the reporting cutoff uses actual execution time:
-
-```text
-configured trigger
-→ delayed run start
-→ shifted cutoff
-→ shifted eligible story set
-```
-
-## Current Decision
-
-Do not change the reporting window yet.
-
-Potential future architecture:
-
-```text
-fixed reporting cutoff
-→ deterministic information window
-→ GitHub delay affects delivery time only
-```
-
-Implement only if repeated evidence demonstrates material product harm.
-
----
-
-# 9. Deduplication Architecture
-
-Current exact reduction:
-
-```text
-normalised URL
-→ fallback normalised title
-```
-
-No near-duplicate clustering exists.
-
-No story-level clustering exists.
-
-No vector similarity exists.
-
-These remain deferred until repeated report evidence demonstrates a meaningful problem.
-
----
-
-# 10. Classification Architecture
-
-Classification remains:
-
-```text
-source defaults
-+
-title keyword matches
-+
-description keyword matches
-```
-
-Properties:
-
-- deterministic;
-- explainable;
-- multi-domain;
-- allows unclassified records;
-- configurable;
-- no ML dependency.
-
-## Current Architectural Principle
-
-Classification should optimize for:
-
-```text
-useful precision
-```
-
-rather than:
-
-```text
-maximum coverage
-```
-
-The 17 August report review validated that many unclassified records were intentionally low-value.
-
-Do not add generic vocabulary merely to improve classification counts.
-
----
-
-# 11. Ranking Architecture
-
-Current formula:
-
-```text
-source-tier points
-+
-2 × assigned domains
-+
-1 × matched keywords
-```
-
-The ranking architecture remains unchanged after Phase 4A.
-
-This is important evidence.
-
-Observed report-quality defects were corrected through:
-
-```text
-source replacement
-source defaults
-keyword precision
-domain coverage
-```
-
-not ranking sophistication.
-
-Continue to prefer upstream corrections.
-
----
-
-# 12. Report Architecture
-
-The report remains deterministic Markdown.
-
-Current flow:
-
-```text
-classified/scored records
-→ deterministic ordering
-→ domain limits
-→ overall limit
-→ one primary placement
-→ secondary-domain metadata
-→ Markdown rendering
-```
-
-Unclassified records remain stored but are not displayed.
-
-### Sparse Reports
-
-A sparse report is not automatically defective.
-
-The relevant question is whether:
-
-- major useful stories were missed;
-- selected items are weak;
-- source coverage is insufficient.
-
-Do not introduce filler behaviour.
-
----
-
-# 13. Storage Architecture
-
-Current persistent artifacts:
+Primary persisted artefacts:
 
 ```text
 data/processed/YYYY/MM/YYYY-MM-DD.jsonl
@@ -1328,409 +1233,234 @@ data/runs/YYYY/MM/YYYY-MM-DD.json
 reports/daily/YYYY/MM/YYYY-MM-DD.md
 ```
 
-Repository-native history remains sufficient.
+Benefits:
 
-Phase 4 demonstrated an additional architectural benefit:
+- no database;
+- no hosting cost;
+- transparent history;
+- easy Git diffing;
+- simple manual inspection;
+- regression corpus naturally accumulates.
 
-> historical processed records can act as deterministic regression corpora for taxonomy changes.
+Costs:
 
-No external database is justified.
+- repository growth;
+- public-storage copyright constraints;
+- same-day reruns overwrite date-keyed outputs before commit if run locally.
 
----
-
-# 14. Failure Architecture
-
-Failure handling remains layered.
-
-## Source-Level Recoverable Failure
-
-One source may fail while others succeed.
-
-Expected outcome:
-
-```text
-partial data
-→ degraded run
-→ report persists
-→ failure visible
-```
-
-## Critical Failure
-
-Examples:
-
-- invalid configuration;
-- core pipeline failure;
-- invalid required output.
-
-Expected outcome:
-
-```text
-pipeline/workflow fails
-→ misleading output not published
-```
-
-Both behaviours have been validated.
+Do not introduce external storage until repository-native persistence becomes a measured limitation.
 
 ---
 
-# 15. Logging and Observability
+# 18. Historical Regression Architecture
 
-Run-level logging remains standard-library based.
+Stored JSONL outputs are not only historical data.
 
-Current logs expose:
+They also function as a deterministic regression corpus.
 
-- run start;
-- active source count;
-- per-source collected item count;
-- validation totals;
-- window totals;
-- deduplication totals;
-- classification/unclassified totals;
-- output paths;
-- final run status.
-
-The 17 August Phase 4A validation used these logs to confirm:
+Current validation pattern:
 
 ```text
-7 active
-7 successful
-1281 valid
-32 window-eligible
-30 unique
-26 unclassified
-success
+proposed keyword/source-default change
+→ replay against stored processed records
+→ inspect changed classifications/scores
+→ evaluate false positives
+→ retain or reject change
 ```
 
-Operational metrics should support diagnosis, not become optimization targets automatically.
+This approach has already been used for:
+
+- Tech.eu keyword refinement;
+- Financial Markets;
+- `startup` removal;
+- Italian-source classification;
+- `AI` case matching;
+- Italian Tech Alliance candidate keywords.
+
+This is the preferred validation mechanism before introducing more sophisticated evaluation infrastructure.
 
 ---
 
-# 16. Test Architecture
+# 19. Report Architecture
 
-The automated suite currently contains:
+The report is intentionally simple Markdown.
 
-> **110 tests**
+It provides:
 
-Coverage includes:
+- report date;
+- generated timestamp;
+- run status;
+- monitored window;
+- source-health summary;
+- items collected;
+- displayed items;
+- sections by primary domain;
+- headline/link;
+- source;
+- publication time;
+- relevance score;
+- secondary domains;
+- truncated description.
 
-- configuration loading;
-- source validation;
-- empty `default_domains`;
-- non-empty geographic scope;
-- source collection;
-- feed fixtures;
-- remote request timeout;
-- User-Agent behaviour;
-- HTTP failure handling;
-- network failure handling;
-- normalisation;
-- validation;
-- publication-window filtering;
-- exact deduplication;
-- classification;
-- ranking;
-- storage;
-- report selection;
-- report rendering;
-- run-summary generation;
-- end-to-end pipeline orchestration;
-- degraded behaviour;
-- CLI invocation;
-- logging configuration.
+GitHub-hosted Markdown remains sufficient as the current delivery interface.
 
-## Test Isolation
-
-Automated tests remain independent of live internet access.
-
-Fixtures and temporary configuration remain the default deterministic test layer.
-
-Real-source validation is separate.
-
-## Phase 4A Validation Pattern
-
-Phase 4A added a useful development pattern:
-
-```text
-live source probe
-→ classification simulation
-→ candidate keyword simulation
-→ stored-corpus regression
-→ configuration edit
-→ targeted tests
-→ full suite
-→ real pipeline run
-→ manual report inspection
-```
-
-This pattern should be reused for material source/taxonomy changes.
+Do not build a frontend until repository browsing becomes a demonstrated usability problem.
 
 ---
 
-# 17. Production Automation Architecture
+# 20. Richer-Report Architecture
 
-GitHub Actions remains the production execution environment.
+The user need is validated:
 
-High-level workflow:
+> reports should provide enough context to understand major developments without immediate click-through.
 
-```text
-workflow_dispatch / schedule
-→ checkout
-→ Python 3.12
-→ install project + development dependencies
-→ run 110 tests
-→ run production CLI
-→ validate outputs
-→ stage output directories
-→ no-change guard
-→ bot commit
-→ push
-```
+However, implementation architecture is intentionally deferred.
 
-## Manual Trigger
-
-Supported through:
+Current description limit:
 
 ```text
-workflow_dispatch
+300 characters
 ```
 
-## Scheduled Trigger
+Potential future solution order:
 
-Current configured schedule:
+1. richer RSS/Atom metadata;
+2. public structured summaries;
+3. official free APIs;
+4. narrowly permitted deterministic public extraction;
+5. more complex methods only if required.
 
-```text
-06:05 Europe/Rome
-```
+Do not assume LLM summarisation is necessary.
 
-This remains a desired trigger time, not guaranteed execution time.
+The future architecture must preserve:
 
-## Runtime
-
-```text
-ubuntu-latest
-Python 3.12
-```
-
-## Permissions
-
-Required:
-
-```text
-contents: write
-```
-
-No broader production permission is currently needed.
-
-## Secrets
-
-No source credentials or repository secrets are required.
-
-## Production AI
-
-No:
-
-- OpenAI API;
-- Copilot;
-- GitHub AI;
-- third-party paid AI.
+- zero recurring cost;
+- provenance;
+- copyright safety;
+- source transparency;
+- low maintenance.
 
 ---
 
-# 18. Concurrency Architecture
+# 21. Premium-Source Architecture
 
-Production uses one concurrency group.
+Premium reading access and production ingestion are separate.
 
-Policy:
-
-```text
-one Daily Intelligence production run at a time
-```
-
-with:
+The architecture may support a premium source only when:
 
 ```text
-cancel-in-progress: false
-```
-
-This prevents simultaneous jobs from racing on:
-
-- date-based output paths;
-- Git commits;
-- Git pushes.
-
----
-
-# 19. Scheduler Architecture
-
-GitHub scheduler latency is an external platform limitation.
-
-Observed delays can be substantial.
-
-Current mitigation:
-
-```text
-schedule earlier than desired reading time
-```
-
-No additional infrastructure is justified.
-
-The unresolved architectural issue is only whether content selection should use a fixed cutoff independent of execution time.
-
----
-
-# 20. Network Architecture
-
-Current remote flow:
-
-```text
-feed URL
-→ urllib Request
-→ User-Agent
-→ Accept header
-→ 10-second timeout
-→ TLS verification
-→ normal redirects
-→ feedparser
-```
-
-Current characteristics:
-
-- seven active public RSS sources;
-- one request per source per run remains lightweight;
-- no source authentication;
-- no source-specific rate-limit architecture;
-- no retry architecture.
-
-Tech.eu required no custom collector logic.
-
-That supports the current architectural preference:
-
-> choose sources compatible with the simple collector where possible.
-
----
-
-# 21. Source Access Architecture
-
-Production separates:
-
-```text
-automation access
-```
-
-from:
-
-```text
-reader access
-```
-
-This distinction remains fundamental.
-
----
-
-## Automated Public Source Layer
-
-Production may ingest through:
-
-- public RSS;
-- public Atom;
-- official free APIs;
-- public structured metadata;
-- other explicitly permitted automation endpoints.
-
-No authenticated publisher access belongs here.
-
----
-
-## Bocconi Premium Reading Layer
-
-The user may have legitimate access to publications including:
-
-- Financial Times;
-- Wall Street Journal;
-- New York Times;
-- The Economist;
-- Il Sole 24 Ore;
-- Foreign Affairs;
-- Harvard Business Review.
-
-This can improve manual follow-up.
-
-It does not automatically expand ingestion rights.
-
----
-
-## Research / Database Layer
-
-Examples:
-
-- Factiva;
-- Nexis Uni;
-- Business Source Ultimate;
-- Bloomberg Terminal;
-- LSEG Workspace;
-- FactSet;
-- S&P Capital IQ Pro;
-- Aida.
-
-These remain manual research systems unless an explicitly permitted structured automation interface exists.
-
----
-
-# 22. Premium Bocconi Exception Architecture
-
-A narrow product exception has now been defined.
-
-Some premium publications may deserve production discovery even when their public metadata cannot support the same context depth as fully public sources.
-
-This is allowed only if:
-
-```text
-exceptional information value
+legitimate user reading access
 +
-legitimate Bocconi reader access
+public / automation-compatible discovery route
 +
-public/automation-compatible discovery endpoint
+no premium body retrieval
 +
-no automated premium-body retrieval
+public-repository-compatible persistence
 ```
 
-This changes the acceptable report experience, not the authentication architecture.
-
-Production still must not:
+The system must not:
 
 - automate OpenAthens;
-- log into publishers;
-- store personal publisher credentials;
+- log into premium publishers;
+- store publisher credentials;
 - fetch premium article bodies;
 - bypass paywalls.
 
-Potential premium-exception source:
+The Premium Bocconi Exception changes acceptable user follow-up behaviour, not the authentication model.
 
-```text
-public feed metadata
-→ deterministic classification/ranking
-→ thinner report entry
-→ user opens article manually through Bocconi
-```
-
-Current highest-priority technical candidate:
+Completed audits demonstrate why this boundary matters:
 
 ```text
 Financial Times
-```
+→ strategically excellent
+→ RSS persistence conflict
+→ standby
 
-followed by:
-
-```text
 Il Sole 24 Ore
+→ technically excellent
+→ persistence/licensing boundary insufficiently clean
+→ standby
 ```
 
-No premium source is currently active under this exception.
+No premium publication is currently active through this exception.
 
 ---
 
-# 23. Security and Privacy Architecture
+# 22. Bank of Italy Structured-Data Architecture
+
+Bank of Italy BDS exposed a potential future source class that does not fit the current article pipeline directly.
+
+A statistical event architecture would conceptually require:
+
+```text
+series configuration
+→ structured data fetch
+→ observation parsing
+→ identify new period / release
+→ compare previous observation
+→ detect revisions
+→ significance rule
+→ generated intelligence event
+→ normal domain/ranking/report pipeline
+```
+
+This architecture is **not implemented**.
+
+Reason for deferral:
+
+- article-source breadth remains a higher-value problem;
+- event-generation semantics have not been designed;
+- significance thresholds have not been validated;
+- additional state would be required.
+
+Bank of Italy BDS remains the strongest validated future use case.
+
+Do not build generic statistical infrastructure before selected series demonstrate sufficient user value.
+
+---
+
+# 23. Opportunity and Deadline Architecture
+
+Professional opportunities can have time semantics different from article publication.
+
+Possible fields include:
+
+```text
+opportunity_name
+organiser
+application_open
+deadline
+event_date
+location
+application_url
+source_url
+```
+
+The current system does not maintain these fields.
+
+Current TEF implementation deliberately remains within:
+
+```text
+ArticleRecord
+```
+
+Potential future need:
+
+```text
+publication date
+≠
+deadline
+≠
+event date
+```
+
+A stateful opportunity/deadline architecture should be introduced only if repeated real-source usage shows that the current publication-based model causes important opportunities to disappear before they are useful.
+
+Do not create an opportunity database merely because the Milan/Bocconi domain exists.
+
+---
+
+# 24. Security and Privacy Architecture
 
 The repository is public.
 
@@ -1750,11 +1480,11 @@ Current production requires no source credential.
 
 That remains preferable.
 
-Even if GitHub Secrets could technically store institutional credentials, architecture policy prohibits using that mechanism to automate premium publisher access merely because the user has legitimate reading rights.
+Even if GitHub Secrets could technically store institutional credentials, architecture policy prohibits using that mechanism to automate premium publisher or Bocconi access merely because the user has legitimate reading rights.
 
 ---
 
-# 24. Copyright and Content Boundaries
+# 25. Copyright and Content Boundaries
 
 The repository may store, where permitted:
 
@@ -1762,7 +1492,7 @@ The repository may store, where permitted:
 - source names;
 - links;
 - timestamps;
-- short feed descriptions;
+- limited feed descriptions;
 - public structured summaries;
 - derived domains;
 - matched keywords;
@@ -1791,7 +1521,7 @@ Not:
 
 ---
 
-# 25. Architecture for ChatGPT Use
+# 26. Architecture for ChatGPT Use
 
 ChatGPT remains outside the production dependency chain.
 
@@ -1805,6 +1535,7 @@ ChatGPT may be used manually for:
 - source/domain strategy;
 - source-audit interpretation;
 - product-quality review;
+- classification/ranking analysis;
 - deciding whether observed limitations justify implementation changes.
 
 The separation remains:
@@ -1821,14 +1552,14 @@ The richer-report requirement does not automatically change this boundary.
 
 ---
 
-# 26. Implemented vs Active vs Deferred Architecture
+# 27. Implemented vs Active vs Deferred Architecture
 
 ## Implemented and Validated
 
 - Python package;
 - repository-native configuration;
-- seven-source public RSS registry;
-- eight-domain active taxonomy;
+- eight-source public RSS registry;
+- nine-domain active taxonomy;
 - RSS/Atom collection;
 - local fixture collection;
 - remote HTTP/HTTPS retrieval;
@@ -1841,12 +1572,15 @@ The richer-report requirement does not automatically change this boundary.
 - normalisation;
 - deterministic URL cleaning;
 - UTC-aware timestamps;
-- deterministic SHA-256 record IDs;
+- deterministic record IDs;
 - structural validation;
 - previous-24-hours publication filtering;
 - exact deduplication;
 - deterministic classification;
 - empty source defaults;
+- empty domain keyword support;
+- validated source-defined domains;
+- uppercase-sensitive keyword handling;
 - deterministic ranking;
 - JSONL persistence;
 - Markdown reporting;
@@ -1868,21 +1602,30 @@ The richer-report requirement does not automatically change this boundary.
 - repository-native production history;
 - Tech.eu replacing Sifted;
 - Financial Markets domain;
+- Milan and Bocconi Ecosystem domain;
+- Tech Europe Foundation source;
 - conservative keyword regression workflow.
 
 ## Active Architectural Evaluation
 
 - further source correction/expansion;
-- Financial Times automation/interface suitability;
-- Il Sole 24 Ore automation/interface suitability;
-- Bank of Italy source role;
-- Reuters feasibility;
+- dedicated Financial Markets source coverage;
+- Companies/Corporate Strategy source coverage;
 - Italy domain implementation;
-- Milan/Bocconi source architecture;
+- broader Milan/Bocconi source coverage;
+- AI source diversity;
+- Italian Tech Alliance production readiness;
+- Nasdaq feed suitability;
+- Federal Reserve feed suitability;
+- MIMIT suitability;
+- Lavoce.info suitability;
+- Bruegel suitability;
+- Assolombarda suitability;
+- Ars Technica suitability;
+- Google DeepMind suitability;
 - source metadata richness;
-- Premium Bocconi Exception application;
-- richer-report architecture;
-- reporting-window cutoff independence.
+- reporting-window cutoff independence;
+- richer-report architecture after Phase 4.
 
 ## Deferred Until Evidence
 
@@ -1893,11 +1636,14 @@ The richer-report requirement does not automatically change this boundary.
 - article-level geography;
 - content-type classification;
 - separate opportunity record model;
+- opportunity deadline state;
+- statistical-event pipeline;
 - long-term source-health database;
 - advanced ranking;
 - automatic publisher-diversity penalties;
 - LLM summarisation;
 - authenticated premium ingestion;
+- authenticated Bocconi ingestion;
 - dashboards;
 - GitHub Pages;
 - GitHub Issues delivery;
@@ -1910,17 +1656,20 @@ The richer-report requirement does not automatically change this boundary.
 
 ---
 
-# 27. Current Architectural Limitations
+# 28. Current Architectural Limitations
 
 Known limitations include:
 
-- current production source universe contains only seven feeds;
-- stronger finance/business reporting remains under evaluation;
-- Italy is not yet an explicit domain;
-- Milan/Bocconi is not yet implemented;
+- current production universe contains only eight feeds;
+- Financial Markets has no dedicated production source;
+- Companies/Corporate Strategy remains weakly sourced;
+- Italy is not yet an explicit implemented domain;
+- Milan/Bocconi has only a first narrow production source;
 - independent AI reporting remains limited;
-- all current active automated feeds are English-language;
-- full bilingual classification is unvalidated;
+- AI primary evidence is concentrated on OpenAI;
+- Startups/VC depends heavily on Tech.eu;
+- current active automated sources are mostly English-language;
+- full bilingual classification remains only partially validated;
 - exact deduplication does not detect differently worded coverage of the same story;
 - records without publication timestamps are excluded;
 - ranking remains provisional;
@@ -1929,235 +1678,128 @@ Known limitations include:
 - no entity enrichment exists;
 - no article-level geography exists;
 - no content-type classification exists;
-- no long-term source-health history exists;
-- current description depth may still be insufficient for richer-report requirements;
-- Premium Bocconi Exception rendering is not implemented;
-- report composition can be sparse;
-- scheduler timing is not precise;
-- collection window remains tied to actual execution time;
-- there is no dedicated latest-report alias;
-- GitHub Markdown remains the primary delivery interface.
+- no statistical-event processing exists;
+- no opportunity-state model exists;
+- no deadline persistence exists;
+- no long-term source-health database exists;
+- report descriptions remain capped at 300 characters;
+- scheduled execution time influences the collection window;
+- repository-native storage creates strict copyright/persistence requirements for candidate sources.
 
-These limitations are not an automatic feature backlog.
-
-Each requires evidence.
+These are maturity limits, not automatic implementation requirements.
 
 ---
 
-# 28. Architecture Decision Rules
-
-Before adding any architectural component, ask:
-
-1. What validated user problem does it solve?
-2. Is the problem frequent enough to matter?
-3. Can the source be replaced instead?
-4. Can configuration solve it?
-5. Can existing structured metadata solve it?
-6. Can standard-library logic solve it?
-7. Does it introduce recurring monetary cost?
-8. Does it increase daily manual work?
-9. Does it require credentials?
-10. Does it create copyright or licence risk?
-11. Does it introduce another service dependency?
-12. How will it be tested?
-13. How will failure be visible?
-14. What maintenance burden does it add?
-15. Can we stop with a simpler solution?
-
-Preferred pattern:
-
-```text
-observe
-→ reproduce
-→ isolate
-→ smallest justified change
-→ test
-→ inspect output
-→ stop
-```
-
-For source/taxonomy work, extend this to:
-
-```text
-strategic need
-→ source probe
-→ metadata/access review
-→ classifier simulation
-→ regression corpus
-→ smallest config change
-→ tests
-→ real pipeline
-→ report inspection
-```
-
----
-
-# 29. Current Open Architecture Decisions
-
-## Source Universe
-
-The current seven-source registry is intentionally not considered final.
-
-Next technical audit:
-
-```text
-Financial Times
-```
-
-Then, if still justified:
-
-```text
-Il Sole 24 Ore
-Bank of Italy
-Reuters
-```
-
-Do not add all strategically attractive sources simultaneously.
-
----
-
-## BBC Business
-
-Current architecture can support removing it through configuration if stronger coverage validates.
-
-Do not remove it before replacement evidence exists.
-
----
-
-## Italy
-
-Strategically approved.
-
-Architectural question:
-
-> Can Italy be added through current `domains.yaml` plus a small validated source set?
-
-Preferred source candidates:
-
-```text
-Il Sole 24 Ore
-Istat
-Bank of Italy
-```
-
-Do not create Italy-specific processing logic unless necessary.
-
----
-
-## Milan/Bocconi
-
-Now a fixed product requirement.
-
-Architectural question:
-
-> Can public Bocconi/B4i/career sources fit the existing article pipeline cleanly?
-
-Investigate first:
-
-```text
-B4i
-Bocconi Career Services
-Bocconi News & Events
-```
-
-Prefer reusing:
-
-```text
-ArticleRecord
-collector
-classifier
-reporter
-```
-
-before introducing:
-
-- new record models;
-- event databases;
-- deadline engines.
-
----
-
-## Richer Report Context
-
-Open question:
-
-> What is the smallest deterministic and compliant mechanism that provides enough context for initial understanding?
-
-Candidate input order:
-
-1. richer feed fields;
-2. public structured metadata;
-3. official free APIs;
-4. narrowly justified permitted public extraction;
-5. more complex mechanisms only if simpler ones fail.
-
-Premium-exception sources may deliberately have thinner automated context.
-
-No production AI summarisation architecture has been selected.
-
----
+# 29. Open Architecture Decisions
 
 ## Reporting Window
 
-Current:
+Question:
 
-```text
-actual run time - 24 hours
-→ actual run time
-```
+> Should reports eventually use a fixed daily cutoff rather than actual workflow start time?
 
-Candidate:
+Status:
 
-```text
-fixed cutoff
-→ deterministic 24-hour report window
-```
-
-More production evidence is required.
+> open; no change without repeated evidence.
 
 ---
 
-## Output Validation for No-News Runs
+## Retry Behaviour
 
-A legitimate no-news case may eventually expose whether output non-empty validation is too strict.
+Question:
 
-Do not change theory-first.
+> Would limited retry logic materially improve source reliability?
 
-Reproduce first.
+Status:
 
----
-
-## Sponsored Content
-
-Tech.eu testing exposed explicit sponsored content.
-
-No architecture change is justified from one observation.
-
-If sponsored material begins to enter reports materially:
-
-```text
-observe repeatedly
-→ define deterministic handling
-→ test
-```
+> deferred.
 
 ---
 
 ## Near-Duplicate Handling
 
-Deferred.
+Question:
+
+> Do sources such as Italian Tech Alliance create enough repeated same-story coverage to justify clustering?
+
+Status:
+
+> deferred pending repeated production evidence.
 
 ---
 
-## Long-Term Source Health
+## Statistical Events
 
-Per-run summaries remain sufficient.
+Question:
+
+> Should official statistical series such as Bank of Italy BDS generate deterministic intelligence events?
+
+Status:
+
+> validated future use case, architecture not approved for implementation yet.
 
 ---
 
-## Delivery Interface
+## Opportunity State
 
-GitHub Markdown remains sufficient until reading friction becomes a demonstrated product constraint.
+Question:
+
+> Do Milan/Bocconi opportunities need deadline/event-state persistence rather than publication-only treatment?
+
+Status:
+
+> deferred pending production evidence.
+
+---
+
+## Independent AI Architecture
+
+Current working hypothesis:
+
+```text
+OpenAI
+→ primary source
+
+Google DeepMind
+→ second primary source
+
+independent technology source
+→ reporting / interpretation
+```
+
+Status:
+
+> source audit pending; no special architecture expected.
+
+---
+
+## Italy Architecture
+
+Current working hypothesis:
+
+```text
+Istat
++ MIMIT
++ Lavoce.info
++ Assolombarda
++ Italian Tech Alliance
+```
+
+with Bank of Italy structured data later if justified.
+
+Status:
+
+> source validation pending.
+
+This is an information architecture hypothesis, not an implemented technical architecture.
+
+---
+
+## Richer Report
+
+Validated product need.
+
+Architecture remains intentionally undefined until source/domain work reaches diminishing returns.
 
 ---
 
@@ -2191,8 +1833,7 @@ Evidence:
 - usable timestamps;
 - successful parsing;
 - real report generation;
-- real degraded-source validation;
-- 110 tests.
+- degraded-source validation.
 
 ---
 
@@ -2232,41 +1873,45 @@ Known limitation:
 
 ## Gate E — Source/Domain Expansion Architecture
 
-**Status: partially passed; active**
-
-The first controlled Phase 4 checkpoint passed.
+**Status: passed for current architecture; source universe still under active expansion**
 
 Evidence:
 
-- Sifted problem reproduced;
-- Tech.eu alternative researched;
-- real collector probe completed;
-- normalisation validated;
-- metadata compared;
-- source default tested;
-- classification simulation completed;
-- stored-corpus regression completed;
-- source replacement completed;
-- new Financial Markets domain added;
-- config tests updated;
-- 110 tests passed;
-- real 17 August run completed;
-- report manually inspected.
+- Sifted replaced by Tech.eu;
+- Financial Markets added without new processing modules;
+- classification regression workflow established;
+- Italian keyword collision reproduced;
+- classifier case behaviour corrected;
+- Tech Europe Foundation added;
+- ninth domain added;
+- empty-keyword domain support added;
+- source-defined classification validated;
+- full real eight-source pipeline executed successfully.
 
 This proves:
 
-> the existing architecture can support substantial source/domain correction through configuration without new processing components.
+> the current architecture can support both ordinary keyword-defined domains and narrow source-defined domains without adding new processing layers.
 
-Gate E remains open because:
-
-- final source universe is not selected;
-- Italy remains unimplemented;
-- Milan/Bocconi remains unimplemented;
-- premium-source architecture has not yet been exercised in production.
+What remains open is the **information universe**, not the basic expansion architecture.
 
 ---
 
-## Gate F — Richer Report Architecture
+## Gate F — Italy Architecture
+
+**Status: not passed**
+
+Required before considering Italy implementation complete:
+
+- suitable source set;
+- production-safe endpoints;
+- classification/default decision;
+- bilingual regression;
+- report contribution review;
+- no unnecessary source-specific architecture.
+
+---
+
+## Gate G — Richer Report Architecture
 
 **Status: not passed**
 
@@ -2275,7 +1920,7 @@ Required before implementation:
 - exact context requirement;
 - source metadata audit;
 - copyright/access boundary;
-- Premium Bocconi fallback behaviour;
+- premium-source fallback behaviour;
 - output-length target;
 - provenance design;
 - candidate approach comparison;
@@ -2287,7 +1932,7 @@ Implementation architecture is not.
 
 ---
 
-## Gate G — Advanced Quality Architecture
+## Gate H — Advanced Quality Architecture
 
 **Status: not passed**
 
@@ -2297,6 +1942,8 @@ Possible future examples:
 - entities;
 - content type;
 - article-level geography;
+- statistical intelligence events;
+- deadline tracking;
 - advanced ranking.
 
 Entry requires:
@@ -2340,10 +1987,13 @@ GitHub trigger
 Current information architecture:
 
 ```text
-7 active public RSS sources
-8 active domains
+8 active public RSS sources
+9 active domains
+
 deterministic source defaults
 deterministic keyword classification
+source-defined domain support
+deterministic keyword case semantics
 deterministic ranking
 repository-native historical data
 ```
@@ -2358,6 +2008,7 @@ European Commission Highlighted News
 Istat Press Releases
 OpenAI News
 Tech.eu
+Tech Europe Foundation
 ```
 
 Current active domains:
@@ -2371,16 +2022,32 @@ Technology and Software
 Startups and Venture Capital
 Europe and the European Union
 Financial Markets
+Milan and Bocconi Ecosystem
 ```
 
 Current architectural direction:
 
 ```text
-finish source/domain correction
+continue domain-gap-driven source correction
+→ strengthen Financial Markets / Companies
 → validate Italy
-→ validate Milan/Bocconi
-→ stop expansion when information universe is strong enough
-→ design richer context
+→ broaden Milan/Bocconi where justified
+→ diversify AI sources
+→ stop expansion when marginal source value falls
+→ design richer report context
+```
+
+Potential future architecture remains gated:
+
+```text
+Bank of Italy BDS
+→ statistical-event pipeline only if justified
+
+professional opportunities
+→ state/deadline model only if justified
+
+near-duplicate clusters
+→ only after repeated report evidence
 ```
 
 The architecture should remain simple unless actual report usage proves otherwise.
@@ -2389,10 +2056,31 @@ The architecture should remain simple unless actual report usage proves otherwis
 
 # Changelog
 
+## 2026-08-17 — TEF / Milan-Bocconi and Multilingual Classification Architecture
+
+- Reconciled architecture with the pushed eight-source / nine-domain production checkpoint.
+- Added Tech Europe Foundation as the eighth active RSS source.
+- Added Milan and Bocconi Ecosystem as the ninth implemented domain.
+- Added support for domain configurations with empty keyword lists.
+- Recorded source-defined domains as a supported deterministic architecture.
+- Recorded TEF's Milan/Bocconi source default.
+- Recorded that the TEF implementation reused the standard `ArticleRecord` pipeline and required no scraper, event model, deadline engine or source-specific collector.
+- Recorded full production-equivalent eight-source pipeline validation.
+- Recorded the 8/8 successful-source result.
+- Recorded that TEF correctly contributed no stale records outside the 24-hour publication window.
+- Added deterministic case semantics for configured keywords.
+- Recorded intentional case-sensitive `AI` matching to avoid Italian `ai` false positives.
+- Recorded that historical English AI recall was preserved.
+- Reframed Source/Domain Expansion Gate E as architecturally passed while information-universe expansion remains active.
+- Added Bank of Italy BDS as the strongest validated future statistical-event architecture use case.
+- Added opportunity/deadline state tracking as a future architecture gated by real Milan/Bocconi evidence.
+- Added Italian Tech Alliance as a possible future near-duplicate evidence source without approving clustering.
+- Updated active architectural evaluation to the new domain-gap-driven source queue.
+- Preserved richer-report architecture as deferred.
+
 ## 2026-08-17 — Phase 4A Source and Domain Architecture Validation
 
-- Reconciled architecture with the first validated Phase 4 source/domain correction.
-- Replaced Sifted with Tech.eu in the active seven-source registry.
+- Replaced Sifted with Tech.eu in the active source registry.
 - Recorded the controlled Tech.eu/Sifted comparison.
 - Recorded 20/20 Tech.eu descriptions versus 0/24 Sifted descriptions in the tested samples.
 - Recorded that source replacement was driven by product metadata/access quality rather than parser compatibility.
@@ -2402,20 +2090,18 @@ The architecture should remain simple unless actual report usage proves otherwis
 - Added the evidence-backed classification changes `tariffs`, `acquired`, `early-stage fund` and `funding market`.
 - Recorded removal of generic `startup`.
 - Added the architectural warning that near-synonymous keywords may independently increase score.
-- Added the 114-record regression pattern as a reusable source/taxonomy validation mechanism.
+- Added the historical regression pattern as a reusable source/taxonomy validation mechanism.
 - Recorded the real 17 August 2026 pipeline validation.
-- Recorded that 26/30 unclassified records did not represent a system failure after manual inspection.
 - Established that classification percentage is not an architectural KPI.
 - Added the narrow Premium Bocconi Exception while preserving the existing authentication prohibition.
 - Upgraded Milan/Bocconi from candidate to validated product requirement.
 - Recorded the preference to reuse the existing `ArticleRecord` pipeline for future Milan/Bocconi inputs before creating new event/opportunity architecture.
 - Preserved ranking weights, report settings and core processing modules unchanged.
-- Confirmed 110 automated tests remain passing.
 
 ## 2026-08-14 — Phase 3 Automation Architecture Completed
 
-- Reconciled the architecture with completed GitHub Actions production automation.
-- Added the implemented `.github/workflows/daily-intelligence.yml` production layer.
+- Reconciled architecture with completed GitHub Actions production automation.
+- Added `.github/workflows/daily-intelligence.yml`.
 - Recorded manual `workflow_dispatch`.
 - Recorded scheduled execution.
 - Recorded current 06:05 Europe/Rome production schedule.
@@ -2426,11 +2112,11 @@ The architecture should remain simple unless actual report usage proves otherwis
 - Recorded output validation before persistence.
 - Recorded automated bot persistence.
 - Recorded no-change commit protection.
-- Recorded deliberate critical configuration failure validation.
-- Recorded deliberate degraded source publication validation.
+- Recorded critical configuration failure validation.
+- Recorded degraded source publication validation.
 - Recorded concurrency protection.
-- Recorded substantial GitHub scheduler latency.
-- Recorded the scheduler-latency/report-window coupling as an open architecture decision.
+- Recorded GitHub scheduler latency.
+- Recorded scheduler-latency/report-window coupling as an open architecture decision.
 - Added richer-report architecture as a validated later design problem.
 - Added automated public / Bocconi premium reading / research-database separation.
 - Explicitly prohibited authenticated premium-content ingestion.
@@ -2452,7 +2138,6 @@ The architecture should remain simple unless actual report usage proves otherwis
 - Added evidence-based politics keyword refinement.
 - Validated real publication timestamps.
 - Validated partial-source degradation.
-- Reached 110 passing tests.
 
 ## 2026-08-11 — Phase 1 Architecture Baseline
 

@@ -18,7 +18,7 @@
 >
 > **Update Frequency**
 >
-> Update only when the project’s purpose, scope, constraints or success criteria materially change.
+> Update only when the project's purpose, scope, constraints or success criteria materially change.
 
 ---
 
@@ -75,6 +75,7 @@ The active development focus is therefore information quality:
 
 ```text
 source quality
+→ information-function coverage
 → domain coverage
 → classification quality
 → report context
@@ -145,15 +146,45 @@ A source may be operationally compatible while still providing:
 - insufficient public metadata;
 - excessive noise;
 - unnecessary overlap;
-- poor value relative to a better alternative.
+- poor value relative to a better alternative;
+- persistence or licensing constraints incompatible with the public repository.
 
-Source credibility, accessibility, metadata richness, uniqueness and automation suitability must therefore be evaluated together.
+Source credibility, accessibility, metadata richness, uniqueness, automation suitability and persistence compatibility must therefore be evaluated together.
 
 ---
 
 ## Weak Prioritisation
 
 Most information products optimise for broad engagement rather than the specific combination of economics, markets, politics, business, AI, technology, startups and professional relevance required by this project.
+
+---
+
+## Uneven Domain Coverage
+
+A technically operational system can still provide poor intelligence if some domains depend almost entirely on:
+
+- one publisher;
+- one institutional source;
+- incidental keyword matches;
+- a source that performs a different information function from what the user actually needs.
+
+The goal is not equal source counts.
+
+The goal is sufficient coverage of distinct information functions.
+
+For example:
+
+```text
+primary institutional evidence
+≠
+market/company reporting
+≠
+independent analysis
+≠
+specialist ecosystem intelligence
+```
+
+The project should therefore correct missing information functions before increasing publisher count.
 
 ---
 
@@ -198,9 +229,13 @@ Relevant opportunities can be scattered across:
 
 Missing a time-sensitive event, programme or application deadline can have a higher opportunity cost than missing an ordinary news article.
 
-The system should therefore eventually provide selective professional ecosystem intelligence for Milan and Bocconi.
+The system should therefore provide selective professional ecosystem intelligence for Milan and Bocconi.
 
 This is a validated product requirement rather than an optional feature.
+
+The first production implementation now exists through Tech Europe Foundation.
+
+The broader requirement remains only partially satisfied.
 
 ---
 
@@ -366,6 +401,7 @@ Its value includes understanding:
 - observability;
 - maintenance;
 - source governance;
+- information-function design;
 - opportunity cost.
 
 ---
@@ -479,11 +515,14 @@ A narrow source-specific exception may allow an unusually valuable premium publi
 - a legitimate public or automation-compatible discovery endpoint exists;
 - Bocconi credentials are never used by production;
 - authenticated premium article bodies are never automatically retrieved;
+- persistence remains compatible with the public-repository model;
 - thinner report context and manual click-through are deliberately accepted.
 
 This exception changes the acceptable reader workflow.
 
 It does not change the authentication or copyright boundary.
+
+Completed source audits have shown that legitimate personal reading access alone is insufficient to justify production activation.
 
 ---
 
@@ -516,6 +555,7 @@ The completed system should:
 - avoid recurring consumption of AI or Copilot credits;
 - collect from a curated universe of permitted structured sources;
 - prefer the smallest strong source universe rather than maximum source count;
+- fill important information-function gaps rather than maximise publisher count;
 - preserve source links and provenance;
 - enforce a clear publication window;
 - reduce obvious duplication;
@@ -565,6 +605,7 @@ It must not become a hidden production dependency.
 - RSS, Atom, official APIs and structured public sources should be preferred before scraping.
 - Infrastructure without demonstrated need should not be introduced.
 - Optional features must not become dependencies of the core workflow without evidence.
+- Existing processing components should be reused before introducing new source-specific architectures.
 
 ---
 
@@ -586,7 +627,9 @@ It must not become a hidden production dependency.
 - Source quality should generally be improved before adding more complex filtering logic.
 - A technically compatible source is not automatically a useful source.
 - Source accessibility and metadata richness should be considered alongside credibility and automation suitability.
+- Source persistence/licensing compatibility must be evaluated against the public repository model.
 - The system should prefer a smaller strong source universe over accumulation.
+- The system should prefer differentiated information functions over redundant publishers.
 - Unclassified records are preferable to misleading classifications.
 - Classification percentage is not itself a success metric.
 - The report should provide enough context for initial understanding without reproducing complete articles.
@@ -615,6 +658,7 @@ The production system must not:
 - bypass paywalls;
 - automate OpenAthens or other institutional authentication merely because credentials are available;
 - scrape authenticated premium publications without explicit permission;
+- scrape authenticated yoU@B or JobGate;
 - bulk-download licensed database content;
 - republish substantial restricted content.
 
@@ -664,6 +708,7 @@ Future work should improve:
 
 ```text
 sources
+→ information-function coverage
 → classification inputs
 → domain coverage
 → report context
@@ -689,13 +734,23 @@ The strategic target consists of ten macroareas:
 9. Italy;
 10. Milan and the Bocconi Ecosystem.
 
-Financial Markets is already implemented.
+Current strategic state:
 
-Italy remains an approved but not yet implemented macroarea.
+```text
+Financial Markets
+→ implemented as a domain
+→ dedicated source coverage still weak
 
-Milan and the Bocconi Ecosystem is a validated product requirement whose production source architecture remains to be established.
+Milan and Bocconi Ecosystem
+→ implemented through a first production source
+→ broader requirement only partially satisfied
 
-Detailed implementation status belongs in:
+Italy
+→ approved target macroarea
+→ dedicated implementation still pending
+```
+
+Detailed implementation state belongs in:
 
 ```text
 04 Development Roadmap and Status.md
@@ -705,7 +760,7 @@ Detailed implementation status belongs in:
 
 # Current Information-Quality Direction
 
-Real production use has established several durable lessons.
+Real production use and source research have established several durable lessons.
 
 ## Source Quality
 
@@ -720,11 +775,16 @@ Production suitability depends on:
 - reader accessibility;
 - uniqueness;
 - noise;
-- maintenance burden.
+- maintenance burden;
+- persistence compatibility.
 
 The Sifted case demonstrated this principle in practice.
 
-Sifted has since been replaced by Tech.eu because Tech.eu provided materially better usable public metadata while preserving relevant European startup/technology coverage.
+Sifted was replaced by Tech.eu because Tech.eu provided materially better usable public metadata while preserving relevant European startup/technology coverage.
+
+Separate audits of Financial Times, Il Sole 24 Ore and Reuters further demonstrated that:
+
+> **high strategic value does not override production-access and persistence constraints.**
 
 The specific technical evidence and source-decision history belong in:
 
@@ -732,6 +792,33 @@ The specific technical evidence and source-decision history belong in:
 03 Information Taxonomy and Source Policy.md
 04 Development Roadmap and Status.md
 ```
+
+---
+
+## Information-Function Coverage
+
+The system should not optimise source expansion around publisher count.
+
+A strong information universe may require different roles such as:
+
+```text
+primary institutional evidence
+market/company reporting
+independent interpretation
+specialist ecosystem intelligence
+professional opportunity discovery
+```
+
+The current strategic principle is:
+
+> **Correct information-function gaps before correcting publisher-count gaps.**
+
+This has become particularly important because current weaknesses are concentrated in:
+
+- Financial Markets;
+- Companies and Corporate Strategy;
+- Italy;
+- independent AI/technology coverage.
 
 ---
 
@@ -753,6 +840,8 @@ not:
 maximise classified-record percentage
 ```
 
+The multilingual `AI` / Italian `ai` correction also demonstrated that precise deterministic rules are preferable to broad recall when the latter creates misleading output.
+
 ---
 
 ## Domain Expansion
@@ -764,9 +853,44 @@ Missing strategic domains should be implemented only when:
 - classification can be tested;
 - the result improves the actual report.
 
-Financial Markets has passed this threshold.
+Financial Markets has passed the taxonomy threshold but still requires stronger dedicated source coverage.
 
-Italy and Milan/Bocconi remain further work.
+Milan/Bocconi has passed the first implementation threshold through Tech Europe Foundation.
+
+Italy remains pending.
+
+---
+
+## Milan/Bocconi
+
+Milan/Bocconi Professional Ecosystem Intelligence is a validated product requirement.
+
+The first production implementation now exists through Tech Europe Foundation.
+
+This proves that useful ecosystem intelligence can enter through the existing article pipeline without requiring:
+
+- private Bocconi access;
+- a custom event database;
+- a deadline engine;
+- source-specific scraping.
+
+Current TEF coverage remains concentrated on:
+
+- startups;
+- entrepreneurship;
+- deep tech;
+- innovation;
+- founder/programme activity.
+
+The wider requirement still includes complementary information such as:
+
+- established firms;
+- finance/business ecosystem activity;
+- recruiting;
+- selected professional events;
+- time-sensitive opportunities.
+
+Authenticated Career Services systems remain outside production.
 
 ---
 
@@ -852,6 +976,8 @@ Production reports, processed records and run summaries remain accessible throug
 
 The historical processed-record layer also provides useful deterministic evidence for later regression testing of classification and ranking changes.
 
+This regression value has already become an important part of controlled taxonomy development.
+
 ---
 
 # Non-Goals
@@ -864,6 +990,7 @@ The project is not intended to:
 - bypass paywalls;
 - scrape websites against their terms;
 - automate authenticated Bocconi premium-content retrieval;
+- automate authenticated Career Services / JobGate retrieval;
 - bulk-ingest Factiva, Nexis, Bloomberg or similar licensed databases;
 - generate investment, legal or political recommendations;
 - predict markets;
@@ -882,7 +1009,9 @@ The project is not intended to:
 - ingest private newsletters or email into the core system;
 - automatically edit the Career OS;
 - automatically transfer GitHub reports into ChatGPT;
-- build infrastructure merely because it is technically interesting.
+- build infrastructure merely because it is technically interesting;
+- recreate Financial Times or Reuters through a collection of weaker redundant sources;
+- force every strategic macroarea to have the same number of sources.
 
 These possibilities should be reconsidered only when real evidence demonstrates a clear workflow need and all core constraints remain satisfied.
 
@@ -936,12 +1065,13 @@ The project should be judged on both technical operation and information usefuln
 
 - Important stories are not systematically buried by noise.
 - Source provenance is transparent.
-- Accessibility and metadata richness are considered.
+- Accessibility, metadata richness and persistence compatibility are considered.
 - Classification is adequate for practical use.
 - Ranking remains understandable.
 - Unsupported context is not fabricated.
 - Missing data and failures are visible.
-- The source universe adequately covers the intended strategic domains.
+- The source universe adequately covers the intended strategic information functions.
+- Major domains are not unnecessarily dependent on one weak or incidental source.
 - Technical sophistication is introduced only when it improves real information quality.
 
 ---
@@ -964,10 +1094,12 @@ The project should be judged on both technical operation and information usefuln
 - Configuration remains separated from logic where appropriate.
 - Sources can be replaced without pipeline redesign.
 - Domains can normally be added through configuration.
+- Source-defined domains can reuse existing classification architecture where justified.
 - Dependencies remain limited.
 - Modules retain clear responsibilities.
 - Architecture remains proportional to value.
 - Source expansion does not create disproportionate recurring maintenance.
+- New processing paradigms are introduced only after their information value is validated.
 
 ---
 
@@ -987,20 +1119,34 @@ observe real problem
 → stop at stable checkpoint
 ```
 
+For source expansion:
+
+```text
+identify information-function gap
+→ research high-value candidate
+→ validate endpoint and policy
+→ test real collector
+→ test classification
+→ inspect report contribution
+→ approve / standby / reject
+→ checkpoint
+```
+
 Before adding complexity, ask:
 
 1. What user problem does this solve?
 2. Has it occurred in real use?
-3. Can a weak source simply be replaced?
-4. Can configuration solve it?
-5. Can existing structured metadata solve it?
-6. What maintenance does the change add?
-7. What new failure modes appear?
-8. Does it preserve zero recurring cost?
-9. Does it preserve negligible daily manual work?
-10. Does it preserve transparency?
-11. Does it preserve credential and copyright boundaries?
-12. How will success be tested?
+3. What information function is missing?
+4. Can a weak source simply be replaced?
+5. Can configuration solve it?
+6. Can existing structured metadata solve it?
+7. What maintenance does the change add?
+8. What new failure modes appear?
+9. Does it preserve zero recurring cost?
+10. Does it preserve negligible daily manual work?
+11. Does it preserve transparency?
+12. Does it preserve credential and copyright boundaries?
+13. How will success be tested?
 
 This applies especially to:
 
@@ -1011,6 +1157,8 @@ This applies especially to:
 - content types;
 - ranking;
 - source-health systems;
+- statistical-event processing;
+- opportunity/deadline tracking;
 - dashboards;
 - AI integration.
 
@@ -1049,6 +1197,19 @@ optional advanced quality or delivery improvements
 
 Source/domain work should stop when additional expansion has lower expected value than improving understanding of already-selected items.
 
+The active expansion process is now driven by domain gaps rather than source prestige.
+
+Current highest-priority information weaknesses are:
+
+```text
+Financial Markets
+Companies / Corporate Strategy
+Italy
+independent AI / Technology coverage
+```
+
+Milan/Bocconi and Startups/VC also require further diversification, but first implementations already exist.
+
 ---
 
 # Risks
@@ -1065,7 +1226,7 @@ The project may become focused on architecture instead of useful output.
 
 More sources may increase noise, duplication and failure rates.
 
-**Response:** optimize for the smallest strong source universe.
+**Response:** optimise for the smallest strong source universe with differentiated information roles.
 
 ---
 
@@ -1073,7 +1234,33 @@ More sources may increase noise, duplication and failure rates.
 
 High-profile publications may appear attractive even when their marginal information value or automation suitability is poor.
 
-**Response:** evaluate actual contribution, access and metadata.
+**Response:** evaluate actual contribution, access, metadata and persistence compatibility.
+
+Completed FT, Reuters and Il Sole audits demonstrate that prestige alone is not sufficient.
+
+---
+
+## Redundant Source Accumulation
+
+Several sources may report the same type of development without adding a distinct information function.
+
+**Response:** prioritise complementarity.
+
+For example:
+
+```text
+primary evidence
++
+independent analysis
+```
+
+is usually more useful than:
+
+```text
+general news source
++
+similar general news source
+```
 
 ---
 
@@ -1117,6 +1304,8 @@ Different headlines may describe the same event.
 
 **Response:** retain exact deduplication until repeated evidence justifies more.
 
+Italian Tech Alliance provides a possible future use case but does not yet justify new clustering architecture.
+
 ---
 
 ## Source Instability
@@ -1132,6 +1321,16 @@ Feeds may change, fail or disappear.
 GitHub may execute scheduled workflows later than configured.
 
 **Response:** continue monitoring whether this materially affects report usefulness before changing architecture.
+
+---
+
+## Multilingual Classification
+
+English keywords may collide with common Italian words.
+
+**Response:** prefer the smallest deterministic correction before introducing language-processing complexity.
+
+The `AI` versus Italian `ai` case has already validated this principle.
 
 ---
 
@@ -1156,26 +1355,35 @@ The system may increase reading without improving understanding.
 Possible later improvements include:
 
 - broader high-quality source coverage where justified;
+- structured statistical signals from official sources;
 - conservative near-duplicate clustering;
 - multi-source story grouping;
 - tracked companies and institutions;
 - article-level geography;
 - content-type classification;
 - source-health history;
+- opportunity/deadline state where justified;
 - weekly archive analytics;
 - trend detection;
 - stable latest-report links;
 - GitHub Issue delivery;
-- GitHub Pages;
-- selected public-newsletter feeds.
+- GitHub Pages.
 
 These are possibilities, not commitments.
 
-Financial Markets and Milan/Bocconi are no longer listed here as speculative possibilities:
+Current strategic macroarea state:
 
-- Financial Markets is implemented.
-- Milan/Bocconi is a validated product requirement.
-- Italy is an approved target macroarea pending implementation.
+```text
+Financial Markets
+→ implemented, dedicated source coverage still incomplete
+
+Milan/Bocconi
+→ first production implementation active through TEF
+→ broader professional ecosystem requirement remains incomplete
+
+Italy
+→ approved target macroarea pending implementation
+```
 
 ---
 
@@ -1224,22 +1432,41 @@ The project is currently in:
 
 > **source and domain correction / expansion**
 
-The first Phase 4 correction has validated the overall approach:
+Phase 4 has already validated several durable principles:
 
 - a weak source can be replaced without redesigning the pipeline;
 - taxonomy coverage can expand through configuration;
+- source-defined domains can reuse the existing pipeline;
 - real historical records can be used for regression testing;
-- report quality must be inspected separately from technical success.
+- report quality must be inspected separately from technical success;
+- premium reading access and automation permission are independent;
+- multilingual edge cases can often be solved with simple deterministic logic;
+- strategic source value does not override persistence/licensing constraints;
+- the source universe should expand according to information-function gaps rather than publisher count.
 
-Detailed implementation state, source counts, test counts, source audit chronology and immediate tasks belong in:
+Milan/Bocconi now has a first production implementation through Tech Europe Foundation.
+
+Italy remains the major target macroarea without a dedicated implementation.
+
+The most important remaining information gaps are:
 
 ```text
+Financial Markets
+Companies / Corporate Strategy
+Italy
+independent AI / Technology
+```
+
+Detailed implementation state, source counts, source audits and immediate tasks belong in:
+
+```text
+03 Information Taxonomy and Source Policy.md
 04 Development Roadmap and Status.md
 ```
 
 Current strategic priority:
 
-> **Continue building the smallest high-value source and domain universe.**
+> **Continue building the smallest high-value source and domain universe, prioritising missing information functions rather than publisher count.**
 
 Following strategic priority:
 
@@ -1253,11 +1480,32 @@ Every future project decision should answer:
 
 > Does this change materially improve reliability, information quality or user value without violating the constraints on cost, manual work, maintainability, accessibility, transparency, privacy, copyright and scope?
 
+For source expansion, also ask:
+
+> Does this source add a meaningful information function that the current system lacks?
+
 If the answer is unclear, defer the change until evidence exists.
 
 ---
 
 # Changelog
+
+## 2026-08-17 — Milan/Bocconi Activation and Information-Function Source Strategy
+
+- Preserved the stable project purpose, constraints and two-layer operating model.
+- Recorded Milan/Bocconi as having a first production implementation through Tech Europe Foundation rather than remaining fully pending.
+- Preserved Milan/Bocconi as only partially satisfied because TEF does not cover complete recruiting, employer-event or deadline intelligence.
+- Preserved authenticated Bocconi Career Services and JobGate as outside automated production.
+- Preserved Italy as the remaining approved strategic macroarea without a dedicated implementation.
+- Recorded Financial Markets as implemented but still lacking sufficient dedicated source coverage.
+- Added information-function coverage as an explicit source-expansion principle.
+- Recorded the durable rule: correct information-function gaps before publisher-count gaps.
+- Recorded Financial Markets, Companies/Corporate Strategy, Italy and independent AI/Technology as the current highest-cost information gaps.
+- Recorded the durable conclusion from FT, Reuters and Il Sole research that strategic value does not override automation, licensing or public-repository persistence constraints.
+- Recorded source-defined domains as a validated low-complexity expansion pattern.
+- Recorded the multilingual `AI` versus Italian `ai` lesson as evidence for minimal deterministic corrections before language-processing complexity.
+- Preserved richer report context as the following major product objective.
+- Kept detailed source decisions, audit results, counts and implementation sequencing in `03` and `04`.
 
 ## 2026-08-17 — Phase 4 Strategic Reconciliation
 
