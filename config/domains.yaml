@@ -25,6 +25,7 @@ domains:
       - fiscal policy
       - public debt
       - economic forecast
+      - inflazione
     active: true
 
   - id: companies_corporate_strategy
@@ -39,6 +40,10 @@ domains:
       - bankruptcy
       - earnings guidance
       - strategic plan
+      - tavoli di crisi
+      - accordo di sviluppo
+      - quadro industriale
+      - rilevanza strategica
     active: true
 
   - id: artificial_intelligence
@@ -112,5 +117,10 @@ domains:
 
   - id: milan_bocconi_ecosystem
     name: Milan and Bocconi Ecosystem
+    keywords: []
+    active: true
+
+  - id: italy
+    name: Italy
     keywords: []
     active: true

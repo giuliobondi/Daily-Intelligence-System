@@ -104,3 +104,15 @@ sources:
     geographic_scope:
       - United States
     active: true
+
+  - id: mimit_news
+    name: MIMIT News
+    feed_url: https://www.mimit.gov.it/index.php/it/notizie-stampa?format=feed&type=rss
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - italy
+    language: it
+    geographic_scope:
+      - Italy
+    active: true

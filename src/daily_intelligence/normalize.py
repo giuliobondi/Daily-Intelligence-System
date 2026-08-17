@@ -5,6 +5,8 @@ from time import struct_time
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from hashlib import sha256
+from html import unescape
+from html.parser import HTMLParser
 
 from daily_intelligence.config import SourceConfig
 from daily_intelligence.models import ArticleRecord
@@ -40,6 +42,14 @@ def normalize_entry(
 
     clean_title = _collapse_whitespace(title)
     description = _optional_text(entry, "description")
+    clean_description = (
+        _normalize_description(description)
+        if description is not None
+        else None
+    )
+
+    if clean_description == "":
+        clean_description = None
     normalized_url = normalize_url(article_url)
 
     return ArticleRecord(
@@ -54,11 +64,7 @@ def normalize_entry(
             ),
         published_at=_parse_publication_time(entry),
         retrieved_at=retrieved_at_utc,
-        description=(
-            _collapse_whitespace(description)
-            if description is not None
-            else None
-        ),
+        description=clean_description
     )
 
 
@@ -177,3 +183,45 @@ def _require_utc_datetime(
         )
 
     return value.astimezone(timezone.utc)
+
+class _HTMLTextExtractor(HTMLParser):
+    """Collect visible text from feed-provided HTML fragments."""
+
+    _BLOCK_TAGS = {
+        "br",
+        "div",
+        "li",
+        "p",
+        "tr",
+    }
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_starttag(
+        self,
+        tag: str,
+        attrs: list[tuple[str, str | None]],
+    ) -> None:
+        if tag in self._BLOCK_TAGS:
+            self.parts.append(" ")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self._BLOCK_TAGS:
+            self.parts.append(" ")
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
+
+
+def _normalize_description(value: str) -> str:
+    """Convert feed-provided HTML or plain text into clean text."""
+
+    parser = _HTMLTextExtractor()
+    parser.feed(value)
+    parser.close()
+
+    text = unescape("".join(parser.parts))
+
+    return _collapse_whitespace(text)

@@ -18,7 +18,7 @@ def test_load_valid_domain_configuration() -> None:
 
     domains = load_domains(CONFIG_PATH)
 
-    assert len(domains) == 9
+    assert len(domains) == 10
 
     assert tuple(domain.id for domain in domains) == (
         "global_politics_geopolitics",
@@ -30,6 +30,7 @@ def test_load_valid_domain_configuration() -> None:
         "europe_eu",
         "financial_markets",
         "milan_bocconi_ecosystem",
+        "italy",
     )
 
     technology = next(
@@ -201,4 +202,3 @@ domains:
 
     assert len(domains) == 1
     assert domains[0].keywords == ()
-    

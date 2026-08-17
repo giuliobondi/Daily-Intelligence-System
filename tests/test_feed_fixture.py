@@ -48,7 +48,7 @@ def test_load_valid_source_configuration() -> None:
 
     sources = load_sources(CONFIG_PATH)
 
-    assert len(sources) == 9
+    assert len(sources) == 10
 
     assert tuple(source.id for source in sources) == (
         "bbc_world",
@@ -60,6 +60,7 @@ def test_load_valid_source_configuration() -> None:
         "tech_eu",
         "tech_europe_foundation",
         "federal_reserve_monetary",
+        "mimit_news",
     )
 
     openai = next(
@@ -135,6 +136,26 @@ def test_load_valid_source_configuration() -> None:
         "United States",
     )
     assert federal_reserve_monetary.active is True
+
+    mimit_news = next(
+        source
+        for source in sources
+        if source.id == "mimit_news"
+    )
+
+    assert (
+        mimit_news.feed_url
+        == (
+            "https://www.mimit.gov.it/index.php/it/"
+            "notizie-stampa?format=feed&type=rss"
+        )
+    )
+    assert mimit_news.source_type == "rss"
+    assert mimit_news.source_tier == 1
+    assert mimit_news.default_domains == ("italy",)
+    assert mimit_news.language == "it"
+    assert mimit_news.geographic_scope == ("Italy",)
+    assert mimit_news.active is True    
 
 def test_missing_source_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete source entry fails with a clear configuration error."""
@@ -402,6 +423,127 @@ def test_missing_optional_metadata_is_preserved_as_none() -> None:
     assert record.published_at is None
     assert record.description is None
 
+def test_normalize_plain_text_description_is_preserved() -> None:
+    """Plain-text feed descriptions remain unchanged."""
+
+    entry = SimpleNamespace(
+        title="Plain text article",
+        link="https://example.com/plain-text",
+        published_parsed=None,
+        description="A plain feed-provided description.",
+    )
+
+    record = normalize_entry(
+        entry=entry,
+        source=_fixture_source(),
+        retrieved_at=datetime(
+            2026,
+            8,
+            17,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    assert record.description == "A plain feed-provided description."
+
+
+def test_normalize_html_description_to_plain_text() -> None:
+    """Visible text is retained while feed HTML markup is removed."""
+
+    entry = SimpleNamespace(
+        title="HTML article",
+        link="https://example.com/html",
+        published_parsed=None,
+        description="<p>Hello <strong>world</strong>.</p>",
+    )
+
+    record = normalize_entry(
+        entry=entry,
+        source=_fixture_source(),
+        retrieved_at=datetime(
+            2026,
+            8,
+            17,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    assert record.description == "Hello world."
+
+
+def test_normalize_description_discards_image_markup() -> None:
+    """Non-text image markup does not enter normalized descriptions."""
+
+    entry = SimpleNamespace(
+        title="Article with image",
+        link="https://example.com/image-description",
+        published_parsed=None,
+        description=(
+            '<p><img alt="" src="https://example.com/image.jpg" /></p>'
+            "<p>Useful summary text.</p>"
+        ),
+    )
+
+    record = normalize_entry(
+        entry=entry,
+        source=_fixture_source(),
+        retrieved_at=datetime(
+            2026,
+            8,
+            17,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    assert record.description == "Useful summary text."
+
+
+def test_normalize_description_decodes_html_entities() -> None:
+    """HTML character entities become normal text."""
+
+    entry = SimpleNamespace(
+        title="Entity article",
+        link="https://example.com/entities",
+        published_parsed=None,
+        description="<p>Tom &amp; Jerry &quot;example&quot;</p>",
+    )
+
+    record = normalize_entry(
+        entry=entry,
+        source=_fixture_source(),
+        retrieved_at=datetime(
+            2026,
+            8,
+            17,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    assert record.description == 'Tom & Jerry "example"'
+
+
+def test_normalize_markup_only_description_becomes_none() -> None:
+    """Descriptions with no visible text are treated as unavailable."""
+
+    entry = SimpleNamespace(
+        title="Image only article",
+        link="https://example.com/image-only",
+        published_parsed=None,
+        description='<img alt="" src="https://example.com/image.jpg" />',
+    )
+
+    record = normalize_entry(
+        entry=entry,
+        source=_fixture_source(),
+        retrieved_at=datetime(
+            2026,
+            8,
+            17,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    assert record.description is None
 
 def test_naive_retrieval_timestamp_is_rejected() -> None:
     """Retrieval timestamps must include timezone information."""
