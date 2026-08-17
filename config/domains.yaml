@@ -5,6 +5,7 @@ domains:
       - sanctions
       - ceasefire
       - trade restriction
+      - tariffs
       - diplomatic agreement
       - geopolitical
       - foreign policy
@@ -30,6 +31,7 @@ domains:
     name: Companies and Corporate Strategy
     keywords:
       - acquisition
+      - acquired
       - merger
       - restructuring
       - divestment
@@ -64,9 +66,10 @@ domains:
   - id: startups_venture_capital
     name: Startups and Venture Capital
     keywords:
-      - startup
       - venture capital
       - funding round
+      - early-stage fund
+      - funding market
       - series a
       - accelerator
       - incubator
@@ -85,4 +88,21 @@ domains:
       - european council
       - eu regulation
       - single market
+    active: true
+
+  - id: financial_markets
+    name: Financial Markets
+    keywords:
+      - stock market
+      - bond market
+      - bond yields
+      - yield curve
+      - credit spreads
+      - capital markets
+      - financial stability
+      - market sell-off
+      - foreign exchange
+      - equities
+      - asset management
+      - ipo
     active: true

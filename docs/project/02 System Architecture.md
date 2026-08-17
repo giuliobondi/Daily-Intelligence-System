@@ -49,7 +49,9 @@ The architecture should therefore prefer:
 - small modules with clear responsibilities;
 - visible failure states;
 - tests for important deterministic behaviour;
-- replacement of weak sources before disproportionate source-specific complexity.
+- replacement of weak sources before disproportionate source-specific complexity;
+- configuration-first source and domain changes where the existing pipeline already supports them;
+- conservative classification over forced coverage.
 
 The architecture should avoid:
 
@@ -72,12 +74,13 @@ The architecture should avoid:
 
 # 2. Architectural Status
 
-The core system is now implemented as a repository-native deterministic production pipeline.
+The core system is implemented as a repository-native deterministic production pipeline.
 
 The current architecture supports:
 
 - repository-native configuration loading;
 - seven active real public RSS sources;
+- eight active topic domains;
 - RSS/Atom collection;
 - bounded remote HTTP retrieval;
 - explicit User-Agent and Accept headers;
@@ -113,13 +116,31 @@ The current automated test suite contains:
 
 > **110 passing tests.**
 
-Phase 3 automation architecture has been validated.
+Phase 3 automation architecture is complete.
 
-The current architectural priority is no longer basic automation.
+Phase 4 has now demonstrated that the existing architecture can support meaningful source and taxonomy changes through configuration alone.
 
-It is:
+The first validated Phase 4 architectural checkpoint replaced:
 
-> **improve the information layer through source/domain correction and expansion, then design richer report context without weakening the zero-cost, deterministic and public-safe architecture.**
+```text
+Sifted
+→ Tech.eu
+```
+
+and expanded the taxonomy:
+
+```text
+7 active domains
+→ 8 active domains
+```
+
+by adding Financial Markets.
+
+No application module required modification for those changes.
+
+The current architectural priority remains:
+
+> **continue improving the information layer through controlled source/domain changes, then design richer report context without weakening the zero-cost, deterministic and public-safe architecture.**
 
 ---
 
@@ -142,58 +163,20 @@ Configuration
 → Output persistence
 ```
 
-The orchestration layer coordinates these stages and exposes them through a thin command-line interface.
-
-Production automation wraps the same pipeline.
-
-Conceptually:
+Production wraps this application flow with:
 
 ```text
-Manual trigger / Scheduled trigger
-             |
-             v
-      GitHub Actions
-             |
-             v
-      Install + Test
-             |
-             v
-            CLI
-             |
-             v
-    Pipeline Orchestrator
-             |
-             +--> Configuration
-             |
-             +--> Source Collection
-             |
-             +--> Normalisation
-             |
-             +--> Validation
-             |
-             +--> Window Filtering
-             |
-             +--> Deduplication
-             |
-             +--> Classification
-             |
-             +--> Ranking
-             |
-             +--> JSONL Storage
-             |
-             +--> Report Selection
-             |
-             +--> Run Summary
-             |
-             +--> Markdown Report
-             |
-             +--> Logging
-             |
-             v
-      Output Validation
-             |
-             v
-    Repository Persistence
+GitHub trigger
+→ checkout
+→ Python setup
+→ dependency installation
+→ automated tests
+→ production CLI
+→ output validation
+→ Git staging
+→ no-change guard
+→ bot commit
+→ push
 ```
 
 There is no separate production processing implementation.
@@ -330,7 +313,16 @@ Current configuration types include:
 - ranking configuration;
 - report configuration.
 
-Configuration remains separate from business logic so changing sources, keywords, score weights or report limits does not require modifying core processing code.
+Configuration remains separate from business logic so changing:
+
+- sources;
+- source defaults;
+- domain keywords;
+- active domains;
+- score weights;
+- report limits;
+
+does not require modifying core processing code.
 
 ### Source Validation Behaviour
 
@@ -352,50 +344,50 @@ Source configuration currently requires:
 default_domains: []
 ```
 
-This supports broad heterogeneous sources whose articles should rely on content-based classification rather than forced publisher-wide topics.
+This is intentional architecture.
 
-`geographic_scope` remains required and non-empty.
+A broad source should not receive a default merely because the publisher is associated with a topic.
 
-### Configuration Boundary
+The Tech.eu replacement validated this architecture directly.
 
-Information-policy properties should not automatically become runtime configuration.
+### Domain Validation Behaviour
 
-For example, source-review concepts such as:
+Domain configuration currently requires:
 
-- reader accessibility;
-- Bocconi access mode;
-- metadata richness;
-- review status;
+- unique domain identifier;
+- non-empty name;
+- keyword list;
+- boolean activation state.
 
-may remain documentation-level properties unless processing logic actually needs them.
+The addition of Financial Markets required only configuration and corresponding test updates.
 
-This prevents descriptive source research from unnecessarily increasing runtime configuration complexity.
+No processing-module change was necessary.
+
+This validates the intended architecture:
+
+> taxonomy expansion should normally be configuration-first.
 
 ---
 
 ## 5.3 `collect.py`
 
-Owns source collection.
+Owns source retrieval and feed parsing.
 
-The collector supports:
+Remote flow:
 
-- controlled local feed files;
-- remote HTTP/HTTPS RSS feeds;
-- remote HTTP/HTTPS Atom feeds.
+```text
+feed URL
+→ urllib Request
+→ explicit User-Agent
+→ explicit Accept header
+→ 10-second timeout
+→ standard TLS verification
+→ redirects
+→ feedparser
+→ structured collection result
+```
 
-It returns source-level structured outcomes rather than allowing expected source failures to terminate the complete run.
-
-Each collection result records:
-
-- source identifier;
-- status;
-- entries;
-- received-item count;
-- error type;
-- error message;
-- retrieval timestamp.
-
-Current statuses are:
+Each source produces a structured result such as:
 
 ```text
 success
@@ -403,255 +395,160 @@ empty
 failed
 ```
 
-Expected source-level failures are isolated.
+Expected source-level network failures are isolated.
 
-A failed source does not discard valid results from successful sources.
+Current implementation does not include:
 
-Unexpected programming failures should not be silently converted into normal source failures.
+- retry logic;
+- rate-limit scheduling;
+- browser automation;
+- authenticated retrieval;
+- source-specific premium-content handling.
 
-### Local Collection
+Add those only if real evidence justifies them.
 
-Local feed paths are validated before being passed to `feedparser`.
+### Source-Replacement Validation
 
-A missing local file raises `CollectionError`.
+Tech.eu was tested through the actual collector before configuration change.
 
-### Remote Collection
-
-Current remote collection flow is:
-
-```text
-configured HTTP/HTTPS feed
-→ urllib Request
-→ explicit User-Agent
-→ explicit Accept header
-→ 10-second timeout
-→ normal TLS verification
-→ normal redirect handling
-→ response bytes
-→ feedparser
-```
-
-The collector uses standard-library networking rather than a third-party HTTP client.
-
-Expected remote failures converted into `CollectionError` include:
-
-- HTTP errors;
-- URL/network errors;
-- request timeout.
-
-Normal SSL certificate verification remains enabled.
-
-No SSL-verification bypass exists.
-
-### Parser Behaviour
-
-After content is loaded, `feedparser` parses the feed.
-
-A parser result marked malformed through `bozo` is currently rejected with `CollectionError`.
-
-Production evidence has not justified weakening this policy.
-
-### Retry Policy
-
-No retry logic is currently implemented.
-
-This remains intentional.
-
-The preferred response to an unreliable low-value source is:
+Observed:
 
 ```text
-review source
-→ replace or remove when appropriate
+status: success
+20 items received
 ```
 
-before:
+Sifted was also technically collectible.
 
-```text
-add increasingly complex retry/resilience behaviour
-```
+Therefore its replacement was not an HTTP compatibility decision.
 
-Retries should be added only if repeated production evidence demonstrates that bounded retry materially improves a valuable source.
+It was an information-quality decision.
 
 ---
 
 ## 5.4 `normalize.py`
 
-Owns deterministic article normalisation.
+Owns transformation from feedparser entries into canonical article records.
 
-Current responsibilities include:
+Normalisation preserves:
 
-- trimming and normalising titles;
-- normalising URLs;
-- removing selected tracking parameters;
-- removing fragments;
-- parsing publication timestamps;
-- converting recognised timestamps to timezone-aware UTC values;
-- creating deterministic record identifiers.
+- source identity;
+- title;
+- article URL;
+- publication time;
+- description where available;
+- retrieval time.
 
-The original article URL is preserved separately from the normalised URL so the report can continue linking to the publisher-provided location.
+URLs and titles are normalised for later identity/deduplication.
 
-### Record Identity
+Publication timestamps are timezone-aware.
 
-The implemented identifier is based deterministically on:
+### Metadata Evidence from Phase 4
+
+The Tech.eu vs Sifted comparison showed:
 
 ```text
-source_id + normalized_url
+Tech.eu:
+20/20 tested records had descriptions
+
+Sifted:
+0/24 tested records had descriptions
 ```
 
-using SHA-256.
+Both normalised successfully.
 
-There is currently no fallback identifier when a valid URL is unavailable.
+This demonstrates that:
 
-That behaviour should not be broadened without evidence.
+> normalisation validity and product metadata quality are separate architectural concerns.
 
-### Publication Timestamps
-
-The normaliser uses feed-provided publication timestamps.
-
-The current source set has supplied usable publication timestamps during production validation.
-
-No publication-time inference layer exists.
-
-### Optional Descriptions
-
-Descriptions remain optional for structural validity.
-
-The system does not generate a synthetic description during normalisation.
-
-Production use has now shown that missing or thin descriptions can create a product-quality limitation.
-
-That issue belongs to the upcoming richer-report design rather than being silently solved inside normalisation.
+The model can accept a missing description, while source policy may still reject the source because that omission materially harms the report.
 
 ---
 
 ## 5.5 `validate.py`
 
-Owns structural record validation before later processing.
+Owns structural record validation.
 
-Validation checks important conditions such as:
+Validation checks that downstream processing receives records with required fields.
 
-- source identifier exists;
-- title exists;
-- article URL is valid HTTP or HTTPS;
-- retrieval timestamp is timezone-aware.
+Invalid records remain distinguishable from valid records.
 
-Validation returns valid and invalid records separately.
+Current architecture does not treat missing optional description as structural invalidity.
 
-Invalid input remains visible rather than disappearing silently.
+That remains correct.
 
-Validation is intentionally distinct from collection-window eligibility.
-
-A record may be:
-
-```text
-structurally valid
-but
-not eligible for the current reporting window
-```
+Source-quality policy decides whether repeated missing descriptions make a source unsuitable.
 
 ---
 
 ## 5.6 `filter_window.py`
 
-Owns deterministic publication-window filtering.
+Owns publication-time eligibility.
 
-Current behaviour:
+Current collection window:
 
-- accepts timezone-aware start and end datetimes;
-- rejects naive boundaries;
-- rejects a window whose end precedes its start;
-- uses inclusive boundaries;
-- retains records whose `published_at` falls within the window;
-- excludes records published before the window;
-- excludes records published after the window;
-- excludes records whose `published_at` is missing.
+```text
+actual run timestamp - 24 hours
+through
+actual run timestamp
+```
 
-The current CLI constructs a previous-24-hours window relative to actual execution time.
+Eligibility is based on:
 
-This architecture is now under evidence-based review because GitHub scheduler latency can shift the effective report window.
+```text
+published_at
+```
 
-No change has yet been implemented.
+not retrieval time.
+
+Records without publication timestamps are excluded from window eligibility.
+
+Both boundaries remain inclusive.
+
+The window uses timezone-aware datetimes.
 
 ---
 
 ## 5.7 `deduplicate.py`
 
-Owns deterministic exact duplicate reduction.
+Owns exact duplicate reduction.
 
-Current duplicate checks are applied in this order:
+Current deterministic evidence:
 
 1. normalised URL;
 2. normalised title.
 
 The first deterministic occurrence is retained.
 
-The component returns both:
+Near-duplicate or same-story clustering remains deferred.
 
-- unique records;
-- duplicate records.
-
-Near-duplicate or semantic clustering remains deferred.
-
-Potential approaches such as:
-
-- title similarity;
-- event clustering;
-- semantic embeddings;
-- LLM comparison;
-
-are not part of the current architecture.
-
-False merging remains a greater concern than modest repeated coverage.
+Do not add fuzzy matching unless repeated production evidence demonstrates material report duplication.
 
 ---
 
 ## 5.8 `classify.py`
 
-Owns deterministic domain classification.
+Owns deterministic topic classification.
 
-Current logic combines:
-
-- source-level default domains;
-- configured domain keywords;
-- title and description text.
-
-Keyword matching is:
-
-- case-insensitive;
-- word-boundary protected;
-- deterministic.
-
-A record may belong to multiple domains.
-
-A record may also remain unclassified.
-
-Unclassified records remain valid processed records but are omitted from the main Markdown report.
-
-### Current Implemented Taxonomy
-
-The current implemented taxonomy contains seven active domains:
-
-- Global Politics and Geopolitics;
-- Economics and Macroeconomics;
-- Companies and Corporate Strategy;
-- Artificial Intelligence;
-- Technology and Software;
-- Startups and Venture Capital;
-- Europe and the European Union.
-
-The broader target taxonomy is defined in:
+Current classification evidence:
 
 ```text
-03 Information Taxonomy and Source Policy.md
+source defaults
++
+configured keyword matches against title and description
 ```
+
+An article may belong to multiple domains.
+
+An article may remain unclassified.
+
+That is an intentional state.
 
 ### Source Defaults
 
-Source defaults are interpreted as prior topical evidence.
+Source defaults are applied only when the selected source/feed provides genuine source-wide topical evidence.
 
-They should be used only where the selected feed is narrow enough that essentially every item legitimately belongs to that topic.
-
-Current source-default policy:
+Current production defaults:
 
 ```text
 BBC News World                → none
@@ -660,35 +557,108 @@ European Central Bank         → none
 European Commission           → none
 Istat Press Releases          → Economics and Macroeconomics
 OpenAI News                   → Artificial Intelligence
-Sifted                        → Startups and Venture Capital
+Tech.eu                       → none
 ```
 
-### Conservative Classification Principle
+Tech.eu was explicitly tested with a Startups/VC default.
 
-The architecture follows:
+That produced misleading assignments to:
 
-> prefer no source default over a weak publisher-level assumption.
+- corporate M&A;
+- AI stories;
+- European industrial-policy stories;
+- broader fintech/business stories.
 
-And:
+The final architecture therefore uses:
 
-> prefer an unclassified record over a misleading classification.
+```yaml
+default_domains: []
+```
 
-### Evidence-Based Keyword Refinement
+for Tech.eu.
 
-Current evidence-based Global Politics additions include:
+### Classification Precision Rule
 
-- `war`;
-- `conflict`;
-- `parliament`.
+Prefer:
 
-Broader candidates such as:
+```text
+unclassified
+```
 
-- `government`;
-- `defence`;
-- `president`;
-- `prime minister`;
+over:
 
-were tested but rejected because of ambiguous or low-value matches.
+```text
+weak or misleading domain assignment
+```
+
+A high unclassified count is not automatically an architecture defect.
+
+A 17 August 2026 run produced:
+
+```text
+30 unique records
+26 unclassified
+4 displayed
+```
+
+Manual inspection showed that most of the 26 excluded records were correctly outside the intended report scope.
+
+Therefore the correct validation question is:
+
+> Which high-value stories are being missed?
+
+not:
+
+> What percentage of all records are classified?
+
+### Keyword Architecture
+
+Keyword matching remains deliberately simple and inspectable.
+
+Current Phase 4 evidence-backed changes include:
+
+```text
+Global Politics and Geopolitics
++ tariffs
+
+Companies and Corporate Strategy
++ acquired
+
+Startups and Venture Capital
++ early-stage fund
++ funding market
+- startup
+```
+
+The removal of generic `startup` is architecturally important.
+
+It demonstrated that a broad lexical signal can create:
+
+```text
+weak semantic evidence
+→ domain assignment
+→ additional domain score
+→ additional keyword score
+→ low-value report promotion
+```
+
+The architecture therefore requires candidate keyword testing against real records before configuration changes.
+
+### Keyword Variant Limitation
+
+Testing acquisition variants also showed that closely related terms can independently match one record.
+
+Because the current score adds one point per matched keyword, naive synonym expansion can inflate relevance.
+
+Do not introduce stemming, NLP or a more complex matcher yet.
+
+The current response should be:
+
+```text
+select candidate terms conservatively
+→ simulate
+→ inspect
+```
 
 ---
 
@@ -696,9 +666,7 @@ were tested but rejected because of ambiguous or low-value matches.
 
 Owns deterministic relevance scoring.
 
-The current score is intentionally simple.
-
-Conceptually:
+Current formula:
 
 ```text
 relevance score
@@ -708,7 +676,7 @@ source-tier score
 + keyword-match score
 ```
 
-Current configured source-tier values are:
+Current source-tier values:
 
 ```text
 Tier 1 → 4
@@ -717,24 +685,30 @@ Tier 3 → 2
 Tier 4 → 1
 ```
 
-Current additional weights are:
+Current additional weights:
 
 ```text
 2 points per assigned domain
 1 point per matched keyword
 ```
 
-Score components are retained for transparency.
+Score components remain stored for transparency.
 
 The formula remains provisional.
 
 ### Architectural Rule
 
-If weak upstream evidence inflates scores:
+If weak evidence inflates score:
 
-> correct the source/default/classification evidence before redesigning ranking.
+> **fix source defaults or classification evidence before redesigning ranking.**
 
-Production experience has already demonstrated this principle.
+Phase 4 reinforced this rule through:
+
+- Tech.eu source-default testing;
+- removal of generic `startup`;
+- conservative Financial Markets terms.
+
+No change to ranking weights was needed.
 
 ---
 
@@ -744,17 +718,34 @@ Owns processed-record persistence.
 
 Processed records are written as JSON Lines.
 
-The current write model overwrites the target file deterministically rather than continually appending.
+Current path pattern:
+
+```text
+data/processed/YYYY/MM/YYYY-MM-DD.jsonl
+```
+
+The write model replaces the dated target deterministically during a run rather than continually appending.
 
 This supports:
 
-- predictable same-path reruns;
+- predictable reruns;
+- simple history;
 - bounded duplicate behaviour;
-- simple repository inspection.
+- regression testing against stored production records.
 
-Repository-native files remain the storage architecture.
+Stored records were directly useful during Phase 4.
 
-No database is justified.
+Three historical JSONL files provided a:
+
+```text
+114-record regression corpus
+```
+
+for taxonomy validation.
+
+This confirms the value of repository-native processed-record history as a testing asset.
+
+No database is currently justified.
 
 ---
 
@@ -762,75 +753,52 @@ No database is justified.
 
 Owns deterministic report selection and Markdown rendering.
 
-It contains two distinct responsibilities.
+Current report behaviour includes:
 
-### Selection
-
-The report selector determines which processed records appear.
-
-Current selection behaviour:
-
-- excludes unclassified records;
-- requires an active primary domain;
-- orders records deterministically;
-- respects maximum items per domain;
-- respects maximum items overall.
-
-### Primary-Domain Placement
-
-The first eligible assigned domain becomes the story's primary report section.
-
-Later assigned domains appear as secondary metadata.
-
-### Rendering
-
-The current Markdown renderer includes:
-
-- report date;
-- generation timestamp;
-- run status;
-- monitored time window;
-- active source count;
-- successful source count;
-- empty source count;
-- failed source count;
-- collected-item count;
-- displayed-item count;
-- degraded-run warnings;
-- domain sections;
-- article title and source link;
-- source name;
+- one primary section per story;
+- secondary domains shown as metadata;
+- source attribution;
 - publication timestamp;
 - relevance score;
-- secondary-domain metadata;
-- short feed-provided description.
+- direct article link;
+- feed-provided description where available;
+- bounded item counts.
 
-Each story appears once.
+Current limits:
+
+```text
+maximum 5 items per domain
+maximum 30 items overall
+maximum description length 300 characters
+```
+
+These limits are configuration, not architecture constants.
 
 ### Current Limitation
 
-The report currently acts partly as an intelligence index.
+The report still acts partly as an intelligence index.
 
-It may provide too little information to understand a development without opening the source.
+It may provide too little context to understand some developments without opening the source.
 
-Production use has validated a new requirement:
+Production use has validated the requirement:
 
-> the report should provide enough lawful context for initial understanding, while preserving the original source for deeper reading.
+> provide enough lawful context for initial understanding while preserving the source for deeper reading.
 
-The architectural method for satisfying that requirement is not yet selected.
+The architectural method is not yet selected.
 
-Do not implement a summarisation layer before the richer-report design phase determines:
+Do not implement richer summarisation before the dedicated design phase establishes:
 
 - required context depth;
-- permitted source material;
+- lawful source material;
 - metadata availability;
 - fallback behaviour;
 - report-length constraints;
+- treatment of premium-exception sources;
 - validation method.
 
 ### Architecture Preference for Richer Context
 
-Evaluate candidate mechanisms in this order:
+Evaluate mechanisms in this order:
 
 ```text
 existing richer RSS/Atom fields
@@ -854,8 +822,6 @@ are required.
 
 Owns structured operational metadata for one pipeline execution.
 
-The run summary is the persistent machine-readable record of what happened.
-
 Current information includes:
 
 - run identifier;
@@ -874,11 +840,6 @@ Current information includes:
 - displayed item count;
 - warnings.
 
-The same summary supports:
-
-- JSON operational history;
-- Markdown operational metadata.
-
 Run status distinguishes:
 
 ```text
@@ -894,8 +855,6 @@ where applicable.
 ## 5.13 `pipeline.py`
 
 Owns end-to-end orchestration.
-
-It coordinates processing stages without absorbing their internal logic.
 
 Current orchestration sequence:
 
@@ -931,7 +890,7 @@ If a future feed contains one malformed entry that terminates an otherwise usabl
 ```text
 reproduce
 → regression test
-→ make smallest justified boundary change
+→ smallest justified boundary change
 ```
 
 ---
@@ -955,13 +914,11 @@ The CLI:
 - derives repository output paths;
 - invokes the pipeline.
 
-The CLI should remain thin.
-
-GitHub Actions invokes the same CLI rather than implementing a parallel processing path.
+GitHub Actions invokes the same CLI.
 
 ### Local Installation Note
 
-Because the package uses a `src/` layout, local source-based pytest execution can reflect newer repository code while:
+Because the package uses a `src/` layout, source-based pytest execution can reflect newer repository code while:
 
 ```text
 python -m daily_intelligence.cli
@@ -969,9 +926,15 @@ python -m daily_intelligence.cli
 
 may execute a stale installed package.
 
-When CLI behaviour does not match validated source changes, refresh the local package installation before diagnosing a new application bug.
+When CLI behaviour appears inconsistent with source changes:
 
-This is a development-environment concern, not a production architecture dependency.
+```text
+verify installation state first
+```
+
+before diagnosing an application bug.
+
+This remains a development-environment concern, not a production dependency.
 
 ---
 
@@ -981,11 +944,32 @@ Configuration is repository-native and human-readable.
 
 The goal is to separate changing information policy from stable processing code.
 
+Phase 4A validated this design strongly:
+
+```text
+source replacement
++
+keyword correction
++
+new domain
+```
+
+required changes only to:
+
+```text
+config/sources.yaml
+config/domains.yaml
+```
+
+plus configuration tests.
+
+No core processing module required modification.
+
 ---
 
 ## 6.1 `sources.yaml`
 
-Current source fields include:
+Current fields include:
 
 - `id`;
 - `name`;
@@ -997,7 +981,7 @@ Current source fields include:
 - `geographic_scope`;
 - `active`.
 
-The current registry contains seven public RSS feeds:
+Current active registry:
 
 - BBC News World;
 - BBC News Business;
@@ -1005,11 +989,25 @@ The current registry contains seven public RSS feeds:
 - European Commission Highlighted News;
 - Istat Press Releases;
 - OpenAI News;
-- Sifted.
-
-The source universe is now under active review.
+- Tech.eu.
 
 The file remains the runtime source of truth for active production feeds.
+
+### Sifted Architectural Decision
+
+Sifted was removed from current production.
+
+The replacement decision was based on:
+
+```text
+same basic collection compatibility
++
+substantially better Tech.eu metadata richness
++
+better follow-up usability
+```
+
+Do not retain a technically compatible weak source merely because existing architecture can parse it.
 
 ### Access Metadata
 
@@ -1025,9 +1023,9 @@ database
 extra paid subscription
 ```
 
-These are currently policy/review dimensions.
+These remain policy/audit dimensions for now.
 
-They should become runtime configuration only if application behaviour genuinely needs them.
+They should become runtime fields only if application behaviour genuinely requires them.
 
 ---
 
@@ -1040,7 +1038,7 @@ Current fields include:
 - `keywords`;
 - `active`.
 
-Current active domains are:
+Current active domains:
 
 - Global Politics and Geopolitics;
 - Economics and Macroeconomics;
@@ -1048,15 +1046,37 @@ Current active domains are:
 - Artificial Intelligence;
 - Technology and Software;
 - Startups and Venture Capital;
-- Europe and the European Union.
+- Europe and the European Union;
+- Financial Markets.
 
-Candidate expansion domains:
+Financial Markets is now implemented.
 
-- Financial Markets;
+Target domains still not implemented:
+
 - Italy;
-- Milan and Bocconi ecosystem.
+- Milan and Bocconi Ecosystem.
 
-Domain expansion should follow source/domain strategy and technical validation.
+### Italy
+
+Strategically approved.
+
+Implementation should remain configuration-first if suitable source evidence and keywords can support it.
+
+### Milan/Bocconi
+
+This is now a validated product requirement rather than merely a candidate.
+
+However, its likely inputs may include:
+
+- events;
+- programmes;
+- deadlines;
+- opportunities;
+- ecosystem news.
+
+The current `ArticleRecord` and pipeline should be reused if possible.
+
+Do not create a separate opportunity architecture until real source metadata demonstrates that the existing model is insufficient.
 
 ---
 
@@ -1087,15 +1107,19 @@ maximum 30 items overall
 maximum description length 300 characters
 ```
 
-These are configurable defaults, not permanent product truths.
+These remain configurable defaults.
 
-The richer-report design may justify changes to report settings.
+No setting was changed during Phase 4A.
+
+That is intentional.
+
+The source and taxonomy problems were solved upstream instead of changing ranking/report settings.
 
 ---
 
 # 7. Data Model and Record Lifecycle
 
-A feed entry passes through distinct processing states:
+A feed entry passes through:
 
 ```text
 Raw feed entry
@@ -1113,23 +1137,22 @@ These states remain deliberately separate.
 
 Examples:
 
-- a structurally valid article may be outside the reporting window;
-- an in-window article may be a duplicate;
-- a unique article may remain unclassified;
-- a classified article may not be displayed because of report limits.
+- structurally valid record outside the reporting window;
+- unique record with no domain;
+- classified record not selected because of limits;
+- source with technically valid records but insufficient metadata quality.
 
 This separation improves:
 
 - testability;
 - counter interpretation;
 - failure isolation;
+- source evaluation;
 - future extension.
 
 ---
 
 # 8. Collection-Window Architecture
-
-The collection window represents the publication-time interval eligible for a report.
 
 Current CLI behaviour:
 
@@ -1141,507 +1164,253 @@ actual run timestamp
 
 Both boundaries are inclusive.
 
-The window must be timezone-aware.
-
-Eligibility uses:
-
-```text
-published_at
-```
-
-not retrieval time.
-
-A record can therefore be:
-
-```text
-collected
-valid
-but outside the report window
-```
+Eligibility uses `published_at`.
 
 ## Observed Production Limitation
 
-Scheduled GitHub Actions execution has demonstrated substantial trigger latency.
+GitHub Actions scheduled runs may start materially later than the configured cron trigger.
 
-A scheduled workflow may start materially later than the configured cron time.
-
-Because the reporting window is currently based on actual start time:
+Because the reporting cutoff uses actual execution time:
 
 ```text
 configured trigger
-→ delayed GitHub start
-→ later report cutoff
-→ shifted 24-hour window
-→ potentially different eligible stories
+→ delayed run start
+→ shifted cutoff
+→ shifted eligible story set
 ```
-
-This coupling means infrastructure timing can affect information composition.
 
 ## Current Decision
 
-Do not change the window yet.
+Do not change the reporting window yet.
 
-The issue is now an explicit architecture question.
-
-Potential future design:
+Potential future architecture:
 
 ```text
 fixed reporting cutoff
-→ deterministic 24-hour information window
+→ deterministic information window
 → GitHub delay affects delivery time only
 ```
 
-This should be implemented only if repeated production evidence confirms that the current coupling materially harms report consistency.
+Implement only if repeated evidence demonstrates material product harm.
 
 ---
 
 # 9. Deduplication Architecture
 
-Deduplication remains conservative.
+Current exact reduction:
 
-Current exact duplicate rules:
+```text
+normalised URL
+→ fallback normalised title
+```
 
-## Rule 1 — Normalised URL
+No near-duplicate clustering exists.
 
-Same normalised URL means duplicate.
+No story-level clustering exists.
 
-## Rule 2 — Normalised Title
+No vector similarity exists.
 
-Records surviving URL comparison but sharing the same normalised title are duplicates.
-
-The first deterministic occurrence is retained.
-
-This approach is:
-
-- deterministic;
-- inexpensive;
-- explainable;
-- easy to test.
-
-It does not infer that differently worded articles describe the same event.
-
-Near-duplicate logic remains deferred.
+These remain deferred until repeated report evidence demonstrates a meaningful problem.
 
 ---
 
 # 10. Classification Architecture
 
-Classification is rules-based.
-
-It separates:
-
-- source defaults;
-- domain configuration;
-- keyword evidence.
-
-A record may:
-
-- receive one domain;
-- receive multiple domains;
-- remain unclassified.
-
-Primary report placement is deterministic.
-
-Potential future dimensions include:
-
-- article-level geography;
-- content type;
-- entities.
-
-They are not part of the core pipeline.
-
-The active source/domain expansion phase may justify additional domains.
-
-It does not automatically justify more sophisticated classification machinery.
-
----
-
-# 11. Ranking Architecture
-
-Ranking is deterministic prioritisation.
-
-It is not an attempt to calculate objective global importance.
-
-Current signals:
-
-- source tier;
-- domain count;
-- keyword count.
-
-Future signals might include:
-
-- domain priority;
-- recency;
-- entities;
-- geography;
-- independent multi-source coverage.
-
-Source accessibility and metadata richness should primarily be handled through source eligibility and report design before being introduced as ranking penalties.
-
-Avoid downstream scoring complexity when upstream source selection can solve the problem more cleanly.
-
----
-
-# 12. Report Architecture
-
-The Markdown report is the primary user-facing production artifact.
-
-Current objectives:
-
-- concise;
-- deterministic;
-- source-transparent;
-- bounded;
-- operationally transparent;
-- easy to inspect on GitHub;
-- easy to read on desktop or mobile.
-
-## Current User Experience
-
-The current report provides:
+Classification remains:
 
 ```text
-headline
-source
-publication time
-relevance score
-secondary domains
-feed description when available
-source link
+source defaults
++
+title keyword matches
++
+description keyword matches
 ```
 
-This is sufficient for triage.
+Properties:
 
-It is not consistently sufficient for understanding.
+- deterministic;
+- explainable;
+- multi-domain;
+- allows unclassified records;
+- configurable;
+- no ML dependency.
 
-## Target User Experience
+## Current Architectural Principle
 
-The future architecture should support:
+Classification should optimize for:
 
 ```text
-report
-→ understand core development
-→ decide whether deeper reading is useful
-→ open selected source
+useful precision
 ```
 
 rather than:
 
 ```text
-report
-→ identify headline
-→ click article
-→ only then understand development
+maximum coverage
 ```
 
-## Architectural Constraint
+The 17 August report review validated that many unclassified records were intentionally low-value.
 
-The report must not become a public mirror of copyrighted articles.
-
-Any richer context must remain compatible with:
-
-- source permissions;
-- public-repository storage;
-- copyright boundaries;
-- zero recurring cost;
-- no authenticated scraping.
-
-## Sparse and Concentrated Reports
-
-Production has also demonstrated that a technically healthy run may produce a short and concentrated report.
-
-This is an information-quality issue, not automatically an architectural failure.
-
-Do not add:
-
-- minimum quotas;
-- artificial publisher balancing;
-- automatic filler;
-
-without repeated evidence.
-
-Source expansion should be evaluated before adding complex report-balancing logic.
+Do not add generic vocabulary merely to improve classification counts.
 
 ---
 
-# 13. Run Status and Failure Architecture
+# 11. Ranking Architecture
 
-Failure handling distinguishes:
-
-- source degradation;
-- critical system failure.
-
----
-
-## Source-Level Failure
-
-Expected collection failures are isolated.
-
-Examples:
-
-- unavailable feed;
-- HTTP failure;
-- DNS failure;
-- timeout;
-- malformed feed.
-
-A failed source produces:
-
-- `failed` source status;
-- error metadata;
-- degraded run status where appropriate;
-- report warning;
-- log warning.
-
-Successful sources continue.
-
-### Validated Automated Behaviour
-
-A deliberate GitHub Actions degraded-source test changed BBC World to an invalid hostname.
-
-Observed behaviour:
+Current formula:
 
 ```text
-7 active sources
-6 successful
-1 failed
-status = degraded
+source-tier points
++
+2 × assigned domains
++
+1 × matched keywords
 ```
 
-The report remained usable.
+The ranking architecture remains unchanged after Phase 4A.
 
-The workflow persisted degraded output.
+This is important evidence.
 
-This is the production policy.
-
----
-
-## Empty Sources
-
-A valid source returning no entries is represented as:
+Observed report-quality defects were corrected through:
 
 ```text
-empty
+source replacement
+source defaults
+keyword precision
+domain coverage
 ```
 
-not as failed.
+not ranking sophistication.
+
+Continue to prefer upstream corrections.
 
 ---
 
-## Critical Failures
+# 12. Report Architecture
 
-Critical failures should stop trustworthy publication.
+The report remains deterministic Markdown.
 
-Examples:
+Current flow:
 
-- invalid source configuration;
-- invalid core configuration;
-- unexpected programming error;
-- failure preventing valid output creation.
+```text
+classified/scored records
+→ deterministic ordering
+→ domain limits
+→ overall limit
+→ one primary placement
+→ secondary-domain metadata
+→ Markdown rendering
+```
 
-A deliberate invalid `geographic_scope: []` configuration was tested through GitHub Actions.
+Unclassified records remain stored but are not displayed.
 
-Observed behaviour:
+### Sparse Reports
 
-- tests/configuration validation failed;
-- production publication did not proceed successfully;
-- no misleading successful output was published.
+A sparse report is not automatically defective.
 
-This establishes the critical-failure boundary.
+The relevant question is whether:
 
----
+- major useful stories were missed;
+- selected items are weak;
+- source coverage is insufficient.
 
-# 14. Observability Architecture
-
-Observability uses four complementary surfaces.
-
----
-
-## 14.1 Run Summary JSON
-
-Persistent machine-readable operational record.
-
-Contains:
-
-- status;
-- source counts;
-- item counts;
-- collection window;
-- warnings;
-- timestamps.
+Do not introduce filler behaviour.
 
 ---
 
-## 14.2 Markdown Operational Header
+# 13. Storage Architecture
 
-User-facing indication of report completeness.
-
-Shows:
-
-- run status;
-- monitored period;
-- source health;
-- item counts;
-- warnings.
-
----
-
-## 14.3 Standard-Library Logging
-
-Technical execution diagnosis.
-
-Logs include:
-
-- pipeline start;
-- each source outcome;
-- validation count;
-- window-filter count;
-- duplicate count;
-- classification/ranking count;
-- output paths;
-- final status.
-
-CLI logging is explicitly configured so these messages appear in GitHub Actions.
-
----
-
-## 14.4 GitHub Actions Job Status
-
-Repository-level automation visibility.
-
-Exposes:
-
-- workflow success/failure;
-- failed step;
-- test failures;
-- pipeline logs;
-- persistence failures.
-
-No external monitoring service is currently justified.
-
----
-
-# 15. Storage Architecture
-
-The repository itself is the production storage and delivery layer.
-
----
-
-## Processed Records
+Current persistent artifacts:
 
 ```text
 data/processed/YYYY/MM/YYYY-MM-DD.jsonl
-```
-
----
-
-## Run Summaries
-
-```text
 data/runs/YYYY/MM/YYYY-MM-DD.json
-```
-
----
-
-## Daily Reports
-
-```text
 reports/daily/YYYY/MM/YYYY-MM-DD.md
 ```
 
+Repository-native history remains sufficient.
+
+Phase 4 demonstrated an additional architectural benefit:
+
+> historical processed records can act as deterministic regression corpora for taxonomy changes.
+
+No external database is justified.
+
 ---
 
-## Production Persistence
+# 14. Failure Architecture
 
-GitHub Actions automatically persists changed outputs.
+Failure handling remains layered.
 
-Current persistence flow:
+## Source-Level Recoverable Failure
+
+One source may fail while others succeed.
+
+Expected outcome:
 
 ```text
-pipeline
-→ generate outputs
-→ validate expected outputs
-→ git add production output directories
-→ inspect staged changes
-→ no change: exit without commit
-→ changes exist: commit as github-actions[bot]
-→ push
+partial data
+→ degraded run
+→ report persists
+→ failure visible
 ```
 
-The bot identity is used only for automated production persistence.
+## Critical Failure
 
-Generated production history remains visible in ordinary Git history.
+Examples:
 
----
+- invalid configuration;
+- core pipeline failure;
+- invalid required output.
 
-## Output Validation
+Expected outcome:
 
-Before persistence, the workflow validates the expected dated output files.
+```text
+pipeline/workflow fails
+→ misleading output not published
+```
 
-The current architecture assumes all three core outputs exist:
-
-- processed JSONL;
-- run-summary JSON;
-- Markdown report.
-
-A future no-news production case should be reviewed if empty JSONL is demonstrated to be valid but current file-size validation rejects it.
-
-Do not redesign this path without reproducing the actual case.
+Both behaviours have been validated.
 
 ---
 
-## Retention
+# 15. Logging and Observability
 
-No retention or archive-cleanup mechanism exists.
+Run-level logging remains standard-library based.
 
-Repository-native daily history remains intentionally simple.
+Current logs expose:
 
-Revisit retention only after repository growth becomes a demonstrated problem.
+- run start;
+- active source count;
+- per-source collected item count;
+- validation totals;
+- window totals;
+- deduplication totals;
+- classification/unclassified totals;
+- output paths;
+- final run status.
 
----
+The 17 August Phase 4A validation used these logs to confirm:
 
-# 16. Idempotency and Determinism
+```text
+7 active
+7 successful
+1281 valid
+32 window-eligible
+30 unique
+26 unclassified
+success
+```
 
-The system should produce predictable results from equivalent inputs and configuration.
-
-Deterministic properties include:
-
-- URL normalisation;
-- record identity;
-- validation;
-- filtering for supplied boundaries;
-- exact deduplication;
-- keyword classification;
-- relevance scoring;
-- report ordering;
-- report limits;
-- target-file overwrite semantics.
-
-Network-fed production runs naturally differ because:
-
-- feed contents change;
-- retrieval time changes;
-- run timestamp changes.
-
-## Automated Commit Determinism
-
-The workflow does not create empty commits.
-
-This branch has been explicitly validated.
-
-A same-day rerun may still create a legitimate changed commit because timestamps or feed content changed.
-
-That is not considered an empty-commit defect.
+Operational metrics should support diagnosis, not become optimization targets automatically.
 
 ---
 
-# 17. Testing Architecture
+# 16. Test Architecture
 
-Testing is part of the architecture.
+The automated suite currently contains:
 
-Current suite:
-
-> **110 tests pass.**
+> **110 tests**
 
 Coverage includes:
 
@@ -1672,34 +1441,37 @@ Coverage includes:
 
 ## Test Isolation
 
-Deterministic automated tests do not depend on live internet access.
+Automated tests remain independent of live internet access.
 
-Fixtures and temporary configuration remain the default for automated tests.
+Fixtures and temporary configuration remain the default deterministic test layer.
 
-Real-source behaviour is validated separately through production-like or actual production runs.
+Real-source validation is separate.
 
-## Production-Level Tests Completed
+## Phase 4A Validation Pattern
 
-The following have been explicitly tested through GitHub Actions:
+Phase 4A added a useful development pattern:
 
 ```text
-normal successful production run
-degraded source run
-critical configuration failure
-changed-output commit
-no-change commit guard
-scheduled execution
+live source probe
+→ classification simulation
+→ candidate keyword simulation
+→ stored-corpus regression
+→ configuration edit
+→ targeted tests
+→ full suite
+→ real pipeline run
+→ manual report inspection
 ```
+
+This pattern should be reused for material source/taxonomy changes.
 
 ---
 
-# 18. Production Automation Architecture
+# 17. Production Automation Architecture
 
-GitHub Actions is the production execution environment.
+GitHub Actions remains the production execution environment.
 
-The workflow remains a thin wrapper around the Python application.
-
-Current high-level workflow:
+High-level workflow:
 
 ```text
 workflow_dispatch / schedule
@@ -1723,102 +1495,53 @@ Supported through:
 workflow_dispatch
 ```
 
-This is used for:
-
-- testing;
-- recovery;
-- controlled production reruns.
-
 ## Scheduled Trigger
 
-The production schedule is:
+Current configured schedule:
 
 ```text
 06:05 Europe/Rome
 ```
 
-The schedule was moved earlier after observing significant GitHub scheduler delays.
-
-The schedule should be understood as:
-
-> desired trigger time
-
-not:
-
-> guaranteed exact execution time.
+This remains a desired trigger time, not guaranteed execution time.
 
 ## Runtime
 
-Current runner:
-
 ```text
 ubuntu-latest
+Python 3.12
 ```
-
-Current configured Python:
-
-```text
-3.12
-```
-
-## Package Installation
-
-The workflow installs the project with development dependencies so the same job can:
-
-- run tests;
-- run production.
-
-## Timeout
-
-An explicit workflow job timeout is configured.
-
-The current timeout remains comfortably above normal runtime while preventing an indefinitely stuck job.
 
 ## Permissions
 
-The workflow requires:
+Required:
 
 ```text
 contents: write
 ```
 
-because it commits generated outputs to the repository.
-
-No broader repository permissions are required for current production behaviour.
+No broader production permission is currently needed.
 
 ## Secrets
 
-No source credentials or repository secrets are required for the current production source universe.
+No source credentials or repository secrets are required.
 
 ## Production AI
 
-The workflow makes no:
+No:
 
-- OpenAI API call;
-- Copilot call;
-- GitHub AI call;
-- third-party paid AI call.
+- OpenAI API;
+- Copilot;
+- GitHub AI;
+- third-party paid AI.
 
 ---
 
-# 19. Concurrency Architecture
+# 18. Concurrency Architecture
 
-Concurrency became necessary once both:
+Production uses one concurrency group.
 
-- manual dispatch;
-- scheduled execution;
-
-could start production runs.
-
-Without protection, overlapping runs could:
-
-- write the same date-based paths;
-- create conflicting commits;
-- race during push.
-
-The workflow therefore uses a single production concurrency group.
-
-Current policy:
+Policy:
 
 ```text
 one Daily Intelligence production run at a time
@@ -1830,58 +1553,33 @@ with:
 cancel-in-progress: false
 ```
 
-A currently running production job should finish rather than being aborted by a newer trigger.
+This prevents simultaneous jobs from racing on:
 
-This is preferable for a small daily pipeline where preserving a valid run is more important than immediately replacing it.
-
----
-
-# 20. Scheduler Architecture and Timing
-
-GitHub Actions scheduling is an external platform dependency.
-
-Production evidence shows that scheduled runs may start materially later than configured.
-
-Observed delays have exceeded two hours.
-
-This is not currently treated as a system failure because:
-
-- the scheduled event eventually executes;
-- the processing pipeline behaves correctly;
-- outputs are persisted correctly.
-
-## Current Mitigation
-
-Schedule earlier than the desired reading time:
-
-```text
-06:05 Europe/Rome
-```
-
-This creates delivery buffer.
-
-## Architectural Limitation
-
-GitHub schedule delay currently affects both:
-
-- delivery time;
-- report-window composition.
-
-The latter occurs because the CLI uses actual run time as the reporting cutoff.
-
-Potential future mitigation:
-
-```text
-scheduled report date / fixed cutoff
-→ deterministic information window
-→ execution can happen later
-```
-
-No implementation has been selected yet.
+- date-based output paths;
+- Git commits;
+- Git pushes.
 
 ---
 
-# 21. Network Architecture
+# 19. Scheduler Architecture
+
+GitHub scheduler latency is an external platform limitation.
+
+Observed delays can be substantial.
+
+Current mitigation:
+
+```text
+schedule earlier than desired reading time
+```
+
+No additional infrastructure is justified.
+
+The unresolved architectural issue is only whether content selection should use a fixed cutoff independent of execution time.
+
+---
+
+# 20. Network Architecture
 
 Current remote flow:
 
@@ -1896,25 +1594,25 @@ feed URL
 → feedparser
 ```
 
-Validated production characteristics:
+Current characteristics:
 
-- all seven current sources have collected successfully;
-- network failures remain isolated;
-- no source requires authentication;
-- no source currently requires custom rate-limit handling;
-- one request per active source per run remains operationally lightweight.
+- seven active public RSS sources;
+- one request per source per run remains lightweight;
+- no source authentication;
+- no source-specific rate-limit architecture;
+- no retry architecture.
 
-Retry behaviour remains absent.
+Tech.eu required no custom collector logic.
 
-Rate-limit architecture remains absent.
+That supports the current architectural preference:
 
-Add either only when real evidence requires them.
+> choose sources compatible with the simple collector where possible.
 
 ---
 
-# 22. Source Access Architecture
+# 21. Source Access Architecture
 
-The production architecture now explicitly separates:
+Production separates:
 
 ```text
 automation access
@@ -1926,27 +1624,27 @@ from:
 reader access
 ```
 
-This distinction is important after production exposed a Sifted Pro access problem and after the user mapped substantial Bocconi institutional access.
+This distinction remains fundamental.
 
 ---
 
-## Automated Source Layer
+## Automated Public Source Layer
 
-The production pipeline may ingest only sources available through:
+Production may ingest through:
 
 - public RSS;
 - public Atom;
 - official free APIs;
 - public structured metadata;
-- other explicitly automation-permitted endpoints.
+- other explicitly permitted automation endpoints.
 
-Production should not depend on authenticated publisher access.
+No authenticated publisher access belongs here.
 
 ---
 
-## Personal Premium Reading Layer
+## Bocconi Premium Reading Layer
 
-The user may legitimately have direct or institutional access to publications such as:
+The user may have legitimate access to publications including:
 
 - Financial Times;
 - Wall Street Journal;
@@ -1954,18 +1652,17 @@ The user may legitimately have direct or institutional access to publications su
 - The Economist;
 - Il Sole 24 Ore;
 - Foreign Affairs;
-- Harvard Business Review;
-- other Bocconi-supported publications.
+- Harvard Business Review.
 
 This can improve manual follow-up.
 
-It does not automatically expand production ingestion rights.
+It does not automatically expand ingestion rights.
 
 ---
 
 ## Research / Database Layer
 
-Institutional research resources may include:
+Examples:
 
 - Factiva;
 - Nexis Uni;
@@ -1976,9 +1673,60 @@ Institutional research resources may include:
 - S&P Capital IQ Pro;
 - Aida.
 
-These remain manual research tools unless an explicitly permitted automation interface exists.
+These remain manual research systems unless an explicitly permitted structured automation interface exists.
 
-The production architecture must not scrape them.
+---
+
+# 22. Premium Bocconi Exception Architecture
+
+A narrow product exception has now been defined.
+
+Some premium publications may deserve production discovery even when their public metadata cannot support the same context depth as fully public sources.
+
+This is allowed only if:
+
+```text
+exceptional information value
++
+legitimate Bocconi reader access
++
+public/automation-compatible discovery endpoint
++
+no automated premium-body retrieval
+```
+
+This changes the acceptable report experience, not the authentication architecture.
+
+Production still must not:
+
+- automate OpenAthens;
+- log into publishers;
+- store personal publisher credentials;
+- fetch premium article bodies;
+- bypass paywalls.
+
+Potential premium-exception source:
+
+```text
+public feed metadata
+→ deterministic classification/ranking
+→ thinner report entry
+→ user opens article manually through Bocconi
+```
+
+Current highest-priority technical candidate:
+
+```text
+Financial Times
+```
+
+followed by:
+
+```text
+Il Sole 24 Ore
+```
+
+No premium source is currently active under this exception.
 
 ---
 
@@ -1986,33 +1734,23 @@ The production architecture must not scrape them.
 
 The repository is public.
 
-The architecture must never require committing:
+Never commit:
 
 - credentials;
 - Bocconi credentials;
-- private Career OS content;
+- Career OS private content;
 - private emails;
-- newsletter-email content;
+- newsletter contents;
 - authentication cookies;
 - access tokens;
 - licensed database text;
 - restricted copyrighted content.
 
-## Current Credential Position
+Current production requires no source credential.
 
-The current production system requires no source credential.
+That remains preferable.
 
-This is preferable.
-
-If a future optional feature requires a secret:
-
-- it must use environment variables or GitHub Secrets;
-- it must not expose secrets in logs;
-- it must not become a dependency of the core system unless the user explicitly changes the architecture constraints.
-
-Institutional premium content should not be introduced merely because credentials could technically be stored as GitHub Secrets.
-
-The licensing and product-architecture question comes first.
+Even if GitHub Secrets could technically store institutional credentials, architecture policy prohibits using that mechanism to automate premium publisher access merely because the user has legitimate reading rights.
 
 ---
 
@@ -2022,12 +1760,13 @@ The repository may store, where permitted:
 
 - titles;
 - source names;
-- direct links;
+- links;
 - timestamps;
 - short feed descriptions;
 - public structured summaries;
-- derived classifications;
-- derived scores;
+- derived domains;
+- matched keywords;
+- relevance scores;
 - operational metadata.
 
 The system must not store:
@@ -2040,17 +1779,15 @@ The system must not store:
 
 ## Richer-Report Boundary
 
-The new richer-report requirement does not override these rules.
+The richer-context requirement does not override copyright rules.
 
-The objective is:
+Objective:
 
-> provide enough lawful context for initial understanding.
+> enough lawful context for initial understanding.
 
-It is not:
+Not:
 
-> reproduce the article.
-
-The richer-report design must preserve provenance and use the smallest source-content footprint sufficient for the product need.
+> reproduction of the source article.
 
 ---
 
@@ -2058,90 +1795,92 @@ The richer-report design must preserve provenance and use the smallest source-co
 
 ChatGPT remains outside the production dependency chain.
 
-The production system must remain useful without an API call to ChatGPT.
+Production must remain useful without any ChatGPT API call.
 
 ChatGPT may be used manually for:
 
 - development reasoning;
-- code generation and review;
+- code review;
 - project-document drafting;
-- source/domain strategy evaluation;
-- interpretation of selected stories;
-- trend analysis;
-- deciding whether a limitation justifies implementation complexity.
+- source/domain strategy;
+- source-audit interpretation;
+- product-quality review;
+- deciding whether observed limitations justify implementation changes.
 
-The architectural separation remains:
+The separation remains:
 
 ```text
 Daily Intelligence System
-= deterministic collection, filtering, ranking and reporting infrastructure
+= deterministic production infrastructure
 
 ChatGPT
-= optional external reasoning and development layer
+= external development and reasoning layer
 ```
 
-The future richer-report requirement does not automatically change this boundary.
-
-Production LLM summarisation remains unselected.
+The richer-report requirement does not automatically change this boundary.
 
 ---
 
-# 26. Implemented vs Planned vs Deferred Architecture
+# 26. Implemented vs Active vs Deferred Architecture
 
 ## Implemented and Validated
 
 - Python package;
 - repository-native configuration;
 - seven-source public RSS registry;
-- seven-domain implemented taxonomy;
+- eight-domain active taxonomy;
 - RSS/Atom collection;
-- local feed collection;
-- remote HTTP/HTTPS collection;
-- explicit User-Agent;
-- explicit Accept header;
-- 10-second request timeout;
-- normal SSL verification;
+- local fixture collection;
+- remote HTTP/HTTPS retrieval;
+- explicit request headers;
+- 10-second timeout;
+- normal TLS verification;
 - redirect handling;
 - structured source outcomes;
 - source-level failure isolation;
 - normalisation;
 - deterministic URL cleaning;
-- UTC publication timestamps;
+- UTC-aware timestamps;
 - deterministic SHA-256 record IDs;
 - structural validation;
-- previous-24-hours filtering;
+- previous-24-hours publication filtering;
 - exact deduplication;
 - deterministic classification;
 - empty source defaults;
 - deterministic ranking;
 - JSONL persistence;
 - Markdown reporting;
-- structured run-summary JSON;
+- JSON run summaries;
 - pipeline orchestration;
 - CLI;
 - logging;
 - automated tests;
 - real-source validation;
-- GitHub Actions workflow;
+- GitHub Actions;
 - manual workflow dispatch;
-- automated tests in Actions;
-- production execution in Actions;
-- output validation;
-- bot persistence;
+- scheduled execution;
+- automated output validation;
+- automated bot persistence;
 - no-change guard;
 - degraded automated publication;
 - critical-failure protection;
-- scheduled execution;
 - concurrency protection;
-- repository-native production history.
+- repository-native production history;
+- Tech.eu replacing Sifted;
+- Financial Markets domain;
+- conservative keyword regression workflow.
 
 ## Active Architectural Evaluation
 
-- source correction and expansion;
-- domain expansion;
-- Sifted keep/replace/remove decision;
+- further source correction/expansion;
+- Financial Times automation/interface suitability;
+- Il Sole 24 Ore automation/interface suitability;
+- Bank of Italy source role;
+- Reuters feasibility;
+- Italy domain implementation;
+- Milan/Bocconi source architecture;
 - source metadata richness;
-- source accessibility;
+- Premium Bocconi Exception application;
 - richer-report architecture;
 - reporting-window cutoff independence.
 
@@ -2153,6 +1892,7 @@ Production LLM summarisation remains unselected.
 - entity extraction;
 - article-level geography;
 - content-type classification;
+- separate opportunity record model;
 - long-term source-health database;
 - advanced ranking;
 - automatic publisher-diversity penalties;
@@ -2175,38 +1915,38 @@ Production LLM summarisation remains unselected.
 Known limitations include:
 
 - current production source universe contains only seven feeds;
-- Sifted may link to inaccessible Pro content;
-- some feed descriptions are too thin for the intended richer report;
-- OpenAI-related AI coverage may be publisher-concentrated;
-- three target domains remain unimplemented;
-- all current production feeds are English-language;
+- stronger finance/business reporting remains under evaluation;
+- Italy is not yet an explicit domain;
+- Milan/Bocconi is not yet implemented;
+- independent AI reporting remains limited;
+- all current active automated feeds are English-language;
 - full bilingual classification is unvalidated;
 - exact deduplication does not detect differently worded coverage of the same story;
 - records without publication timestamps are excluded;
 - ranking remains provisional;
 - classification remains conservative;
-- some valid records remain unclassified;
+- strategically useful records can still remain unclassified;
 - no entity enrichment exists;
-- no article-level geographic classification exists;
+- no article-level geography exists;
 - no content-type classification exists;
 - no long-term source-health history exists;
-- report context may be insufficient without click-through;
-- report composition can be sparse or source-concentrated;
+- current description depth may still be insufficient for richer-report requirements;
+- Premium Bocconi Exception rendering is not implemented;
+- report composition can be sparse;
 - scheduler timing is not precise;
-- the collection window is tied to actual execution time;
+- collection window remains tied to actual execution time;
 - there is no dedicated latest-report alias;
-- GitHub Markdown remains the primary delivery interface;
-- there is no automated use of Bocconi premium content.
+- GitHub Markdown remains the primary delivery interface.
 
-These limitations should not be interpreted as a feature backlog to implement automatically.
+These limitations are not an automatic feature backlog.
 
-Each change still requires evidence.
+Each requires evidence.
 
 ---
 
 # 28. Architecture Decision Rules
 
-Before adding any new architectural component, ask:
+Before adding any architectural component, ask:
 
 1. What validated user problem does it solve?
 2. Is the problem frequent enough to matter?
@@ -2224,7 +1964,7 @@ Before adding any new architectural component, ask:
 14. What maintenance burden does it add?
 15. Can we stop with a simpler solution?
 
-The preferred pattern remains:
+Preferred pattern:
 
 ```text
 observe
@@ -2236,33 +1976,104 @@ observe
 → stop
 ```
 
+For source/taxonomy work, extend this to:
+
+```text
+strategic need
+→ source probe
+→ metadata/access review
+→ classifier simulation
+→ regression corpus
+→ smallest config change
+→ tests
+→ real pipeline
+→ report inspection
+```
+
 ---
 
 # 29. Current Open Architecture Decisions
 
 ## Source Universe
 
-The current seven-source registry is no longer assumed to be sufficient.
+The current seven-source registry is intentionally not considered final.
 
-Immediate work:
+Next technical audit:
 
-- review current sources;
-- evaluate Sifted;
-- assess candidate replacements;
-- evaluate new source proposals from the Career Agent;
-- keep production collection public and permitted.
+```text
+Financial Times
+```
+
+Then, if still justified:
+
+```text
+Il Sole 24 Ore
+Bank of Italy
+Reuters
+```
+
+Do not add all strategically attractive sources simultaneously.
 
 ---
 
-## Domain Universe
+## BBC Business
 
-Reconsider:
+Current architecture can support removing it through configuration if stronger coverage validates.
 
-- Financial Markets;
-- Italy;
-- Milan/Bocconi.
+Do not remove it before replacement evidence exists.
 
-Do not implement without appropriate source support and classification evidence.
+---
+
+## Italy
+
+Strategically approved.
+
+Architectural question:
+
+> Can Italy be added through current `domains.yaml` plus a small validated source set?
+
+Preferred source candidates:
+
+```text
+Il Sole 24 Ore
+Istat
+Bank of Italy
+```
+
+Do not create Italy-specific processing logic unless necessary.
+
+---
+
+## Milan/Bocconi
+
+Now a fixed product requirement.
+
+Architectural question:
+
+> Can public Bocconi/B4i/career sources fit the existing article pipeline cleanly?
+
+Investigate first:
+
+```text
+B4i
+Bocconi Career Services
+Bocconi News & Events
+```
+
+Prefer reusing:
+
+```text
+ArticleRecord
+collector
+classifier
+reporter
+```
+
+before introducing:
+
+- new record models;
+- event databases;
+- deadline engines.
 
 ---
 
@@ -2270,17 +2081,19 @@ Do not implement without appropriate source support and classification evidence.
 
 Open question:
 
-> What is the smallest deterministic and compliant mechanism that provides enough context for the user to understand selected developments without immediate click-through?
+> What is the smallest deterministic and compliant mechanism that provides enough context for initial understanding?
 
-Candidate inputs should be evaluated in this order:
+Candidate input order:
 
 1. richer feed fields;
 2. public structured metadata;
 3. official free APIs;
-4. limited permitted public extraction if justified;
-5. more complex mechanisms only if necessary.
+4. narrowly justified permitted public extraction;
+5. more complex mechanisms only if simpler ones fail.
 
-No architecture for AI summarisation has been selected.
+Premium-exception sources may deliberately have thinner automated context.
+
+No production AI summarisation architecture has been selected.
 
 ---
 
@@ -2293,57 +2106,58 @@ actual run time - 24 hours
 → actual run time
 ```
 
-Candidate future architecture:
+Candidate:
 
 ```text
-fixed report cutoff
-→ previous 24 hours
+fixed cutoff
+→ deterministic 24-hour report window
 ```
 
-The fixed-cutoff design would decouple content selection from GitHub scheduler delay.
-
-More production evidence is required before implementation.
+More production evidence is required.
 
 ---
 
 ## Output Validation for No-News Runs
 
-The production workflow currently validates output files before persistence.
+A legitimate no-news case may eventually expose whether output non-empty validation is too strict.
 
-If a legitimate no-news run produces an empty processed JSONL file, current non-empty-file validation may need review.
+Do not change theory-first.
 
-Do not change this from theory alone.
+Reproduce first.
 
-Reproduce a valid no-news case first.
+---
+
+## Sponsored Content
+
+Tech.eu testing exposed explicit sponsored content.
+
+No architecture change is justified from one observation.
+
+If sponsored material begins to enter reports materially:
+
+```text
+observe repeatedly
+→ define deterministic handling
+→ test
+```
 
 ---
 
 ## Near-Duplicate Handling
 
-Deferred until repeated report evidence demonstrates material repetition.
+Deferred.
 
 ---
 
 ## Long-Term Source Health
 
-Current per-run summaries remain sufficient.
-
-Add historical source-health analysis only when recurring maintenance requires it.
+Per-run summaries remain sufficient.
 
 ---
 
 ## Delivery Interface
 
-GitHub-rendered Markdown remains sufficient until actual mobile or reading friction becomes a demonstrated limitation.
-
-Potential future options include:
-
-- stable latest-report path;
-- GitHub Pages;
-- GitHub Issues;
-- Obsidian-oriented reading workflow.
-
-None are current core requirements.
+GitHub Markdown remains sufficient until reading friction becomes a demonstrated product constraint.
 
 ---
 
@@ -2355,12 +2169,12 @@ None are current core requirements.
 
 Evidence:
 
-- local orchestration works;
-- deterministic processing works;
-- tests exist;
-- output is inspectable;
-- failures are visible;
-- CLI is operational.
+- local orchestration;
+- deterministic processing;
+- automated tests;
+- inspectable output;
+- visible failures;
+- operational CLI.
 
 ---
 
@@ -2370,17 +2184,15 @@ Evidence:
 
 Evidence:
 
-- seven validated public feeds;
-- 10-second timeout;
-- explicit User-Agent;
-- normal SSL verification;
-- successful redirects;
-- successful real-feed parsing;
-- usable publication timestamps;
+- real public feeds;
+- bounded HTTP;
+- explicit headers;
+- redirects;
+- usable timestamps;
+- successful parsing;
 - real report generation;
-- classification corrections;
 - real degraded-source validation;
-- 110 passing tests.
+- 110 tests.
 
 ---
 
@@ -2388,27 +2200,16 @@ Evidence:
 
 **Status: passed**
 
-Required:
-
-- manual Actions run;
-- output validation;
-- minimal required repository permissions;
-- visible failure states;
-- correct commit behaviour;
-- no empty commits;
-- no paid or AI dependency.
-
 Evidence:
 
-- `workflow_dispatch` validated;
-- 110 tests pass in Actions;
-- production CLI runs in Actions;
-- application logging visible;
-- outputs validated;
-- bot persistence validated;
-- no-change guard validated;
-- critical configuration failure validated;
-- degraded source publication validated.
+- manual workflow dispatch;
+- full tests in Actions;
+- production CLI in Actions;
+- output validation;
+- bot persistence;
+- no-change guard;
+- critical failure handling;
+- degraded publication.
 
 ---
 
@@ -2416,170 +2217,200 @@ Evidence:
 
 **Status: passed**
 
-Required:
-
-- Gate C passed;
-- scheduled trigger configured;
-- scheduled run observed;
-- concurrency behaviour safe;
-- production history persisted.
-
 Evidence:
 
-- scheduled run observed;
-- outputs produced;
-- repository persistence succeeded;
-- concurrency protection added;
-- schedule now set to 06:05 Europe/Rome.
+- scheduled execution observed;
+- production outputs persisted;
+- concurrency protection;
+- 06:05 Europe/Rome trigger configuration.
 
 Known limitation:
 
-- scheduler punctuality is not guaranteed.
-
-Gate D passing means automation architecture is complete.
+- trigger punctuality not guaranteed.
 
 ---
 
 ## Gate E — Source/Domain Expansion Architecture
 
-**Status: open for controlled work**
+**Status: partially passed; active**
 
-Evidence justifying entry:
+The first controlled Phase 4 checkpoint passed.
 
-- Sifted accessibility problem;
-- thin feed context;
-- sparse/concentrated report;
-- three missing target domains;
-- broader user information needs;
-- substantial available premium reading universe.
+Evidence:
 
-Requirements:
+- Sifted problem reproduced;
+- Tech.eu alternative researched;
+- real collector probe completed;
+- normalisation validated;
+- metadata compared;
+- source default tested;
+- classification simulation completed;
+- stored-corpus regression completed;
+- source replacement completed;
+- new Financial Markets domain added;
+- config tests updated;
+- 110 tests passed;
+- real 17 August run completed;
+- report manually inspected.
 
-- strategic source/domain proposal;
-- technical source review;
-- automation-permission review;
-- metadata inspection;
-- controlled source testing;
-- report-quality inspection;
-- full regression tests.
+This proves:
+
+> the existing architecture can support substantial source/domain correction through configuration without new processing components.
+
+Gate E remains open because:
+
+- final source universe is not selected;
+- Italy remains unimplemented;
+- Milan/Bocconi remains unimplemented;
+- premium-source architecture has not yet been exercised in production.
 
 ---
 
 ## Gate F — Richer Report Architecture
 
-**Status: not yet passed**
+**Status: not passed**
 
 Required before implementation:
 
-- precise richer-context requirement;
-- metadata audit;
+- exact context requirement;
+- source metadata audit;
 - copyright/access boundary;
-- fallback behaviour;
+- Premium Bocconi fallback behaviour;
 - output-length target;
-- source provenance model;
+- provenance design;
 - candidate approach comparison;
 - acceptance tests.
 
-The problem is validated.
+The user need is validated.
 
-The architecture is not yet selected.
+Implementation architecture is not.
 
 ---
 
 ## Gate G — Advanced Quality Architecture
 
-**Status: not yet passed**
+**Status: not passed**
 
-Required:
-
-- repeated real evidence;
-- simpler deterministic changes insufficient;
-- explicit evaluation method.
-
-Potential examples:
+Possible future examples:
 
 - near-duplicate clustering;
-- entity tracking;
-- advanced ranking;
+- entities;
 - content type;
-- article-level geography.
+- article-level geography;
+- advanced ranking.
+
+Entry requires:
+
+- repeated real problem;
+- simpler corrections insufficient;
+- explicit evaluation method.
 
 ---
 
 # 31. Current Architecture Summary
 
-The Daily Intelligence System is now a production-operational, repository-native deterministic Python pipeline.
+The Daily Intelligence System is a production-operational, repository-native deterministic Python pipeline.
 
-Its core remains:
+Core application flow:
 
 ```text
 collect
 → normalize
 → validate
-→ filter by publication window
+→ filter
 → deduplicate
 → classify
 → rank
 → store
-→ generate readable report
-→ generate run summary
-→ persist automatically
+→ report
+→ run summary
 ```
 
-Remote collection follows:
-
-```text
-public RSS/Atom
-→ bounded HTTP request
-→ explicit headers
-→ feedparser
-→ isolated source result
-```
-
-Production automation follows:
+Production flow:
 
 ```text
 GitHub trigger
 → setup
-→ install
 → test
-→ run pipeline
-→ validate outputs
-→ commit changed artifacts
-→ push
+→ run
+→ validate
+→ persist
 ```
 
-It currently has:
+Current information architecture:
 
-- zero recurring monetary cost;
-- no production AI dependency;
-- no paid API dependency;
-- no production source credentials;
-- seven active public sources;
-- seven implemented domains;
-- 110 passing tests;
-- conservative deterministic classification;
-- deterministic ranking;
-- visible degraded-run behaviour;
-- critical-failure protection;
-- automated persistence;
-- scheduled execution;
-- concurrency protection;
-- inspectable historical reports.
+```text
+7 active public RSS sources
+8 active domains
+deterministic source defaults
+deterministic keyword classification
+deterministic ranking
+repository-native historical data
+```
 
-The main architectural bottleneck is no longer infrastructure.
+Current active source set:
 
-It is information quality.
+```text
+BBC News World
+BBC News Business
+European Central Bank
+European Commission Highlighted News
+Istat Press Releases
+OpenAI News
+Tech.eu
+```
 
-The next architectural work should therefore support:
+Current active domains:
 
-> **source/domain correction and expansion first, followed by deliberate richer-report design.**
+```text
+Global Politics and Geopolitics
+Economics and Macroeconomics
+Companies and Corporate Strategy
+Artificial Intelligence
+Technology and Software
+Startups and Venture Capital
+Europe and the European Union
+Financial Markets
+```
 
-The architecture should not become more sophisticated merely because production automation is complete.
+Current architectural direction:
+
+```text
+finish source/domain correction
+→ validate Italy
+→ validate Milan/Bocconi
+→ stop expansion when information universe is strong enough
+→ design richer context
+```
+
+The architecture should remain simple unless actual report usage proves otherwise.
 
 ---
 
 # Changelog
+
+## 2026-08-17 — Phase 4A Source and Domain Architecture Validation
+
+- Reconciled architecture with the first validated Phase 4 source/domain correction.
+- Replaced Sifted with Tech.eu in the active seven-source registry.
+- Recorded the controlled Tech.eu/Sifted comparison.
+- Recorded 20/20 Tech.eu descriptions versus 0/24 Sifted descriptions in the tested samples.
+- Recorded that source replacement was driven by product metadata/access quality rather than parser compatibility.
+- Recorded Tech.eu as a broad Tier 2 source with no default domain.
+- Added Financial Markets as the eighth implemented domain.
+- Recorded that Financial Markets required configuration only and no processing-module changes.
+- Added the evidence-backed classification changes `tariffs`, `acquired`, `early-stage fund` and `funding market`.
+- Recorded removal of generic `startup`.
+- Added the architectural warning that near-synonymous keywords may independently increase score.
+- Added the 114-record regression pattern as a reusable source/taxonomy validation mechanism.
+- Recorded the real 17 August 2026 pipeline validation.
+- Recorded that 26/30 unclassified records did not represent a system failure after manual inspection.
+- Established that classification percentage is not an architectural KPI.
+- Added the narrow Premium Bocconi Exception while preserving the existing authentication prohibition.
+- Upgraded Milan/Bocconi from candidate to validated product requirement.
+- Recorded the preference to reuse the existing `ArticleRecord` pipeline for future Milan/Bocconi inputs before creating new event/opportunity architecture.
+- Preserved ranking weights, report settings and core processing modules unchanged.
+- Confirmed 110 automated tests remain passing.
 
 ## 2026-08-14 — Phase 3 Automation Architecture Completed
 
@@ -2593,66 +2424,52 @@ The architecture should not become more sophisticated merely because production 
 - Recorded explicit workflow timeout.
 - Recorded `contents: write` production permission.
 - Recorded output validation before persistence.
-- Recorded `github-actions[bot]` automated persistence.
+- Recorded automated bot persistence.
 - Recorded no-change commit protection.
 - Recorded deliberate critical configuration failure validation.
 - Recorded deliberate degraded source publication validation.
-- Recorded concurrency protection with non-cancelling production semantics.
-- Marked Gate C — Automation Architecture as passed.
-- Added Gate D — Scheduled Production Architecture and marked it passed.
-- Recorded substantial GitHub scheduler latency as an external platform limitation.
-- Recorded scheduler-latency/report-window coupling as an open architecture decision.
-- Recorded the current report as potentially too thin for initial understanding.
-- Reframed report architecture so original sources are for deeper reading rather than necessarily basic comprehension.
-- Added the richer-report architecture design boundary without choosing an implementation.
-- Added the distinction between automated public sources, Bocconi premium reading and research/database layers.
-- Explicitly prohibited authenticated premium-content ingestion as a consequence of Bocconi access.
-- Recorded Sifted accessibility and metadata limitations as source-architecture evidence.
+- Recorded concurrency protection.
+- Recorded substantial GitHub scheduler latency.
+- Recorded the scheduler-latency/report-window coupling as an open architecture decision.
+- Added richer-report architecture as a validated later design problem.
+- Added automated public / Bocconi premium reading / research-database separation.
+- Explicitly prohibited authenticated premium-content ingestion.
 - Added source/domain expansion as the next active architectural work.
-- Added no-news output validation as a future evidence-based edge case.
-- Preserved zero recurring monetary cost and no-production-AI architecture.
 
 ## 2026-08-11 — Phase 2 Real-Source Architecture Validated
 
 - Moved the minimal real-source registry into implemented architecture.
 - Recorded seven validated public RSS sources.
 - Expanded the implemented taxonomy from two to seven active domains.
-- Added bounded remote HTTP retrieval with a 10-second timeout.
-- Added explicit User-Agent and Accept request headers.
-- Preserved normal SSL certificate verification.
-- Validated redirects and real-feed parsing through the actual collector.
-- Added explicit remote HTTP, URL and timeout failure handling through `CollectionError`.
-- Kept retry logic absent because real-source evidence did not justify it.
-- Added support for explicitly empty `default_domains`.
-- Recorded the distinction between narrow source-wide defaults and broad heterogeneous feeds.
-- Recorded evidence-based Global Politics keyword refinement.
-- Confirmed real publication timestamps were usable with the current seven-feed source set.
-- Confirmed optional missing descriptions did not invalidate records.
-- Validated real-source report quality and corrected misleading source-default behaviour.
-- Validated deliberate real-network partial-source failure.
-- Recorded test isolation between deterministic fixtures and live production configuration.
-- Reached 110 passing automated tests.
-- Marked Gate B — Real-Source Architecture as passed.
-- Made GitHub Actions manual execution the next architecture gate.
+- Added bounded HTTP retrieval with 10-second timeout.
+- Added explicit User-Agent and Accept headers.
+- Preserved standard SSL verification.
+- Validated redirects and real-feed parsing.
+- Added structured remote failure handling.
+- Kept retry logic absent.
+- Added support for empty source defaults.
+- Recorded narrow-vs-broad source-default policy.
+- Added evidence-based politics keyword refinement.
+- Validated real publication timestamps.
+- Validated partial-source degradation.
+- Reached 110 passing tests.
 
 ## 2026-08-11 — Phase 1 Architecture Baseline
 
-- Replaced the pre-implementation architecture with the validated local system architecture.
-- Added explicit orchestration and CLI components.
-- Added collection-window filtering as a first-class processing stage.
-- Recorded deterministic SHA-256 record identity.
-- Recorded exact URL/title deduplication.
-- Recorded deterministic classification and ranking behaviour.
-- Recorded report selection and operational metadata behaviour.
-- Recorded run-summary and logging responsibilities.
-- Distinguished implemented, planned and deferred architecture.
-- Removed speculative modules that were not part of the repository.
-- Reframed near-duplicate, entity, geography and content-type logic as evidence-driven future enhancements.
-- Defined real-source validation as the next architecture gate.
+- Replaced the pre-implementation architecture with the validated local architecture.
+- Added orchestration and CLI components.
+- Added publication-window filtering.
+- Recorded deterministic record identity.
+- Recorded exact deduplication.
+- Recorded classification and ranking.
+- Recorded report selection.
+- Recorded run-summary and logging.
+- Distinguished implemented and deferred architecture.
+- Defined real-source validation as the next gate.
 
 ## Initial System Architecture Baseline
 
-- Defined the deterministic pipeline architecture.
-- Established Python and repository-native configuration as the core technical model.
+- Defined the deterministic pipeline.
+- Established Python and repository-native configuration.
 - Defined source collection, normalisation, validation, deduplication, classification, ranking, storage and reporting responsibilities.
 - Established zero recurring cost, public-source preference and no-production-AI constraints.

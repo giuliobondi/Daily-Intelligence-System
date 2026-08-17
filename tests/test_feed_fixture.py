@@ -57,7 +57,7 @@ def test_load_valid_source_configuration() -> None:
         "ec_highlights",
         "istat_press_en",
         "openai_news",
-        "sifted_articles",
+        "tech_eu",
     )
 
     openai = next(
@@ -76,6 +76,19 @@ def test_load_valid_source_configuration() -> None:
     assert openai.geographic_scope == ("Global",)
     assert openai.active is True
 
+    tech_eu = next(
+        source
+        for source in sources
+        if source.id == "tech_eu"
+    )
+
+    assert tech_eu.feed_url == "https://tech.eu/feed/"
+    assert tech_eu.source_type == "rss"
+    assert tech_eu.source_tier == 2
+    assert tech_eu.default_domains == ()
+    assert tech_eu.language == "en"
+    assert tech_eu.geographic_scope == ("Europe",)
+    assert tech_eu.active is True
 
 def test_missing_source_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete source entry fails with a clear configuration error."""

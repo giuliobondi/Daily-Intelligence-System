@@ -18,7 +18,7 @@ def test_load_valid_domain_configuration() -> None:
 
     domains = load_domains(CONFIG_PATH)
 
-    assert len(domains) == 7
+    assert len(domains) == 8
 
     assert tuple(domain.id for domain in domains) == (
         "global_politics_geopolitics",
@@ -28,6 +28,7 @@ def test_load_valid_domain_configuration() -> None:
         "technology",
         "startups_venture_capital",
         "europe_eu",
+        "financial_markets",
     )
 
     technology = next(
@@ -52,6 +53,45 @@ def test_load_valid_domain_configuration() -> None:
         for domain in domains
         if domain.id == "artificial_intelligence"
     )
+
+    companies = next(
+        domain
+        for domain in domains
+        if domain.id == "companies_corporate_strategy"
+    )
+    assert "acquired" in companies.keywords
+
+    startups = next(
+        domain
+        for domain in domains
+        if domain.id == "startups_venture_capital"
+    )
+    assert "early-stage fund" in startups.keywords
+    assert "funding market" in startups.keywords
+
+    global_politics = next(
+        domain
+        for domain in domains
+        if domain.id == "global_politics_geopolitics"
+    )
+    assert "tariffs" in global_politics.keywords
+
+    startups = next(
+        domain
+        for domain in domains
+        if domain.id == "startups_venture_capital"
+    )
+    assert "startup" not in startups.keywords
+
+    financial_markets = next(
+        domain
+        for domain in domains
+        if domain.id == "financial_markets"
+    )
+    assert financial_markets.name == "Financial Markets"
+    assert financial_markets.active is True
+    assert "stock market" in financial_markets.keywords
+    assert "financial stability" in financial_markets.keywords
 
     assert (
         artificial_intelligence.name

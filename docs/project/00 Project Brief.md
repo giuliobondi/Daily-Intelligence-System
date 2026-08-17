@@ -43,36 +43,44 @@ The project does not aim to collect every article, reproduce the work of a profe
 
 Its objective is to create a reliable process for:
 
-- collecting relevant public information;
+- collecting relevant information from permitted structured sources;
 - reducing duplication and noise;
 - organising stories by domain;
 - ranking items transparently;
-- preserving source links and metadata;
+- preserving source links and provenance;
 - providing enough context to understand important developments before deeper reading;
 - generating a concise daily report;
 - building a historical archive;
 - exposing failures clearly;
+- surfacing professionally relevant Milan/Bocconi developments and opportunities;
 - supporting deeper interpretation through a separate ChatGPT workflow.
 
 The deterministic collection-to-report pipeline is implemented and production-automated through GitHub Actions.
 
-The current strategic priority is no longer basic automation.
-
-The project is now moving from:
+The strategic question is no longer:
 
 ```text
 Can the system run reliably every day?
 ```
 
-to:
+It is now:
 
 ```text
-Does the system collect the right information and present enough useful context to make the daily report genuinely valuable?
+Does the system collect the right information
+and present it with enough context
+to make the daily report genuinely valuable?
 ```
 
-The immediate next objective is to correct and expand the source and domain universe, beginning with weaknesses exposed by real production use.
+The active development focus is therefore information quality:
 
-After the information-source layer is improved, the next major design objective is to define and implement a richer report experience that provides sufficient lawful context without requiring immediate click-through for basic understanding.
+```text
+source quality
+→ domain coverage
+→ classification quality
+→ report context
+```
+
+The current source/domain correction phase should be completed before richer-report implementation becomes the main focus.
 
 ---
 
@@ -84,12 +92,12 @@ Important information is distributed across:
 - official institutions;
 - company announcements;
 - research organisations;
-- technical blogs;
+- technical publications;
 - startup and venture-capital sources;
-- public newsletters and feeds;
-- university and local ecosystem channels.
+- university channels;
+- professional and local ecosystem sources.
 
-Following these sources manually creates several problems.
+Following these manually creates several recurring problems.
 
 ## Fragmentation
 
@@ -111,13 +119,13 @@ The same event may appear through many publications, creating the impression of 
 
 ## Uneven Source Quality
 
-Primary evidence, high-quality reporting, commentary, promotion and low-quality aggregation are often mixed together.
+Primary evidence, high-quality reporting, commentary, promotion and low-quality aggregation are mixed together.
 
 ---
 
 ## Uneven Source Accessibility
 
-A technically valid source may link to content that is difficult or impossible for the user to access.
+A technically valid source may still be a poor product source.
 
 Real production use has demonstrated that:
 
@@ -131,30 +139,29 @@ does not necessarily mean:
 useful in the daily reading workflow
 ```
 
-A source can therefore be operationally compatible while still being a poor product source because:
+A source may be operationally compatible while still providing:
 
-- linked articles require an additional subscription;
-- public feed metadata is too thin;
-- the report cannot provide enough context without the unavailable article;
-- a more accessible alternative could provide equivalent information.
+- inaccessible follow-up links;
+- insufficient public metadata;
+- excessive noise;
+- unnecessary overlap;
+- poor value relative to a better alternative.
 
-Source accessibility and metadata richness must therefore be considered alongside credibility and technical compatibility.
+Source credibility, accessibility, metadata richness, uniqueness and automation suitability must therefore be evaluated together.
 
 ---
 
 ## Weak Prioritisation
 
-Most news products optimise for broad engagement rather than the specific combination of economics, politics, markets, AI, technology, startups and professional relevance required by this project.
+Most information products optimise for broad engagement rather than the specific combination of economics, markets, politics, business, AI, technology, startups and professional relevance required by this project.
 
 ---
 
 ## Thin Context
 
-A headline, relevance score and short feed description may be insufficient to understand why a development matters.
+A headline, relevance score and short feed description may not be enough to understand why a development matters.
 
-The system should reduce unnecessary click-through.
-
-The desired user experience is:
+The intended workflow is:
 
 ```text
 daily report
@@ -174,7 +181,26 @@ daily report
 
 The report should not replace original sources.
 
-It should provide enough initial context that original sources become deeper-reading destinations rather than mandatory first steps.
+It should provide enough lawful initial context that source articles become deeper-reading destinations rather than mandatory first steps.
+
+---
+
+## Missed Professional Opportunities
+
+Relevant opportunities can be scattered across:
+
+- Bocconi;
+- Milan;
+- startup ecosystems;
+- recruiting channels;
+- innovation organisations;
+- professional events.
+
+Missing a time-sensitive event, programme or application deadline can have a higher opportunity cost than missing an ordinary news article.
+
+The system should therefore eventually provide selective professional ecosystem intelligence for Milan and Bocconi.
+
+This is a validated product requirement rather than an optional feature.
 
 ---
 
@@ -186,17 +212,17 @@ Daily reading is easily forgotten when stories, sources and recurring themes are
 
 ## Passive Consumption
 
-Reading more news does not necessarily produce better understanding.
+Reading more information does not necessarily produce better understanding.
 
-The system should support informed judgment, professional conversations and durable learning rather than encourage endless content consumption.
+The system should support informed judgment, professional conversations, opportunity awareness and durable learning rather than encourage endless content consumption.
 
 ---
 
 ## Maintenance Friction
 
-A useful information system can become counterproductive if it requires daily copying, manual source checking or constant technical intervention.
+A useful information system becomes counterproductive if it requires daily copying, manual source checking or constant technical intervention.
 
-The system should therefore automate repetitive collection and organisation while keeping source maintenance occasional and deliberate.
+The system should automate repetitive work while keeping source maintenance occasional and deliberate.
 
 ---
 
@@ -206,16 +232,17 @@ The initial system is designed for one user.
 
 The user:
 
-- wants structured awareness across economics, politics, finance, AI, technology, startups and business strategy;
+- wants structured awareness across economics, politics, finance, business strategy, AI, technology and startups;
+- wants dedicated European and Italian awareness;
+- wants professionally relevant Milan/Bocconi intelligence;
 - values source quality over content volume;
 - has limited time for daily manual research;
-- wants to avoid recurring monetary costs;
-- is willing to invest time in initial setup, source review and occasional maintenance;
-- has working exposure to Python, GitHub, data analysis and software-system concepts;
+- wants zero recurring project cost;
+- accepts occasional source review and maintenance;
 - wants the system to remain understandable rather than become an unnecessarily complex engineering project;
-- has legitimate institutional access through Bocconi to many high-quality publications and research resources.
+- has legitimate institutional access through Bocconi to high-quality publications and research resources.
 
-Bocconi access materially expands the user’s personal reading and research options.
+Bocconi access materially expands personal reading and research options.
 
 It does not automatically expand the set of sources that may be ingested programmatically.
 
@@ -237,19 +264,21 @@ Multi-user features remain outside the project scope.
 
 # Strategic Rationale
 
-The project has value across several dimensions.
+The project creates value across several dimensions.
 
 ## Knowledge
 
 It should improve awareness of:
 
-- current economic conditions;
+- economic conditions;
 - political and geopolitical developments;
-- market movements;
+- financial-market mechanisms;
 - company and industry changes;
 - AI and technology evolution;
 - startup and venture-capital activity;
-- European and Italian developments.
+- European developments;
+- Italian developments;
+- relevant Milan/Bocconi ecosystem developments.
 
 ---
 
@@ -283,16 +312,21 @@ It should provide better evidence about:
 
 ## Opportunity Detection
 
-It may surface:
+It should be capable of surfacing high-value:
 
 - events;
 - programmes;
-- companies;
-- technologies;
-- sectors;
-- policy developments;
+- application deadlines;
+- startup opportunities;
+- professional communities;
+- research opportunities;
+- recruiting events;
 - networking opportunities;
 - project ideas.
+
+The Daily Intelligence System should detect the external opportunity.
+
+Personal decisions, applications, networking follow-up and relationship management belong in the Career OS.
 
 ---
 
@@ -313,22 +347,13 @@ The repository may demonstrate:
 - technical documentation;
 - incremental software development.
 
-The project should preserve optionality across:
-
-- data analytics;
-- consulting;
-- AI strategy;
-- finance;
-- venture capital;
-- startups;
-- economic research;
-- technology-oriented roles.
+Technical sophistication remains secondary to actual usefulness.
 
 ---
 
 ## Systems Thinking
 
-The project is also a practical exercise in building a small business system rather than simply writing isolated scripts.
+The project is a practical exercise in building a small information system rather than simply writing isolated scripts.
 
 Its value includes understanding:
 
@@ -348,8 +373,6 @@ Its value includes understanding:
 # Agreed Operating Model
 
 The complete information workflow contains two independent layers.
-
----
 
 ## Layer 1 — ChatGPT Intelligence and Development Layer
 
@@ -376,7 +399,7 @@ The repository does not depend on automatic access to:
 - OpenAI API credits;
 - paid model APIs.
 
-The project may use ChatGPT manually as a development and reasoning tool without making it a production infrastructure dependency.
+ChatGPT may be used manually as a development and reasoning tool without becoming production infrastructure.
 
 ---
 
@@ -386,7 +409,7 @@ The GitHub repository owns the deterministic collection and archive system.
 
 Its role is to:
 
-1. collect items from permitted public structured sources;
+1. collect items from permitted structured sources;
 2. normalise metadata;
 3. validate records;
 4. enforce the reporting window;
@@ -400,8 +423,6 @@ Its role is to:
 12. run automatically through GitHub Actions;
 13. persist production outputs automatically.
 
-The two layers may cover overlapping stories, but they serve different purposes.
-
 The ChatGPT layer provides optional reasoning and interpretation.
 
 The GitHub layer provides controlled collection, transparency, reproducibility and historical memory.
@@ -412,33 +433,29 @@ The core production system does not require an automated connection between them
 
 # Information Access Model
 
-The project should distinguish three information-access layers.
+The project distinguishes three information-access layers.
 
-## Layer A — Automated Public Sources
+## Layer A — Automated Public Intelligence
 
-These are eligible for continuous production ingestion when the required usage is compatible with the source and its access mechanism.
+Eligible for continuous production ingestion when the required usage is compatible with the source and its access mechanism.
 
 Examples include:
 
-- public RSS feeds;
-- public Atom feeds;
-- official public APIs;
+- public RSS;
+- public Atom;
+- official free APIs;
 - government and institutional feeds;
 - company public feeds;
 - public structured metadata;
-- other explicitly permitted public endpoints.
+- other explicitly permitted automation-compatible endpoints.
 
-These sources drive the automated production system.
+These sources drive production.
 
 ---
 
 ## Layer B — Personal Premium Reading
 
-The user has legitimate institutional access through Bocconi to high-quality publications including several major newspapers and research publications.
-
-These can be used manually when deeper reading is useful.
-
-Examples may include:
+The user has legitimate institutional access through Bocconi to high-quality publications including:
 
 - Financial Times;
 - Wall Street Journal;
@@ -449,15 +466,28 @@ Examples may include:
 - Harvard Business Review;
 - other Bocconi-accessible publications.
 
-Personal institutional access can increase the usefulness of a source as a follow-up destination.
+These can be used manually when deeper reading is useful.
 
-It must not be interpreted as permission for authenticated automated ingestion.
+Institutional access does not authorise authenticated automated ingestion.
+
+### Premium Bocconi Exception
+
+A narrow source-specific exception may allow an unusually valuable premium publication to appear in production discovery even when public metadata is thinner than ideal, provided that:
+
+- the user can legitimately access the linked article;
+- the publication's information value is unusually high;
+- a legitimate public or automation-compatible discovery endpoint exists;
+- Bocconi credentials are never used by production;
+- authenticated premium article bodies are never automatically retrieved;
+- thinner report context and manual click-through are deliberately accepted.
+
+This exception changes the acceptable reader workflow.
+
+It does not change the authentication or copyright boundary.
 
 ---
 
 ## Layer C — Research and Database Resources
-
-The user also has access to professional and academic research tools.
 
 Examples include:
 
@@ -470,9 +500,9 @@ Examples include:
 - S&P Capital IQ Pro;
 - Aida.
 
-These are valuable for targeted investigation.
+These are useful for targeted investigation.
 
-They are not part of the normal automated production pipeline unless a specific public or explicitly licensed automation mechanism is separately identified.
+They are not part of the normal automated production pipeline unless a separate explicitly permitted automation mechanism is identified.
 
 ---
 
@@ -485,19 +515,21 @@ The completed system should:
 - operate with zero recurring monetary cost;
 - avoid recurring consumption of AI or Copilot credits;
 - collect from a curated universe of permitted structured sources;
-- preserve direct source links;
+- prefer the smallest strong source universe rather than maximum source count;
+- preserve source links and provenance;
 - enforce a clear publication window;
 - reduce obvious duplication;
-- organise content into configurable domains;
+- organise information into configurable domains;
+- support the ten intended strategic macroareas;
 - rank stories using understandable deterministic rules;
 - generate a concise and readable daily report;
 - provide enough lawful context to understand selected developments before immediate click-through;
-- store enough metadata for later inspection and analysis;
-- preserve historical daily outputs;
-- make degraded and failed runs visible;
+- surface high-value Milan/Bocconi professional ecosystem intelligence;
+- preserve structured historical outputs;
+- expose degraded and failed runs clearly;
 - remain simple enough to understand and maintain;
 - distinguish technical success from information-product success;
-- create a foundation that can be improved without rebuilding the complete system.
+- create a foundation that can improve incrementally without rebuilding the system.
 
 ---
 
@@ -511,9 +543,9 @@ The completed system should:
 - The project must not depend on recurring GitHub AI or Copilot usage.
 - Cloud services that could create accidental charges should be avoided unless explicitly approved later.
 
-Personal access to publications funded through Bocconi does not violate this constraint because it does not create an additional project-level recurring expense.
+Personal Bocconi access does not violate this constraint because it creates no additional project-level recurring expense.
 
-However, such access must not become a hidden production dependency.
+It must not become a hidden production dependency.
 
 ---
 
@@ -530,8 +562,8 @@ However, such access must not become a hidden production dependency.
 
 - Ordinary Python and GitHub Actions should handle recurring production work.
 - Deterministic logic should be preferred before machine learning or LLM calls.
-- RSS, Atom, official APIs and other structured public sources should be preferred before scraping.
-- The system should avoid infrastructure without a demonstrated requirement.
+- RSS, Atom, official APIs and structured public sources should be preferred before scraping.
+- Infrastructure without demonstrated need should not be introduced.
 - Optional features must not become dependencies of the core workflow without evidence.
 
 ---
@@ -543,7 +575,6 @@ However, such access must not become a hidden production dependency.
 - Degraded output should be distinguishable from complete output.
 - Critical failures should not produce falsely successful output.
 - Processing should be deterministic where inputs are controlled.
-- The system should fail clearly rather than silently produce misleading output.
 - External scheduling delay should not be confused with pipeline failure.
 
 ---
@@ -551,12 +582,14 @@ However, such access must not become a hidden production dependency.
 ## Information Quality
 
 - Technical success alone is insufficient.
-- A report that is noisy, repetitive, misleading, inaccessible, overly concentrated, too sparse or too thin to understand should be treated as a product-quality problem even if the pipeline executed correctly.
-- Source quality should generally be improved before adding increasingly complex filtering logic.
-- A technically compatible source is not automatically a useful production source.
-- Source accessibility and metadata richness should be considered when evaluating production value.
-- The system should prefer a smaller strong source universe over source accumulation.
-- The report should provide enough initial context to support understanding without attempting to reproduce complete articles.
+- A report that is noisy, repetitive, misleading, inaccessible, overly concentrated, too sparse or too thin should be treated as a product-quality problem even if the pipeline executed correctly.
+- Source quality should generally be improved before adding more complex filtering logic.
+- A technically compatible source is not automatically a useful source.
+- Source accessibility and metadata richness should be considered alongside credibility and automation suitability.
+- The system should prefer a smaller strong source universe over accumulation.
+- Unclassified records are preferable to misleading classifications.
+- Classification percentage is not itself a success metric.
+- The report should provide enough context for initial understanding without reproducing complete articles.
 
 ---
 
@@ -625,90 +658,44 @@ Output validation
 Automated repository persistence
 ```
 
-This complete loop is now implemented.
+This loop is implemented.
 
-The next phases should improve the quality of:
+Future work should improve:
 
 ```text
 sources
 → classification inputs
+→ domain coverage
 → report context
 → user experience
 ```
 
-without destabilising the validated production foundation.
+without destabilising the production foundation.
 
 ---
 
-# Current Production Baseline
+# Target Information Universe
 
-The current production system contains seven active public RSS sources:
+The strategic target consists of ten macroareas:
 
-- BBC News World;
-- BBC News Business;
-- European Central Bank;
-- European Commission Highlighted News;
-- Istat Press Releases;
-- OpenAI News;
-- Sifted.
+1. Global Politics and Geopolitics;
+2. Economics and Macroeconomics;
+3. Financial Markets;
+4. Companies and Corporate Strategy;
+5. Artificial Intelligence;
+6. Technology and Software;
+7. Startups and Venture Capital;
+8. Europe and the European Union;
+9. Italy;
+10. Milan and the Bocconi Ecosystem.
 
-The current implemented taxonomy contains seven active domains:
+Financial Markets is already implemented.
 
-- Global Politics and Geopolitics;
-- Economics and Macroeconomics;
-- Companies and Corporate Strategy;
-- Artificial Intelligence;
-- Technology and Software;
-- Startups and Venture Capital;
-- Europe and the European Union.
+Italy remains an approved but not yet implemented macroarea.
 
-Three target domains remain candidates for expansion:
+Milan and the Bocconi Ecosystem is a validated product requirement whose production source architecture remains to be established.
 
-- Financial Markets;
-- Italy;
-- Milan and the Bocconi ecosystem.
-
-The seven-source universe should now be treated as:
-
-> **a validated production baseline, not the final information universe.**
-
-Production use has provided enough evidence to justify controlled source and domain correction.
-
----
-
-# Current Production Capabilities
-
-The current system has validated:
-
-- real public-source collection;
-- bounded network requests;
-- source-level failure isolation;
-- normalisation;
-- validation;
-- publication-window filtering;
-- exact deduplication;
-- deterministic classification;
-- deterministic ranking;
-- JSON Lines persistence;
-- Markdown report generation;
-- JSON run summaries;
-- visible operational warnings;
-- one-command local execution;
-- 110 automated tests;
-- GitHub Actions execution;
-- manual workflow dispatch;
-- scheduled execution;
-- automated output validation;
-- automated repository persistence;
-- no-change commit protection;
-- critical-failure behaviour;
-- degraded-source publication;
-- concurrency protection;
-- historical repository-native reports.
-
-The production automation baseline is therefore complete.
-
-Detailed implementation evidence and chronology belong in:
+Detailed implementation status belongs in:
 
 ```text
 04 Development Roadmap and Status.md
@@ -716,109 +703,90 @@ Detailed implementation evidence and chronology belong in:
 
 ---
 
-# Current Product-Quality Findings
+# Current Information-Quality Direction
 
-Real production use has exposed several issues that now justify the next development phases.
+Real production use has established several durable lessons.
 
-## Source Accessibility
+## Source Quality
 
-At least one production-selected Sifted article required Sifted Pro access.
+A source should be judged on more than technical collectability.
 
-This demonstrated that:
+Production suitability depends on:
+
+- strategic value;
+- credibility;
+- automation suitability;
+- metadata richness;
+- reader accessibility;
+- uniqueness;
+- noise;
+- maintenance burden.
+
+The Sifted case demonstrated this principle in practice.
+
+Sifted has since been replaced by Tech.eu because Tech.eu provided materially better usable public metadata while preserving relevant European startup/technology coverage.
+
+The specific technical evidence and source-decision history belong in:
 
 ```text
-valid RSS source
-≠
-automatically useful reading source
+03 Information Taxonomy and Source Policy.md
+04 Development Roadmap and Status.md
 ```
 
-Sifted should therefore be reviewed rather than assumed to remain permanently in the production registry.
+---
 
-The correct response is not to bypass the paywall.
+## Selective Classification
 
-The correct response is to evaluate:
+The system should not attempt to classify every collected record.
 
-- public metadata richness;
-- unique source value;
-- frequency of restricted links;
-- legitimate user accessibility;
-- alternative sources.
+The correct product objective is:
+
+```text
+capture important developments
++
+exclude low-value noise
+```
+
+not:
+
+```text
+maximise classified-record percentage
+```
 
 ---
 
-## Report Context
+## Domain Expansion
 
-The current report often provides:
+Missing strategic domains should be implemented only when:
 
-- headline;
-- source;
-- timestamp;
-- relevance score;
-- secondary domains;
-- short feed description where available;
-- source link.
+- the need is validated;
+- suitable sources exist;
+- classification can be tested;
+- the result improves the actual report.
 
-This is useful for prioritisation but can be insufficient for understanding.
+Financial Markets has passed this threshold.
 
-A new validated strategic requirement is:
-
-> **The report should provide enough lawful context for the user to understand the core development without requiring immediate click-through.**
-
-The exact implementation method remains deliberately undecided.
+Italy and Milan/Bocconi remain further work.
 
 ---
 
-## Source and Domain Coverage
+## Richer Context
 
-The current seven-source universe was selected to validate the system.
+The current report can still be too thin.
 
-It was not designed to be the final optimal information universe.
+A validated requirement is:
 
-The next development action is therefore to:
+> **Selected stories should provide enough lawful context for initial understanding without requiring immediate click-through.**
 
-- review current sources;
-- correct weak sources;
-- identify missing information domains;
-- expand sources only where justified;
-- reconsider Financial Markets, Italy and Milan/Bocconi coverage.
+The exact architecture remains deliberately undecided.
 
-The Career Agent may help define strategic source and domain priorities.
-
-This Development project should evaluate candidate sources for technical and policy suitability before production integration.
+It should be designed only after the information-source layer is sufficiently mature.
 
 ---
 
-## Report Concentration and Sparsity
+# Outputs
 
-A technically successful production run may still produce a short or concentrated report.
-
-This reinforces the principle:
-
-> technical execution and product quality are separate dimensions.
-
-The response should begin with source and coverage review rather than automatic quotas or complex balancing logic.
-
----
-
-## Scheduling Latency
-
-GitHub scheduled workflows have been observed to start materially later than the configured time.
-
-The production schedule has therefore been moved earlier to create delivery buffer.
-
-The current rolling publication window is based on actual execution time.
-
-This means scheduler delay can also shift report composition.
-
-A fixed reporting cutoff is now a legitimate future design question.
-
-It should not be implemented without additional evidence.
-
----
-
-# MVP Outputs
-
-The production system creates three main persistent output types.
+The system creates three primary persistent output types.
 
 ## Structured Article Records
 
@@ -828,7 +796,7 @@ Processed records preserve enough metadata to:
 - inspect original and normalised fields;
 - understand classifications;
 - understand relevance scores;
-- reconstruct report-selection behaviour where practical.
+- support later deterministic quality analysis.
 
 Current storage format:
 
@@ -840,33 +808,27 @@ JSON Lines
 
 ## Daily Markdown Report
 
-The current report supports:
+The report includes:
 
 - report date;
 - monitored period;
 - generation timestamp;
 - run status;
-- active source count;
-- source success/failure counts;
-- collected-item count;
-- displayed-item count;
+- source health;
+- item counts;
 - domain sections;
 - ranked headlines;
-- source name;
+- source identity;
 - publication time;
 - relevance score;
 - secondary domains;
-- short feed-provided description;
-- direct source link;
-- visible warnings for degraded runs.
-
-The current report does not generate richer analytical summaries.
-
-That limitation is now the subject of a future dedicated design phase.
+- permitted source-provided context;
+- direct source links;
+- visible degraded-run warnings.
 
 The target is not to reproduce full articles.
 
-The target is to provide enough permitted context for initial understanding.
+The target is enough lawful context for initial understanding.
 
 ---
 
@@ -884,24 +846,11 @@ Each run creates a structured JSON operational summary containing:
 
 ---
 
-## Historical Archive
+# Historical Archive
 
-Production daily reports, processed records and run summaries remain accessible through the repository.
+Production reports, processed records and run summaries remain accessible through the repository.
 
----
-
-## Execution Logs
-
-The system makes it possible to understand:
-
-- whether the workflow completed;
-- which sources succeeded or failed;
-- how many records were validated;
-- how many remained inside the publication window;
-- how many duplicates were removed;
-- how many items were processed;
-- which output paths were written;
-- whether the run completed successfully or in degraded state.
+The historical processed-record layer also provides useful deterministic evidence for later regression testing of classification and ranking changes.
 
 ---
 
@@ -915,7 +864,7 @@ The project is not intended to:
 - bypass paywalls;
 - scrape websites against their terms;
 - automate authenticated Bocconi premium-content retrieval;
-- bulk-ingest Factiva, Nexis, Bloomberg or other licensed databases;
+- bulk-ingest Factiva, Nexis, Bloomberg or similar licensed databases;
 - generate investment, legal or political recommendations;
 - predict markets;
 - verify every factual claim independently;
@@ -935,7 +884,7 @@ The project is not intended to:
 - automatically transfer GitHub reports into ChatGPT;
 - build infrastructure merely because it is technically interesting.
 
-These possibilities should be reconsidered only if later evidence demonstrates a clear workflow need and the core constraints remain satisfied.
+These possibilities should be reconsidered only when real evidence demonstrates a clear workflow need and all core constraints remain satisfied.
 
 ---
 
@@ -943,96 +892,81 @@ These possibilities should be reconsidered only if later evidence demonstrates a
 
 The project should be judged on both technical operation and information usefulness.
 
----
-
 ## Functional Success
 
-- The system collects items from a credible structured-source universe.
+- Relevant items are collected from a credible structured-source universe.
 - Metadata is normalised consistently.
 - The publication window is enforced correctly.
 - Malformed records are handled visibly.
-- Obvious exact duplicates are reduced.
-- Items are assigned to useful domains.
-- A transparent ranking process is applied.
-- A readable Markdown report is generated.
-- Structured records and run summaries are stored historically.
-- The workflow runs automatically through GitHub Actions.
-- Changed outputs are persisted automatically.
-- Failed sources and workflow problems are visible.
-
-The current production baseline satisfies these criteria.
+- Obvious duplicates are reduced.
+- Important items receive useful domain classifications.
+- Unclassified low-value material does not need to be forced into the report.
+- Ranking is transparent.
+- A readable daily report is generated.
+- Structured history is preserved.
+- Production runs automatically.
+- Changed outputs persist automatically.
+- Failures are visible.
 
 ---
 
 ## Cost Success
 
 - Recurring monetary cost remains zero.
-- Production runs do not consume GitHub AI or Copilot credits.
+- Production does not consume recurring AI or Copilot credits.
 - No paid API is required.
 - No commercial automation platform is required.
-
-The current production baseline satisfies these criteria.
 
 ---
 
 ## User-Experience Success
 
 - Normal daily manual work is negligible.
-- The report can be read within a manageable amount of time.
-- The user can understand the core development of selected stories without opening every source.
-- Source links remain easy to access for deeper reading.
-- The report is not dominated by duplicates or low-value content.
-- The report is not systematically too sparse or concentrated.
-- A degraded report is visibly degraded.
-- Inaccessible source links do not routinely make selected items useless.
-
-The current system only partially satisfies these criteria.
-
-This is now a major focus of further development.
+- The report can be consumed within manageable time.
+- Important developments can be understood without opening every article.
+- Source links remain useful for selective deeper reading.
+- Reports are not dominated by duplicates or low-value material.
+- Relevant professional ecosystem opportunities are surfaced when available.
+- Degraded reports are visibly degraded.
+- Inaccessible links do not routinely make selected items useless.
 
 ---
 
 ## Quality Success
 
-- Important items are not systematically buried by low-value stories.
-- Source quality remains transparent.
-- Source accessibility is considered.
-- Public metadata is sufficiently rich for the intended report experience.
+- Important stories are not systematically buried by noise.
+- Source provenance is transparent.
+- Accessibility and metadata richness are considered.
 - Classification is adequate for practical use.
-- Ranking logic is understandable.
-- The system does not fabricate unsupported context.
-- Missing data and source failures are not hidden.
-- The source universe covers the intended strategic domains adequately.
-- Technical sophistication is added only when it improves real report quality.
-
-These criteria require further production refinement.
+- Ranking remains understandable.
+- Unsupported context is not fabricated.
+- Missing data and failures are visible.
+- The source universe adequately covers the intended strategic domains.
+- Technical sophistication is introduced only when it improves real information quality.
 
 ---
 
 ## Reliability Success
 
-- Individual source failures are isolated where appropriate.
+- Source failures are isolated where appropriate.
 - Critical failures do not create falsely successful output.
-- Degraded runs preserve usable successful-source content.
+- Degraded runs preserve usable content.
 - Repeated runs do not create uncontrolled duplication.
 - No-change runs do not create empty commits.
-- No-news runs behave predictably.
-- Network requests cannot hang indefinitely.
-- Scheduled automation functions without normal daily intervention.
-
-The current production baseline substantially satisfies these criteria.
+- Network requests are bounded.
+- Scheduled automation works without normal daily intervention.
 
 ---
 
 ## Maintainability Success
 
-- A future contributor can understand the repository from its documentation.
-- Configuration is separated from application logic where appropriate.
-- Sources can be added or disabled without rewriting the pipeline.
-- Weak sources can be replaced without redesigning the system.
+- The repository remains understandable.
+- Configuration remains separated from logic where appropriate.
+- Sources can be replaced without pipeline redesign.
+- Domains can normally be added through configuration.
 - Dependencies remain limited.
-- Modules have clear responsibilities.
-- The architecture remains proportional to the value created.
+- Modules retain clear responsibilities.
+- Architecture remains proportional to value.
 - Source expansion does not create disproportionate recurring maintenance.
 
 ---
@@ -1041,32 +975,32 @@ The current production baseline substantially satisfies these criteria.
 
 The project should evolve through evidence rather than speculative architecture.
 
-The preferred development loop is:
+Preferred loop:
 
 ```text
-Build smallest useful behaviour
+observe real problem
+→ isolate cause
+→ identify simplest solution
+→ implement smallest coherent change
 → validate
-→ inspect real output
-→ identify actual limitation
-→ make smallest justified correction
-→ validate again
+→ inspect actual output
+→ stop at stable checkpoint
 ```
-
-A technically possible feature is not automatically a useful feature.
 
 Before adding complexity, ask:
 
-1. What problem does this solve?
-2. Has that problem occurred in real use?
-3. Can a weaker source simply be replaced?
-4. Can configuration solve the issue?
-5. Can richer existing structured metadata solve it?
+1. What user problem does this solve?
+2. Has it occurred in real use?
+3. Can a weak source simply be replaced?
+4. Can configuration solve it?
+5. Can existing structured metadata solve it?
 6. What maintenance does the change add?
-7. What new failure modes does it introduce?
-8. Does it preserve zero recurring monetary cost?
-9. Does it preserve source transparency?
-10. Does it preserve privacy and copyright boundaries?
-11. How will success be measured?
+7. What new failure modes appear?
+8. Does it preserve zero recurring cost?
+9. Does it preserve negligible daily manual work?
+10. Does it preserve transparency?
+11. Does it preserve credential and copyright boundaries?
+12. How will success be tested?
 
 This applies especially to:
 
@@ -1075,25 +1009,25 @@ This applies especially to:
 - entity extraction;
 - geography;
 - content types;
-- advanced ranking;
+- ranking;
 - source-health systems;
 - dashboards;
 - AI integration.
 
 ---
 
-# Current Development Sequence
+# Current Strategic Sequence
 
-The current strategic sequence is:
+The strategic sequence is:
 
 ```text
-Production automation baseline
+Production automation
 COMPLETE
 
 ↓
 
 Source and domain correction / expansion
-NEXT ACTIVE PRIORITY
+ACTIVE
 
 ↓
 
@@ -1113,18 +1047,7 @@ Only then:
 optional advanced quality or delivery improvements
 ```
 
-The current source/domain expansion should be informed by:
-
-- observed production weaknesses;
-- missing strategic coverage;
-- source accessibility;
-- public metadata richness;
-- source reliability;
-- Bocconi follow-up access;
-- source diversity;
-- maintenance burden.
-
-The source universe should be improved before the richer-report architecture is finalised because source metadata quality may materially affect which richer-context solution is necessary.
+Source/domain work should stop when additional expansion has lower expected value than improving understanding of already-selected items.
 
 ---
 
@@ -1132,35 +1055,35 @@ The source universe should be improved before the richer-report architecture is 
 
 ## Overengineering
 
-The project may become focused on architecture rather than useful output.
+The project may become focused on architecture instead of useful output.
 
-**Response:** continue to make evidence-driven incremental changes and stop when the simpler system creates sufficient value.
+**Response:** prefer simple evidence-driven corrections.
 
 ---
 
 ## Excessive Source Volume
 
-Adding too many sources may increase noise, duplication and failure rates.
+More sources may increase noise, duplication and failure rates.
 
-**Response:** expand only where a source solves a demonstrated information gap or replaces a weaker source.
+**Response:** optimize for the smallest strong source universe.
 
 ---
 
 ## Prestige Bias
 
-High-profile publications may appear attractive even when they are unsuitable for automated ingestion or expose too little public metadata.
+High-profile publications may appear attractive even when their marginal information value or automation suitability is poor.
 
-**Response:** separate publisher prestige and personal reading value from automation suitability.
+**Response:** evaluate actual contribution, access and metadata.
 
 ---
 
 ## Paywalled Follow-Up
 
-A report item may link to content requiring an additional subscription.
+A useful item may link to premium content.
 
-**Response:** evaluate whether enough public context exists, whether the user has legitimate access, and whether a better source should replace it.
+**Response:** prefer accessible sources where value is comparable. Apply the Premium Bocconi Exception only deliberately and source by source.
 
-Do not bypass the paywall.
+Never bypass the paywall.
 
 ---
 
@@ -1168,23 +1091,23 @@ Do not bypass the paywall.
 
 Bocconi access may create temptation to automate premium resources.
 
-**Response:** treat Bocconi publications and databases as personal reading/research layers unless a separate public or explicitly automation-permitted endpoint exists.
+**Response:** preserve a strict separation between personal reading access and production retrieval.
 
 ---
 
 ## Weak Report Context
 
-The report may identify relevant stories without explaining them sufficiently.
+The report may identify important stories without explaining them sufficiently.
 
-**Response:** design a richer report carefully before implementation, beginning with public structured metadata rather than automatically introducing full-article extraction or AI summarisation.
+**Response:** design the richer-context layer deliberately, beginning with lawful structured metadata.
 
 ---
 
 ## Weak Ranking
 
-Simple deterministic scoring may fail to reflect practical importance.
+Simple deterministic scoring may not perfectly represent practical importance.
 
-**Response:** keep scoring transparent, review real outputs and modify only observed weaknesses after source-quality problems are addressed.
+**Response:** fix source and classification evidence first. Increase ranking sophistication only if necessary.
 
 ---
 
@@ -1192,7 +1115,7 @@ Simple deterministic scoring may fail to reflect practical importance.
 
 Different headlines may describe the same event.
 
-**Response:** exact URL/title deduplication remains the current baseline. Add near-duplicate logic only if repeated reports demonstrate material remaining repetition.
+**Response:** retain exact deduplication until repeated evidence justifies more.
 
 ---
 
@@ -1200,39 +1123,23 @@ Different headlines may describe the same event.
 
 Feeds may change, fail or disappear.
 
-**Response:** isolate source failures, expose run health and replace disproportionately expensive or low-value sources.
-
----
-
-## Missing or Weak Timestamps
-
-Some useful feeds may provide poor publication metadata.
-
-**Response:** current policy excludes missing publication timestamps from the reporting window. Reconsider only if production evidence shows material coverage loss.
+**Response:** isolate failures and replace sources whose maintenance cost becomes disproportionate.
 
 ---
 
 ## Scheduler Latency
 
-GitHub may run scheduled workflows later than configured.
+GitHub may execute scheduled workflows later than configured.
 
-**Response:** schedule earlier than the intended reading time and continue observing whether timing variability materially affects output.
-
----
-
-## Reporting-Window Drift
-
-The current reporting window depends on actual execution time.
-
-**Response:** evaluate a fixed reporting cutoff if repeated production evidence shows scheduler latency materially changes information coverage.
+**Response:** continue monitoring whether this materially affects report usefulness before changing architecture.
 
 ---
 
 ## Public-Repository Exposure
 
-Generated content may accidentally include restricted or private material.
+Generated content may accidentally contain restricted or private material.
 
-**Response:** use only approved public structured inputs and maintain explicit repository boundaries.
+**Response:** use only approved inputs and preserve explicit repository boundaries.
 
 ---
 
@@ -1240,38 +1147,19 @@ Generated content may accidentally include restricted or private material.
 
 The system may increase reading without improving understanding.
 
-**Response:** optimise for concise understanding and selective deeper reading rather than maximum article volume.
-
----
-
-## Maintenance Burden
-
-A complex pipeline may require more effort than the value it provides.
-
-**Response:** prefer simple components, minimal dependencies, source replacement and occasional controlled maintenance.
-
----
-
-## Misleading Success
-
-A technically completed run may still produce a poor information product.
-
-**Response:** evaluate technical status and report quality separately.
+**Response:** optimise for concise understanding, selective deeper reading and actionable opportunity awareness.
 
 ---
 
 # Long-Term Possibilities
 
-The following may be considered after source quality and richer-report design are validated:
+Possible later improvements include:
 
-- broader high-quality source coverage;
-- Financial Markets implementation;
-- Italy implementation;
-- Milan and Bocconi opportunity monitoring;
+- broader high-quality source coverage where justified;
 - conservative near-duplicate clustering;
 - multi-source story grouping;
 - tracked companies and institutions;
-- geographic classification;
+- article-level geography;
 - content-type classification;
 - source-health history;
 - weekly archive analytics;
@@ -1283,40 +1171,32 @@ The following may be considered after source quality and richer-report design ar
 
 These are possibilities, not commitments.
 
-Each should be evaluated against:
+Financial Markets and Milan/Bocconi are no longer listed here as speculative possibilities:
 
-- demonstrated user need;
-- zero recurring monetary cost;
-- reliability;
-- daily manual work;
-- information quality;
-- maintainability;
-- transparency;
-- accessibility;
-- privacy;
-- copyright;
-- opportunity cost.
+- Financial Markets is implemented.
+- Milan/Bocconi is a validated product requirement.
+- Italy is an approved target macroarea pending implementation.
 
 ---
 
 # Public Repository Boundary
 
-This repository is intended to remain public and may function as proof of work.
+The repository is intended to remain public and may function as proof of work.
 
 It may contain:
 
-- public project documentation;
+- project documentation;
 - source code;
 - public-source configuration;
 - structured permitted metadata;
 - generated headlines and links;
-- permitted public descriptions or summaries;
+- permitted public descriptions;
 - deterministic classifications and scores;
 - run summaries;
 - tests;
 - controlled fixtures;
 - GitHub Actions workflows;
-- public-safe generated reports.
+- public-safe reports.
 
 It must not contain:
 
@@ -1336,60 +1216,34 @@ Private contextual materials may inform development reasoning but must remain ou
 
 ---
 
-# Current Project Status
+# Current Strategic Status
 
-**Current development state:** production automation baseline complete; information-quality improvement active.
+Production automation is complete.
 
-**Implemented and validated:**
+The project is currently in:
 
-- deterministic collection-to-report pipeline;
-- seven active public RSS sources;
-- seven active domains;
-- bounded network collection;
-- one-command local execution;
-- publication-window enforcement;
-- exact deduplication;
-- deterministic classification;
-- deterministic ranking;
-- structured JSONL storage;
-- Markdown reporting;
-- JSON run summaries;
-- degraded-source handling;
-- critical-failure handling;
-- operational logging;
-- 110 automated tests;
-- GitHub Actions;
-- manual workflow execution;
-- scheduled workflow execution;
-- automated output validation;
-- automated repository persistence;
-- no-change commit protection;
-- concurrency protection;
-- repository-native historical reports.
+> **source and domain correction / expansion**
 
-**Current validated product-quality limitations:**
+The first Phase 4 correction has validated the overall approach:
 
-- the seven-source universe is not necessarily the optimal long-term source set;
-- Sifted requires explicit review because selected content may require Sifted Pro;
-- source accessibility must be considered alongside technical compatibility;
-- public metadata richness varies materially by source;
-- report entries can be too thin to understand without click-through;
-- some reports may become unusually sparse or source/domain concentrated;
-- GitHub schedule latency can shift the current rolling 24-hour reporting window.
+- a weak source can be replaced without redesigning the pipeline;
+- taxonomy coverage can expand through configuration;
+- real historical records can be used for regression testing;
+- report quality must be inspected separately from technical success.
 
-**Current priority:**
-
-> Correct and expand the source and domain universe, beginning with the problems exposed by current production use and the Sifted accessibility case.
-
-**Following priority:**
-
-> Conduct a deliberate richer-report product-design phase defining how much context each selected item should provide, which public information may be used, how source restrictions should be handled, and how success will be evaluated before implementation begins.
-
-The detailed phase sequencing and implementation status belong in:
+Detailed implementation state, source counts, test counts, source audit chronology and immediate tasks belong in:
 
 ```text
 04 Development Roadmap and Status.md
 ```
+
+Current strategic priority:
+
+> **Continue building the smallest high-value source and domain universe.**
+
+Following strategic priority:
+
+> **Design and implement a richer report experience that provides enough lawful context for initial understanding.**
 
 ---
 
@@ -1399,48 +1253,45 @@ Every future project decision should answer:
 
 > Does this change materially improve reliability, information quality or user value without violating the constraints on cost, manual work, maintainability, accessibility, transparency, privacy, copyright and scope?
 
-If the answer is unclear, the change should be deferred until evidence is available.
+If the answer is unclear, defer the change until evidence exists.
 
 ---
 
 # Changelog
 
+## 2026-08-17 — Phase 4 Strategic Reconciliation
+
+- Preserved the stable project purpose, constraints and operating model.
+- Removed unnecessary transient implementation detail from the strategic brief.
+- Recorded Financial Markets as an implemented strategic macroarea rather than a future possibility.
+- Recorded Milan/Bocconi Professional Ecosystem Intelligence as a validated product requirement.
+- Preserved Italy as an approved target macroarea pending implementation.
+- Recorded the durable lesson from the Sifted → Tech.eu replacement: technical compatibility alone does not establish source quality.
+- Added the narrow Premium Bocconi Exception while preserving the prohibition on authenticated automated premium-content retrieval.
+- Recorded selective classification rather than classification percentage as the intended information-quality philosophy.
+- Preserved source/domain correction as the active strategic phase.
+- Preserved richer report context as the following major product objective.
+- Kept detailed implementation status and chronology in the dedicated roadmap/status document.
+
 ## 2026-08-14 — Production Automation Closeout and Information-Quality Reorientation
 
 - Reconciled the Project Brief with completed Phase 2 and Phase 3 implementation.
 - Recorded the completed deterministic production automation baseline.
-- Recorded seven active public sources and seven implemented domains as the current production baseline rather than the final information universe.
-- Recorded 110 passing automated tests.
-- Recorded GitHub Actions manual and scheduled execution.
-- Recorded automated repository persistence and historical production outputs.
-- Recorded validated degraded-source and critical-failure behaviour.
-- Changed the immediate strategic priority from automation to source/domain correction and expansion.
-- Added source accessibility as a strategic information-quality consideration.
-- Added public metadata richness as a strategic source-quality consideration.
-- Recorded the Sifted Pro access case as evidence requiring source review without pre-deciding removal.
-- Added the requirement that reports provide enough lawful context for initial understanding before immediate click-through.
-- Preserved original-source links as deeper-reading destinations.
-- Added the distinction between automated public sources, Bocconi premium reading access and institutional research/database resources.
-- Explicitly preserved the rule that institutional access does not authorise automated authenticated ingestion.
-- Recorded scheduler latency and report-window drift as observed limitations requiring continued evaluation.
-- Reframed technical success and information-product success as separate dimensions.
+- Changed the strategic priority from automation to source/domain quality.
+- Added source accessibility and metadata richness as strategic information-quality considerations.
+- Added the requirement for sufficient lawful context before immediate click-through.
+- Added the distinction between automated public sources, Bocconi premium reading and institutional research/database resources.
 - Preserved zero recurring monetary cost, deterministic production, public-repository safety and no-production-AI constraints.
 
 ## 2026-08-11 — Phase 1 Project Brief Reconciliation
 
-- Updated the brief from project-definition status to the validated Phase 1 delivery state.
-- Preserved the original project purpose, target user, strategic rationale and hybrid operating model.
-- Added publication-window enforcement and operational visibility to the core workflow.
-- Recorded the completed deterministic local vertical slice.
-- Recorded 104 passing automated tests at Phase 1 closeout.
-- Distinguished the controlled two-domain/sample-source implementation from the intended broader information scope.
-- Clarified the remaining production MVP work at that stage.
-- Reframed advanced quality features as evidence-driven possibilities rather than automatic prerequisites.
-- Reinforced the workflow-first, minimal-complexity development philosophy.
+- Reconciled the brief with the validated local vertical slice.
+- Preserved the original project purpose and strategic rationale.
+- Reinforced evidence-driven, minimal-complexity development.
 
 ## Initial Project Brief Baseline
 
 - Defined the Daily Intelligence System problem and strategic rationale.
 - Defined the two-layer ChatGPT and GitHub operating model.
 - Established zero recurring cost and negligible daily manual work as hard constraints.
-- Defined MVP scope, outputs, non-goals, risks and success criteria.
+- Defined scope, outputs, non-goals, risks and success criteria.

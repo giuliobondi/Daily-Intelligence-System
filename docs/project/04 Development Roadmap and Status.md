@@ -43,6 +43,9 @@ Development should follow these rules:
 - Keep the repository public-safe.
 - Stop at stable checkpoints.
 - Treat technically successful execution as insufficient if the report is noisy, repetitive, misleading, inaccessible, too sparse or too thin to understand without unnecessary click-through.
+- Prefer a smaller high-value source universe over accumulation of individually prestigious sources.
+- Prefer unclassified records over misleading classification.
+- Evaluate report quality from real selected and missed stories, not from classification rate alone.
 
 The project should not move to the next phase until the current phase has a clear completion condition or there is evidence that a different immediate priority creates materially more user value.
 
@@ -52,24 +55,24 @@ The project should not move to the next phase until the current phase has a clea
 
 | Field | Current Status |
 |---|---|
-| Project Phase | Phase 3 complete — entering evidence-driven information-quality improvement |
+| Project Phase | Phase 4 — Source and Domain Correction / Expansion |
 | Current Milestone | Milestone 4 — Correct and expand the source and domain universe |
 | Repository Status | Public Python repository with automated GitHub-native daily execution and repository-native historical outputs |
 | Implementation Status | Deterministic collect → normalize → validate → filter → deduplicate → classify → rank → store → report pipeline implemented and production-validated |
 | Automation Status | GitHub Actions implemented; manual and scheduled execution validated; outputs persisted automatically |
 | Production Schedule | Daily at 06:05 Europe/Rome; GitHub scheduling latency remains an observed operational limitation |
-| Source Registry | Seven active production sources pending immediate quality/accessibility review |
-| Taxonomy Status | Seven implemented domains; Financial Markets, Italy, and Milan/Bocconi remain candidate expansion domains |
+| Source Registry | Seven active production sources; Sifted replaced by Tech.eu in the current validated Phase 4 checkpoint |
+| Taxonomy Status | Eight implemented domains; Financial Markets now active; Italy remains pending; Milan/Bocconi is a validated requirement pending implementation |
 | Testing Status | 110 automated tests passing |
-| Current Product-Quality Findings | Current reports can be too thin, some linked articles may be inaccessible, source concentration can be high, and scheduler latency can shift the rolling 24-hour window |
-| Current Blockers | No automation blocker; information-source quality and report usefulness are now the active constraints |
-| Current Priority | Review, correct and expand sources and domains, beginning with accessibility and metadata-richness problems exposed by Sifted |
+| Latest Local Validation | Real pipeline run completed successfully on 17 August 2026 with 7/7 sources successful and generated report manually inspected |
+| Current Product-Quality Findings | Source quality and classification selectivity matter more than raw classification rate; richer report context remains a validated later requirement |
+| Current Blockers | No automation blocker; remaining source/domain quality work is the active constraint |
+| Current Priority | Close the validated Tech.eu / Financial Markets checkpoint, then technically audit Financial Times |
+| Current Git State | Phase 4 implementation locally validated; documentation reconciliation and commit still pending |
 
 ---
 
-# Completed Work
-
-## Project Decisions
+# Completed Project Decisions
 
 The following decisions are established unless explicitly changed later:
 
@@ -86,7 +89,7 @@ The following decisions are established unless explicitly changed later:
 - The repository remains public.
 - Private Career OS materials remain outside the repository.
 - Bocconi institutional credentials and other private credentials must never be embedded in the production pipeline.
-- Personal or institutional access to a publication does not automatically make that publication eligible for automated ingestion.
+- Personal or institutional reading access does not automatically authorise automated ingestion.
 - Processed records use JSON Lines.
 - Run summaries use JSON.
 - Daily reports use Markdown.
@@ -95,16 +98,23 @@ The following decisions are established unless explicitly changed later:
 - Relevance scoring is deterministic and explainable.
 - Repository-native persistence is the current production delivery model.
 - GitHub Issues, GitHub Pages and other interface layers remain optional and deferred.
-- Broad heterogeneous feeds may use no default domain rather than forcing every item into a misleading classification.
-- Source defaults should represent a genuine source-wide topical guarantee rather than a broad publisher category.
+- Broad heterogeneous feeds may use no default domain.
+- Source defaults represent genuine source-wide topical evidence rather than publisher category.
 - Unclassified records are preferable to misleading classifications.
-- Retry logic should not be added without evidence that current bounded single-attempt collection is insufficient.
+- A high unclassified rate is not itself a defect.
+- Classification quality should be judged by valuable misses and false positives.
+- Retry logic should not be added without evidence.
 - A technically compatible source is not automatically a good production source.
 - Production source quality must consider both automation suitability and end-user usefulness.
-- A source that frequently links to inaccessible content or exposes too little public context may be replaced rather than supported with increasingly complex logic.
-- Report quality must be evaluated independently from technical run success.
+- A source may be replaced instead of receiving source-specific complexity.
+- Report quality must be evaluated independently from run success.
+- Premium Bocconi-accessible publications may receive a narrow source-specific exception when their strategic value justifies thinner automated context.
+- The Premium Bocconi Exception never permits authenticated automated article retrieval.
+- The smallest strong source universe is preferred over maximum publication coverage.
 
-## Repository and Package Setup
+---
+
+# Repository and Package Baseline
 
 Completed repository foundations include:
 
@@ -117,12 +127,11 @@ Completed repository foundations include:
 - `src/daily_intelligence/`;
 - `tests/` and controlled fixtures;
 - `docs/project/` for canonical project documentation;
-- `.github/workflows/daily-intelligence.yml` for production automation;
-- repository-native `data/` and `reports/` production history.
+- `.github/workflows/daily-intelligence.yml`;
+- repository-native `data/`;
+- repository-native `reports/`.
 
 The Python package uses a `src/` layout and requires Python 3.12 or later.
-
-## Implemented Processing Modules
 
 The processing core includes:
 
@@ -159,37 +168,24 @@ The exact repository tree remains the source of truth if file names later change
 
 Create the minimum project definition required to begin implementation without major ambiguity.
 
-## Scope
+## Completed Scope
 
-- define project purpose;
-- define product behaviour;
-- define information taxonomy and source policy;
-- define system architecture;
-- define implementation roadmap;
-- establish repository structure;
-- make hard constraints explicit;
-- separate current requirements from deferred ideas.
+Phase 0 established:
 
-## Completion Criteria
-
-Phase 0 is complete when:
-
-- documents `00` through `04` are internally consistent enough to guide implementation;
-- no major contradiction blocks the local slice;
-- unresolved decisions are explicitly visible;
-- the MVP boundary is clear;
-- the next implementation milestone is defined;
-- repository foundations exist.
+- project purpose;
+- product behaviour;
+- information taxonomy;
+- source policy;
+- architecture;
+- implementation roadmap;
+- repository structure;
+- hard constraints;
+- MVP boundary;
+- initial implementation sequence.
 
 ## Status
 
 **Complete**
-
-## Completion Notes
-
-Phase 0 established the initial product, architecture, information policy and implementation sequence.
-
-The canonical documents are updated as implementation changes rather than being treated as immutable historical snapshots.
 
 ---
 
@@ -197,175 +193,51 @@ The canonical documents are updated as implementation changes rather than being 
 
 ## Objective
 
-Build the smallest complete local pipeline that proves the core workflow from collection to readable output.
+Build the smallest complete local pipeline proving the workflow from collection to readable output.
 
 ## Implemented Scope
 
-Phase 1 implemented and validated:
+Phase 1 implemented:
 
 1. configuration loading;
-2. RSS/Atom collection from controlled inputs;
+2. RSS/Atom collection;
 3. structured source-level collection results;
-4. record normalisation;
+4. normalisation;
 5. required-field validation;
-6. deterministic collection-window filtering;
-7. exact duplicate reduction;
-8. simple deterministic domain classification;
-9. provisional deterministic relevance scoring;
-10. JSON Lines persistence;
-11. deterministic Markdown report selection and rendering;
-12. structured JSON run summaries;
-13. end-to-end local orchestration;
+6. publication-window filtering;
+7. exact deduplication;
+8. deterministic classification;
+9. deterministic relevance scoring;
+10. JSONL persistence;
+11. Markdown report generation;
+12. JSON run summaries;
+13. local orchestration;
 14. one-command CLI execution;
-15. source-level failure isolation and degraded-run behaviour;
-16. user-facing operational report metadata and warnings;
-17. minimal standard-library run-level logging;
-18. automated tests for critical deterministic logic and integration paths.
+15. source-level failure isolation;
+16. degraded-run behaviour;
+17. operational logging;
+18. automated tests.
 
-## Local Execution
-
-The pipeline can be run locally with:
+Local execution:
 
 ```text
 python -m daily_intelligence.cli run
 ```
 
-The CLI constructs repository-default output paths and a previous-24-hours collection window.
+Phase 1 also established the development pattern:
 
-## Phase 1 Controlled Configuration
-
-Phase 1 intentionally used:
-
-- one fixture/sample source;
-- Technology and Software domain;
-- Artificial Intelligence domain;
-- deterministic ranking weights;
-- configurable report limits.
-
-That setup existed to validate pipeline behaviour before introducing real network and information-quality uncertainty.
-
-## Key Implemented Behaviour
-
-### Collection
-
-Each source returns a structured result with status:
-
-- `success`;
-- `empty`;
-- `failed`.
-
-Expected source-level failures are isolated so one bad source does not discard successful source results.
-
-### Normalisation and Identity
-
-Records preserve useful source metadata while normalising titles, URLs and timestamps.
-
-Record identity is deterministic from source identity and normalised URL.
-
-### Validation
-
-Invalid records are separated visibly from valid records before later processing.
-
-### Collection Window
-
-The reporting window is enforced rather than recorded only as metadata.
-
-Current behaviour:
-
-- requires timezone-aware window boundaries;
-- uses inclusive boundaries;
-- excludes records published before or after the window;
-- excludes records without a confirmed publication timestamp;
-- rejects reversed windows.
-
-### Deduplication
-
-Current exact duplicate handling uses:
-
-1. normalised URL;
-2. normalised title.
-
-The first deterministic occurrence is retained.
-
-### Classification
-
-Classification uses source defaults plus deterministic keyword matching with word-boundary protection.
-
-Multiple domains are allowed.
-
-Unclassified records remain valid processed records but are omitted from the main report.
-
-### Ranking
-
-The current provisional score is deterministic and based on:
-
-- configured source tier;
-- number of domain matches;
-- number of keyword matches.
-
-Score components are stored for transparency.
-
-### Storage and Reporting
-
-Processed records are written as JSON Lines using deterministic overwrite semantics for a target file.
-
-The Markdown report:
-
-- applies deterministic selection;
-- respects total and per-domain limits;
-- places each item once under a primary domain;
-- shows secondary domains as metadata;
-- shows relevance score;
-- uses only feed-provided descriptions;
-- truncates descriptions to configuration limits;
-- omits unclassified records from the main report;
-- exposes run status, monitored window, source health, collected count and displayed count;
-- exposes warnings on degraded runs.
-
-### Run Summary and Logging
-
-Each run produces a structured JSON summary containing operational counts, status, warnings and monitored window.
-
-The pipeline emits lightweight standard-library logs for:
-
-- pipeline start;
-- source outcomes;
-- validation counts;
-- collection-window retention;
-- duplicate counts;
-- classification/ranking counts;
-- output paths;
-- final run status.
-
-## Phase 1 Validation Completed
-
-Phase 1 was validated through:
-
-- unit tests for deterministic modules;
-- controlled feed fixture tests;
-- end-to-end pipeline integration tests;
-- degraded source integration testing;
-- collection-window boundary and exclusion tests;
-- report-selection and operational-header tests;
-- CLI invocation tests;
-- logging tests;
-- manual one-command CLI runs;
-- generated JSONL inspection;
-- generated Markdown inspection;
-- run-summary inspection;
-- repeated full-suite execution.
+```text
+run real workflow
+→ inspect output
+→ identify concrete defect
+→ make smallest correction
+→ test
+→ inspect again
+```
 
 At Phase 1 closeout:
 
-> **104 tests passed.**
-
-A manual CLI run also exposed a real gap: the original pipeline recorded a collection window without enforcing it.
-
-The missing filter was implemented, regression-tested and revalidated through the CLI.
-
-This established the development pattern used in later phases:
-
-> real output should drive the next justified change.
+> **104 automated tests passed.**
 
 ## Status
 
@@ -377,13 +249,11 @@ This established the development pattern used in later phases:
 
 ## Objective
 
-Validate the local pipeline against a deliberately small real public source set before adding automation or speculative quality features.
+Validate the local system with a small real public source universe before automation.
 
-The purpose was to discover real source, metadata, network and report-quality problems using the smallest useful production-like input set.
+## Initial Real-Source Baseline
 
-## Implemented Real-Source Set
-
-The validated active registry contains seven public RSS sources:
+Phase 2 validated seven public RSS sources:
 
 1. BBC News World;
 2. BBC News Business;
@@ -393,15 +263,11 @@ The validated active registry contains seven public RSS sources:
 6. OpenAI News;
 7. Sifted.
 
-The source set was intentionally small enough to remain inspectable during initial production-readiness work.
+This was a validation baseline, not a permanent source universe.
 
-The set is no longer considered final.
+## Initial Implemented Taxonomy
 
-Production use has now provided enough evidence to begin a structured source review and expansion.
-
-## Implemented Taxonomy
-
-The implemented taxonomy contains seven active domains:
+Phase 2 validated seven domains:
 
 1. Global Politics and Geopolitics;
 2. Economics and Macroeconomics;
@@ -411,213 +277,74 @@ The implemented taxonomy contains seven active domains:
 6. Startups and Venture Capital;
 7. Europe and the European Union.
 
-The target taxonomy remains broader than the implemented subset.
+## Network Hardening
 
-The following target domains remain candidate additions:
+Real-source testing justified:
 
-- Financial Markets;
-- Italy;
-- Milan and Bocconi ecosystem.
+- bounded remote HTTP retrieval;
+- 10-second timeout;
+- explicit User-Agent;
+- explicit Accept headers;
+- normal SSL verification;
+- source-level collection isolation;
+- explicit handling of HTTP, URL and timeout errors.
 
-These should be reconsidered during the next source/domain strategy phase rather than added automatically.
+No retry policy was added because evidence did not require it.
 
-## Network Production-Readiness Changes
+## Source-Default Correction
 
-Real-source testing exposed two concrete collector requirements:
+Real reports showed that broad source defaults created misleading classifications and inflated relevance.
 
-- remote requests needed a bounded timeout;
-- some feeds required an explicit User-Agent.
-
-The collector was therefore hardened using ordinary Python standard-library networking.
-
-Current remote collection behaviour:
+The policy became:
 
 ```text
-remote feed URL
-→ urllib Request
-→ explicit User-Agent and Accept headers
-→ 10-second timeout
-→ response bytes
-→ feedparser
+broad heterogeneous source
+→ no default domain
 ```
 
-Expected HTTP, URL and timeout failures are converted into `CollectionError`.
+Narrow defaults were retained only when justified.
 
-Source-level failures remain isolated by `collect_source`.
+At Phase 2 closeout:
 
-Normal SSL certificate verification remains enabled.
-
-No SSL bypass was introduced.
-
-No new third-party HTTP dependency was added.
-
-No retry policy was added because real-source testing did not demonstrate a current need for one.
-
-## Real-Source Compatibility Validation
-
-All seven selected feeds were collected successfully through the actual project collector during Phase 2.
-
-Observed feed sizes included:
-
-- BBC World — approximately two dozen entries;
-- BBC Business — approximately five dozen entries;
-- ECB — 15 entries;
-- European Commission — 30 entries;
-- Istat — 10 entries;
-- OpenAI — more than one thousand entries;
-- Sifted — approximately two dozen entries.
-
-The large OpenAI feed did not create a blocker because collection-window filtering reduces the eligible record set after validation.
-
-All returned entries from the seven feeds during the compatibility test normalised successfully.
-
-No missing publication timestamps were observed in the tested entries.
-
-Missing descriptions occurred for some feeds and entries but were valid under the original optional-description model.
-
-That model is now under product review because real production use showed that thin descriptions can materially reduce report usefulness.
-
-## Source-Default Classification Correction
-
-The first full real-source report exposed misleading classification caused by overly broad source defaults.
-
-Examples included:
-
-- unrelated BBC Business items being forced into Economics and Macroeconomics;
-- an ECB concert announcement being classified as Economics and Europe/EU;
-- relevance scores being inflated by domains assigned solely from broad publisher defaults.
-
-The smallest correction was to make `default_domains` explicitly optional.
-
-Broad sources may use:
-
-```yaml
-default_domains: []
+```text
+BBC World           → none
+BBC Business        → none
+ECB                 → none
+European Commission → none
+Istat               → Economics and Macroeconomics
+OpenAI              → Artificial Intelligence
+Sifted              → Startups and Venture Capital
 ```
 
-Current default-domain policy:
+## Evidence-Based Keyword Refinement
 
-- BBC News World → no default domain;
-- BBC News Business → no default domain;
-- European Central Bank → no default domain;
-- European Commission Highlighted News → no default domain;
-- Istat Press Releases → Economics and Macroeconomics;
-- OpenAI News → Artificial Intelligence;
-- Sifted → Startups and Venture Capital.
-
-This policy reflects the rule:
-
-> A source default should represent a genuine source-wide topical guarantee, not merely the general category of the publisher.
-
-`geographic_scope` remains required and non-empty.
-
-Domain keyword lists remain required and non-empty.
-
-## Evidence-Based Keyword Adjustment
-
-Removing broad source defaults improved precision but exposed a recall gap in Global Politics and Geopolitics.
-
-Real in-window BBC World items were manually reviewed.
-
-Candidate keywords were simulated against the actual processed sample before configuration was changed.
-
-The following keywords were added because they recovered clearly relevant political or geopolitical stories without observed false positives in the sample:
+Real BBC records led to tested additions:
 
 - `war`;
 - `conflict`;
 - `parliament`.
 
-Several broader candidates were tested but deliberately not added, including:
+Broader terms including:
 
 - `government`;
 - `defence`;
 - `president`;
-- `prime minister`.
+- `prime minister`;
 
-Those terms produced ambiguous or low-value matches in the observed sample.
+were rejected because they generated ambiguous matches.
 
-This preserves the policy of preferring under-classification over noisy classification.
+## Real Failure Validation
 
-## Real Report Validation
+A controlled valid-source + invalid-source run confirmed:
 
-The first production-like run succeeded technically but exposed classification noise.
-
-The initial report displayed 15 items.
-
-After removing inappropriate broad source defaults, the report became smaller and more credible, displaying 8 items.
-
-After evidence-based Global Politics keyword additions, the report displayed 11 items across useful sections including:
-
-- Global Politics and Geopolitics;
-- Economics and Macroeconomics;
-- Artificial Intelligence;
-- Startups and Venture Capital.
-
-This demonstrated that technical success alone is insufficient and that real report inspection should drive deterministic corrections.
-
-The result was judged useful enough to justify moving to automation.
-
-## Degraded Real-Source Validation
-
-A controlled run was executed using:
-
-- one valid real Istat source;
-- one deliberately invalid remote source.
-
-Observed behaviour:
-
-- Istat collection succeeded;
-- the invalid source failed with `CollectionError`;
-- the overall run status became `degraded`;
-- the failure appeared in structured warnings;
-- the valid Istat record still reached the final report;
-- successful-source output was preserved.
-
-This confirmed real-network partial-source failure isolation rather than relying only on fixture tests.
-
-## Phase 2 Validation Completed
-
-Phase 2 validation included:
-
-- direct live feed compatibility probing;
-- hardened collector tests;
-- real collection through the actual project collector;
-- normalization of all returned entries from the seven selected feeds;
-- repeated full-suite automated testing;
-- real CLI execution;
-- real JSONL inspection;
-- real Markdown report inspection;
-- real run-summary inspection;
-- classification coverage review;
-- simulated keyword evaluation against actual processed samples;
-- deliberate degraded real-network execution;
-- repeated report-quality comparison after deterministic corrections.
+- source failure isolation;
+- `degraded` overall status;
+- structured warning visibility;
+- preservation of valid output.
 
 At Phase 2 closeout:
 
-> **110 automated tests pass.**
-
-## Completion Criteria
-
-Phase 2 is complete because:
-
-- a small real-source set can be collected manually and repeatedly;
-- remote requests use an explicit bounded timeout;
-- feeds that require a User-Agent collect successfully;
-- normal SSL verification remains intact;
-- source failures remain isolated and visible;
-- publication timestamps behave adequately for the current reporting-window model;
-- real metadata survives normalization;
-- all tested real entries normalised successfully;
-- real JSONL, Markdown and run-summary outputs were generated and inspected;
-- report-quality problems were identified from real output;
-- only small deterministic corrections justified by evidence were added;
-- misleading broad source defaults were removed;
-- conservative classification recall was improved with tested keywords;
-- a deliberate real-network failure produced a usable degraded run;
-- the full automated suite passes;
-- zero recurring monetary cost remains intact;
-- no production AI dependency was introduced.
+> **110 automated tests passed.**
 
 ## Status
 
@@ -629,7 +356,7 @@ Phase 2 is complete because:
 
 ## Objective
 
-Run the validated real-source pipeline automatically in the public repository with zero recurring monetary cost and negligible daily manual work.
+Run the validated production pipeline automatically with zero recurring monetary cost and negligible manual work.
 
 ## Implemented Scope
 
@@ -637,242 +364,92 @@ Phase 3 implemented and validated:
 
 - GitHub Actions workflow;
 - manual `workflow_dispatch`;
-- GitHub-hosted Ubuntu runner;
-- Python 3.12 runtime;
-- deterministic package installation;
-- full automated test execution;
+- scheduled execution;
+- Python 3.12 hosted runtime;
+- deterministic dependency installation;
+- full automated tests before production;
 - production CLI execution;
 - explicit workflow timeout;
-- repository-write permission limited to the workflow's production persistence need;
-- generated-output validation;
-- visible application logs;
-- coherent automated output commit;
+- required repository-write permission;
+- output validation;
+- application logs;
+- bot persistence;
 - no-empty-commit guard;
-- automated repository persistence;
-- deliberate critical-failure validation;
-- deliberate degraded-source validation;
-- scheduled daily execution;
+- degraded-source publication;
+- critical-failure blocking;
 - concurrency protection;
-- timezone-aware production schedule.
+- timezone-aware daily schedule.
 
-## Production Workflow
-
-The production path is:
+Production flow:
 
 ```text
-workflow_dispatch or schedule
-→ checkout repository
-→ set up Python 3.12
-→ install project and development dependencies
-→ run 110 automated tests
-→ run production CLI
-→ validate generated outputs
-→ stage production output directories
-→ stop if no output changes exist
-→ commit as github-actions[bot]
-→ push generated outputs
+GitHub trigger
+→ checkout
+→ Python setup
+→ install
+→ test
+→ run pipeline
+→ validate output
+→ stage generated artifacts
+→ commit if changed
+→ push
 ```
 
-The production workflow remains deterministic and does not use:
+Production contains no:
 
-- paid APIs;
-- paid automation services;
-- OpenAI API credits;
-- GitHub AI or Copilot credits;
-- private credentials;
-- cloud databases;
-- external persistence services.
+- paid API;
+- OpenAI API call;
+- Copilot credit consumption;
+- authenticated news access;
+- private database;
+- cloud infrastructure dependency.
 
-## Manual Workflow Validation
+## Production Schedule
 
-Manual Actions execution validated that:
-
-- the workflow could be triggered from GitHub;
-- dependencies installed successfully;
-- 110 tests passed in the hosted runner;
-- the production CLI executed successfully;
-- all seven production sources were attempted;
-- logs exposed source-level progress and final run status;
-- JSONL, Markdown and run-summary outputs were generated in expected paths;
-- generated files were inspectable.
-
-A missing CLI logging configuration was discovered during the first Actions run because pipeline INFO logs were not visible.
-
-The CLI was updated to configure standard-library logging.
-
-The targeted tests and full suite were rerun successfully.
-
-The subsequent Actions run displayed source collection, validation, filtering, deduplication, classification, output and final-status logs correctly.
-
-## Automated Persistence Validation
-
-The workflow was extended to:
-
-- validate generated output paths;
-- stage only production output directories;
-- avoid empty commits;
-- use the `github-actions[bot]` identity;
-- commit changed outputs;
-- push them to the executing branch.
-
-A successful production run created one coherent bot commit containing:
-
-- processed JSONL;
-- run-summary JSON;
-- daily Markdown report.
-
-Repository-native production history is therefore operational.
-
-## No-Change Validation
-
-The commit guard was explicitly validated.
-
-When no staged output differences exist:
-
-```text
-git diff --cached --quiet
-```
-
-causes the workflow persistence logic to exit without creating an empty commit.
-
-No additional complexity was added for same-day reruns because legitimate timestamp and content changes may still produce real differences.
-
-## Critical-Failure Validation
-
-A temporary branch deliberately changed one source to an invalid configuration:
-
-```yaml
-geographic_scope: []
-```
-
-Observed behaviour:
-
-- configuration validation failed;
-- automated tests failed;
-- the workflow returned a non-zero result;
-- the production pipeline did not proceed to valid publication;
-- no misleading successful output publication occurred.
-
-This validated the distinction between critical configuration failure and recoverable source failure.
-
-## Degraded-Source Validation
-
-A temporary branch deliberately changed the BBC World feed URL to an invalid `.invalid` hostname while keeping the source configuration structurally valid.
-
-Observed behaviour:
-
-- 110 automated tests still passed;
-- BBC World collection failed;
-- the other six sources continued successfully;
-- the pipeline completed with `status: degraded`;
-- run-summary JSON recorded 7 active, 6 successful and 1 failed source;
-- the warning identified `bbc_world`;
-- the Markdown report visibly showed `Run status: degraded`;
-- successful-source content remained available;
-- the workflow itself completed successfully;
-- degraded outputs were persisted by the bot.
-
-This validated the intended production distinction:
-
-> recoverable source failure should produce visible degraded intelligence, not suppress all usable output.
-
-## Concurrency
-
-Once both manual and scheduled execution existed, overlap protection became justified.
-
-The production workflow uses one concurrency group and does not cancel an already-running production job.
-
-This reduces the risk of simultaneous runs writing and pushing the same date-based output paths.
-
-## Scheduled Execution
-
-Scheduled execution was enabled only after manual workflow, persistence and failure semantics were validated.
-
-The workflow uses a timezone-aware `Europe/Rome` schedule.
-
-The production schedule is currently:
+Current schedule:
 
 ```text
 06:05 Europe/Rome
 ```
 
-The earlier target was moved earlier after real scheduled runs demonstrated substantial GitHub scheduling delay.
+GitHub scheduled execution has demonstrated significant latency.
 
-## Scheduler-Latency Observation
-
-Scheduled execution is functional but not punctual.
-
-Observed behaviour included scheduled runs beginning materially later than their configured cron time, including delays of more than two hours during controlled testing.
-
-This is treated as an external GitHub scheduling limitation rather than a pipeline failure.
-
-Moving the production trigger earlier creates delivery buffer but does not eliminate the underlying timing uncertainty.
-
-## Reporting-Window Coupling
-
-The current CLI defines the collection window relative to actual pipeline start time.
-
-Therefore:
+The current report window remains:
 
 ```text
-late GitHub start
-→ later 24-hour reporting window
-→ potentially different eligible content
+actual execution time - 24 hours
+→ actual execution time
 ```
 
-This means scheduling latency currently affects not only delivery time but also report composition.
+This creates a known coupling:
 
-A scheduled production report on 14 August was substantially shorter than the preceding reports while source collection remained technically healthy.
+```text
+scheduler delay
+→ shifted report cutoff
+→ potentially different report composition
+```
 
-This is not yet sufficient evidence for an immediate architecture change, but it creates a validated design question:
+The problem is recorded but not yet severe enough to justify immediate architecture change.
 
-> Should the reporting window remain anchored to actual execution time, or should it use a deterministic reporting cutoff independent of GitHub scheduler latency?
+## Validated Failure Semantics
 
-This issue should be considered during the upcoming product-quality design work.
+### Critical configuration failure
 
-## Phase 3 Validation Completed
+A deliberately invalid configuration correctly:
 
-Phase 3 validation included:
+- failed validation/tests;
+- stopped production;
+- avoided misleading publication.
 
-- manual `workflow_dispatch`;
-- hosted-runner dependency installation;
-- full 110-test execution in Actions;
-- production seven-source run;
-- operational log inspection;
-- output path inspection;
-- JSONL inspection;
-- Markdown inspection;
-- run-summary inspection;
-- automated bot persistence;
-- coherent commit inspection;
-- no-change commit-guard validation;
-- critical configuration failure;
-- degraded source failure;
-- preservation of successful-source content;
-- scheduled execution;
-- concurrency protection;
-- confirmation that production remains zero-cost and does not consume AI credits.
+### Recoverable source failure
 
-## Completion Criteria
+A deliberately invalid BBC World endpoint correctly:
 
-Phase 3 is complete because:
-
-- manual Actions execution works;
-- all dependencies install successfully;
-- the full automated suite passes in Actions;
-- production real feeds are attempted in Actions;
-- outputs are generated and inspectable;
-- application logs are visible;
-- changed outputs create one coherent bot commit;
-- unchanged outputs do not create empty commits;
-- degraded source failure remains visible and usable;
-- critical configuration failure blocks misleading publication;
-- an explicit timeout is present;
-- overlap protection is present;
-- scheduled execution has been observed successfully;
-- no credentials are exposed;
-- no paid service is required;
-- no recurring AI credits are consumed.
+- allowed other sources to succeed;
+- produced `degraded` status;
+- exposed the failed source;
+- preserved usable output;
+- allowed persistence.
 
 ## Status
 
@@ -884,411 +461,556 @@ Phase 3 is complete because:
 
 ## Objective
 
-Correct weaknesses in the current seven-source baseline and expand the source and domain universe only where the resulting information product becomes materially more useful.
+Correct weak production sources and expand sources/domains only where the resulting information product becomes materially more useful.
 
-This phase is now the active priority.
+This is the current active phase.
 
-## Why This Phase Is Now Justified
+---
 
-The original seven-source registry was sufficient to validate the pipeline and automation architecture.
+## Strategic Input Completed
 
-Production use has now exposed concrete information-quality limitations.
+A dedicated Career Agent source/domain audit has been completed.
 
-### Sifted Accessibility Problem
+Its main strategic conclusions were:
 
-At least one Sifted item selected into a production report linked to an article requiring Sifted Pro access.
+- optimize for the smallest high-value information universe;
+- prioritize economics, companies, AI, Financial Markets and actionable Milan/Bocconi intelligence;
+- retain broad geopolitical awareness without building a generic-news product;
+- preserve Startups/VC but reduce low-value funding noise;
+- prioritize Financial Times and Il Sole 24 Ore among premium Bocconi-accessible candidates;
+- replace Sifted if a better European startup source can preserve its useful coverage;
+- treat Milan/Bocconi as a professional ecosystem sensor rather than generic local news.
 
-This matters because:
+Strategic approval does not equal technical production approval.
 
-- the automated system currently provides only limited feed-derived context;
-- the user may therefore need to open the original article to understand the development;
-- a paywalled destination can make the selected report item substantially less useful;
-- Sifted feed metadata has also been observed to provide limited descriptive context for some entries.
+Development remains responsible for:
 
-Sifted should therefore be reviewed as a production source.
-
-Its status should not be assumed to be either permanently retained or immediately removed.
-
-The review should compare:
-
-- topical value;
-- public-feed richness;
-- frequency of inaccessible linked articles;
-- uniqueness of coverage;
-- availability of better accessible alternatives;
-- maintenance burden.
-
-### Source Accessibility
-
-Production source eligibility must now distinguish:
-
-1. whether the system can legally and reliably ingest the source;
-2. whether the resulting item is actually useful to the user.
-
-A technically valid RSS feed may still be a weak production source if it repeatedly leads to inaccessible content and does not provide enough lawful context inside the feed itself.
-
-### Bocconi Access
-
-The user has substantial institutional access through Bocconi.
-
-This creates a personal reading and research advantage but does not change automation rules.
-
-The upcoming source review should distinguish:
-
-- public web access;
-- direct publisher access through Bocconi;
-- SearchLib access;
-- academic database access;
-- access requiring an additional personal paid subscription.
-
-Bocconi credentials must remain outside the production system.
-
-Institutional access can improve the value of a source for manual follow-up but must not be treated as permission for automated scraping, systematic downloading or redistribution.
-
-### Coverage and Domain Gaps
-
-The current taxonomy still excludes target domains that may now be useful:
-
-- Financial Markets;
-- Italy;
-- Milan and Bocconi ecosystem.
-
-Production reports have also shown that some days can become highly concentrated in only a few sources or domains.
-
-The next source/domain strategy should therefore reconsider:
-
-- missing high-value coverage;
-- excessive source concentration;
-- weak or inaccessible sources;
-- sources whose structured metadata is too thin;
-- domains that are consistently underrepresented;
-- domains that are strategically important but currently absent.
-
-## Source/Domain Strategy Ownership
-
-The Career Agent should first help define:
-
-- desired information universe;
-- priority domains;
-- high-value publications;
-- professional and career relevance;
-- acceptable source mix.
-
-This Development project should then evaluate candidate sources technically.
-
-Technical evaluation should include:
-
-- public structured access;
-- RSS/Atom availability;
-- official free API availability;
-- metadata richness;
-- timestamp reliability;
-- description quality;
+- endpoint validation;
 - automation permission;
-- paywall/accessibility characteristics;
-- expected maintenance;
-- overlap with existing sources;
-- source quality;
-- compatibility with the public-repository model.
-
-No source should be added to production merely because it is prestigious or personally accessible.
-
-## Candidate Domain Review
-
-The following domains should now be explicitly reconsidered:
-
-- Financial Markets;
-- Italy;
-- Milan and Bocconi ecosystem.
-
-Their implementation remains contingent on:
-
-- demonstrated user value;
-- suitable source availability;
-- classification design;
-- manageable noise;
-- zero recurring cost.
-
-## Completion Criteria
-
-Phase 4 is complete when:
-
-- current seven-source performance has been reviewed;
-- Sifted has a deliberate keep/replace/remove decision;
-- low-value or inaccessible sources have explicit decisions;
-- the Career Agent source/domain strategy has been received;
-- candidate sources have been technically evaluated;
-- candidate domains have been assessed against available sources;
-- the smallest justified source/domain corrections have been implemented;
-- configuration tests pass;
-- real-source collection remains reliable;
-- generated reports are manually inspected;
-- source concentration and accessibility improve or remain acceptably balanced;
-- zero recurring cost and credential safety remain intact.
-
-## Status
-
-**Current active phase**
+- metadata quality;
+- timestamp quality;
+- collector compatibility;
+- maintenance;
+- copyright;
+- public-repository safety;
+- real report quality.
 
 ---
 
-# Phase 5 — Richer-Report Product Design
+# Phase 4A — First Source and Taxonomy Correction
 
-## Objective
+## Problem
 
-Design a report that provides enough lawful context for the user to understand key developments without requiring immediate click-through.
-
-This phase should be deliberate and design-heavy before implementation begins.
-
-## Validated Problem
-
-The current report often contains:
-
-- headline;
-- source;
-- timestamp;
-- relevance score;
-- optional secondary domain;
-- short feed-provided description;
-- source link.
-
-This is useful for triage but can be too thin for daily intelligence.
-
-The current workflow can therefore become:
+Production evidence exposed a concrete weakness in Sifted:
 
 ```text
-report
-→ identify potentially relevant item
-→ click source
-→ read article to understand development
+useful startup/VC headline
+→ little or no feed description
+→ click-through needed
+→ Sifted Pro can block article
 ```
 
-The desired workflow is closer to:
+This reduced the usefulness of otherwise relevant report entries.
+
+The objective was not simply to remove a paywall.
+
+The objective was to preserve European startup/VC intelligence with better:
+
+- reader accessibility;
+- metadata richness;
+- report usefulness;
+- source balance.
+
+---
+
+## Sifted vs Tech.eu Audit
+
+Both sources were tested through the project's real collector and normaliser.
+
+### Tech.eu
+
+Observed:
 
 ```text
-report
-→ understand the core development
-→ open only selected sources for deeper reading
+20 items received
+20 normalized
+20 with descriptions
+0 without descriptions
+average description length ≈ 203 characters
 ```
 
-This is now a validated product requirement rather than a speculative feature.
+### Sifted
 
-## Design Questions
+Observed:
 
-Before implementation, determine:
+```text
+24 items received
+24 normalized
+0 with descriptions
+24 without descriptions
+```
 
-- what “enough context” means in practical terms;
-- how much context should each item contain;
-- how report length should remain bounded;
-- which feed fields are available by source;
-- which sources provide rich public summaries;
-- which sources provide only titles or thin excerpts;
-- when public article metadata can be used safely;
-- whether any source-specific extraction is permitted and maintainable;
-- what should happen when sufficient context is unavailable;
-- whether inaccessible linked content should disqualify an item;
-- how source attribution should be preserved;
-- how copied source text should be limited;
-- how copyright and licence boundaries should be enforced;
-- whether the system should distinguish feed summary from system-generated context;
-- how the new report quality should be objectively validated.
+Both were technically collectible.
 
-## Hard Boundaries
+The deciding difference was product quality.
 
-The design must preserve:
+Tech.eu also supplied relevant European coverage including:
 
-- zero recurring monetary cost;
-- no production OpenAI API dependency;
-- no recurring AI-credit use;
-- no authenticated scraping of premium sources;
-- no use of Bocconi credentials in GitHub Actions;
-- no paywall bypass;
-- no storage of restricted full article bodies;
-- no substantial copyrighted reproduction in the public repository;
-- source transparency;
-- manageable report length;
-- low maintenance.
+- startup funding;
+- VC funds;
+- M&A;
+- corporate strategy;
+- AI;
+- fintech;
+- industrial policy;
+- European technology.
 
-## Preferred Design Order
+## Decision
 
-Evaluate solutions in this order:
+> **Replace Sifted with Tech.eu.**
 
-1. richer existing RSS/Atom fields;
-2. public structured metadata exposed by the source;
-3. official free APIs where available and permitted;
-4. limited deterministic public-page extraction only if clearly justified and allowed;
-5. more complex approaches only if simpler options cannot satisfy the requirement.
+Current production configuration:
 
-Do not assume AI summarization is required.
+```text
+Tech.eu
+Tier 2
+Europe
+RSS
+default domains: none
+```
 
-## Reporting-Window Design
-
-The same design phase should also consider whether report composition should remain coupled to actual GitHub execution time.
-
-Evaluate whether a deterministic cutoff would create a more stable daily information product.
-
-Do not implement this solely from one sparse report.
-
-Use additional production evidence before changing the current window semantics.
-
-## Completion Criteria
-
-Phase 5 is complete when:
-
-- the richer-context requirement is precise;
-- acceptable source-content boundaries are explicit;
-- fallback behaviour is defined;
-- report-length expectations are defined;
-- source metadata richness has been inspected systematically;
-- candidate implementation approaches have been compared;
-- the smallest compliant approach has been selected;
-- acceptance tests are defined before implementation.
+Sifted is no longer an active production source.
 
 ---
 
-# Phase 6 — Richer-Report Implementation and Quality Evaluation
+# Tech.eu Source-Default Decision
 
-## Objective
+Tech.eu was initially simulated with a Startups/VC default.
 
-Implement the smallest justified richer-report solution and evaluate whether it materially improves the daily reading experience.
+That produced misleading classification because the general feed also contains:
 
-## Entry Condition
+- AI;
+- corporate M&A;
+- European policy;
+- fintech strategy;
+- technology;
+- industrial developments.
 
-Phase 5 design is complete.
+Decision:
 
-## Possible Implementation Areas
+```yaml
+default_domains: []
+```
 
-Depending on the design outcome:
+This preserves the principle:
 
-- additional normalized source fields;
-- richer feed-description handling;
-- structured public metadata ingestion;
-- deterministic context construction;
-- source-specific safe metadata adapters;
-- report-rendering changes;
-- explicit missing-context fallbacks;
-- updated source-quality rules;
-- updated selection logic where insufficient context makes an item low-value;
-- reporting-window stabilization if separately justified.
-
-## Validation
-
-Validation should include:
-
-- deterministic unit tests;
-- source-specific fixture tests;
-- malformed/missing-context cases;
-- real-source sample inspection;
-- copyright-safe output inspection;
-- report-length comparison;
-- click-through requirement comparison;
-- source concentration review;
-- accessibility review;
-- ranking/classification regression checks.
-
-## Longitudinal Evaluation
-
-After implementation, use repeated reports to evaluate:
-
-### Usage
-
-- Is the report opened consistently?
-- Can the main developments be understood without opening every article?
-- Are source links used mainly for deeper reading?
-
-### Coverage
-
-- Are major relevant stories missed?
-- Are important domains consistently empty?
-- Are some sources or domains overrepresented?
-
-### Context Quality
-
-- Is each item sufficiently understandable?
-- Are summaries or descriptions too thin?
-- Is context misleading because the public source material is incomplete?
-- Are important facts omitted?
-
-### Accessibility
-
-- Do selected stories frequently lead to inaccessible pages?
-- Does Bocconi access materially improve follow-up usability?
-- Are inaccessible links acceptable when the report itself contains sufficient context?
-
-### Noise
-
-- Are low-value items frequently displayed?
-- Is promotional content overrepresented?
-- Are duplicate or near-duplicate developments common?
-
-### Classification and Ranking
-
-- Are items assigned to useful domains?
-- Is the unclassified rate acceptable?
-- Do high-value items appear near the top?
-- Do source-tier weights distort relevance?
-- Are keyword matches creating noisy score inflation?
-
-### Operations
-
-- Do scheduled runs complete reliably?
-- Are failures understandable?
-- Is source maintenance acceptably low?
-- Does scheduler latency materially affect report composition?
-- Does the project remain at zero recurring cost?
-
-## Completion Criteria
-
-Phase 6 is complete when:
-
-- repeated reports demonstrate meaningful improvement;
-- the user can understand most key selected developments without immediate click-through;
-- source accessibility is acceptable;
-- source concentration is acceptable;
-- report length remains manageable;
-- remaining weaknesses are documented with examples;
-- further changes are prioritized by observed impact rather than speculative sophistication.
+> source defaults are evidence, not publisher labels.
 
 ---
 
-# Phase 7 — Optional Delivery and Interface Improvements
+# Phase 4 Keyword Evidence
 
-## Objective
+Removing the blanket source default exposed legitimate classification misses.
 
-Improve access only if repository-native Markdown reports become a demonstrated usability limitation.
+Candidate keyword additions were tested on real Tech.eu records before configuration changes.
 
-## Possible Enhancements
+Initial candidates that showed value included:
 
-- stable latest-report link;
-- GitHub Issues delivery;
-- GitHub Pages;
-- weekly archive summaries;
-- opportunity-specific views;
-- other zero-cost delivery improvements.
+```text
+Companies / Corporate Strategy
+- acquired
 
-## Entry Condition
+Startups / Venture Capital
+- early-stage fund
+- funding market
+```
 
-Reports must already be used in practice and the delivery limitation must be observed rather than assumed.
+The candidates were then tested against the existing three-day production corpus:
 
-## Current Mobile Position
+```text
+114 records tested
+0 records changed
+```
 
-GitHub-rendered Markdown remains the default mobile-access path.
+This established that the additions improved Tech.eu recall without observed regression in the previous production universe.
 
-Obsidian or another reading interface may be considered later only if it reduces real friction without creating recurring cost or significant maintenance.
+---
 
-## Excluded by Default
+# Financial Markets Activation
 
-- paid APIs;
-- automated ChatGPT integration;
-- authenticated premium-content ingestion;
-- private email ingestion;
-- unrestricted full-article extraction;
-- autonomous agents;
-- RAG;
-- vector databases;
-- complex cloud infrastructure;
-- sophisticated frontend development;
-- dedicated mobile application development.
+The Career Agent had strategically approved Financial Markets as a high-value domain.
+
+Real production evidence then provided a concrete missed story:
+
+> a severe South Korean stock-market correction remained unclassified.
+
+A conservative Financial Markets candidate domain was simulated.
+
+The test recovered exactly the intended story through:
+
+```text
+stock market
+```
+
+without observed unrelated changes in that daily sample.
+
+## Decision
+
+Financial Markets is now the eighth active domain.
+
+Initial conservative keywords:
+
+```text
+stock market
+bond market
+bond yields
+yield curve
+credit spreads
+capital markets
+financial stability
+market sell-off
+foreign exchange
+equities
+asset management
+ipo
+```
+
+Broad terms such as:
+
+```text
+market
+stocks
+shares
+bonds
+rates
+bank
+investment
+```
+
+remain intentionally excluded until real evidence justifies them.
+
+---
+
+# Geopolitics Refinement
+
+A BBC World story about countries helping China evade US tariffs remained unclassified.
+
+The plural keyword:
+
+```text
+tariffs
+```
+
+was simulated and correctly recovered the story.
+
+It was then included in the three-day regression.
+
+---
+
+# Startups/VC Precision Correction
+
+The generic keyword:
+
+```text
+startup
+```
+
+caused a low-value Tech.eu startup profile to receive a full Startups/VC domain assignment and score uplift.
+
+The Career Agent had explicitly recommended avoiding generic startup/funding volume.
+
+The keyword was therefore tested for removal.
+
+Observed result:
+
+- low-value Tech.eu startup profile became unclassified;
+- historical Sifted records retained their old Startups/VC source default but lost one generic keyword score point;
+- no strategically harmful removal was observed in the tested corpus.
+
+## Decision
+
+Remove generic:
+
+```text
+startup
+```
+
+from the Startups/VC keyword list.
+
+The domain should depend on stronger evidence.
+
+---
+
+# Phase 4A Three-Day Regression
+
+Final candidate taxonomy changes were tested across:
+
+```text
+data/processed/2026/08/2026-08-12.jsonl
+data/processed/2026/08/2026-08-13.jsonl
+data/processed/2026/08/2026-08-14.jsonl
+```
+
+Total:
+
+```text
+114 records
+```
+
+Final changed records:
+
+```text
+6
+```
+
+They were all interpretable:
+
+- three historical Sifted stories lost only the generic `startup` keyword point;
+- one US-China tariff story gained Global Politics/Geopolitics;
+- one South Korean stock-market story gained Financial Markets;
+- one weak Tech.eu startup profile lost its unsupported Startups/VC classification.
+
+No unexpected regression was observed.
+
+---
+
+# Phase 4A Configuration Changes
+
+Current validated changes:
+
+## Source
+
+```text
+Sifted
+→ Tech.eu
+```
+
+## Global Politics and Geopolitics
+
+Added:
+
+```text
+tariffs
+```
+
+## Companies and Corporate Strategy
+
+Added:
+
+```text
+acquired
+```
+
+## Startups and Venture Capital
+
+Added:
+
+```text
+early-stage fund
+funding market
+```
+
+Removed:
+
+```text
+startup
+```
+
+## New Domain
+
+Added:
+
+```text
+Financial Markets
+```
+
+---
+
+# Phase 4A Test Validation
+
+Targeted configuration tests:
+
+```text
+20 passed
+```
+
+after the source replacement.
+
+Domain configuration validation after Financial Markets activation:
+
+```text
+5 passed
+```
+
+Full suite:
+
+```text
+110 passed
+```
+
+No application module required modification.
+
+The implementation remained configuration-first.
+
+---
+
+# Phase 4A Real-Run Validation — 17 August 2026
+
+A real local pipeline run after the source/taxonomy changes produced:
+
+```text
+7 active sources
+7 successful
+0 failed
+
+1281 valid collected records
+32 inside collection window
+30 unique records
+26 unclassified
+4 displayed
+status: success
+```
+
+The report was manually inspected.
+
+Displayed stories included:
+
+- a major US/South Korea/Iran geopolitical story;
+- a Tech.eu AI + Series A story;
+- a BBC Business AI deployment/governance story;
+- an ECB euro-area defence-spending speech.
+
+The 26 unclassified records were also reviewed.
+
+The inspection established:
+
+> **a high unclassified count is not automatically a classification failure.**
+
+Most excluded records were correctly low-value or outside the product's intended intelligence scope.
+
+Remaining misses should be corrected only when they represent strategically important lost information.
+
+---
+
+# Current Phase 4 Source Registry
+
+Current validated active sources:
+
+1. BBC News World;
+2. BBC News Business;
+3. European Central Bank;
+4. European Commission Highlighted News;
+5. Istat Press Releases;
+6. OpenAI News;
+7. Tech.eu.
+
+Current working strategic view:
+
+| Source | Current Position |
+|---|---|
+| BBC News World | Retain |
+| BBC News Business | Retain temporarily; likely replacement if stronger business coverage validates |
+| ECB | Core |
+| European Commission | Retain, selectively |
+| Istat | Core |
+| OpenAI News | Retain as primary AI source, not complete AI coverage |
+| Tech.eu | Active Sifted replacement; monitor production quality |
+
+---
+
+# Current Phase 4 Domain Universe
+
+Implemented:
+
+1. Global Politics and Geopolitics;
+2. Economics and Macroeconomics;
+3. Companies and Corporate Strategy;
+4. Artificial Intelligence;
+5. Technology and Software;
+6. Startups and Venture Capital;
+7. Europe and the European Union;
+8. Financial Markets.
+
+Not yet implemented:
+
+9. Italy;
+10. Milan and Bocconi Ecosystem.
+
+## Italy
+
+Strategic decision:
+
+> **Approved for implementation when suitable source coverage and classification evidence are validated.**
+
+Priority candidates include:
+
+- Il Sole 24 Ore;
+- Bank of Italy;
+- existing Istat coverage.
+
+## Milan and Bocconi
+
+Strategic decision:
+
+> **Validated product requirement.**
+
+It is no longer an optional candidate.
+
+Implementation remains pending because the correct source architecture still needs validation.
+
+The desired role is:
+
+> **Professional Ecosystem Intelligence**
+
+rather than generic local news.
+
+Priority candidates:
+
+1. B4i;
+2. Bocconi Career Services;
+3. Bocconi News & Events.
+
+Possible later complements:
+
+- Italian Tech Alliance;
+- Fintech District;
+- selected Comune di Milano sources.
+
+---
+
+# Premium Bocconi Source Exception
+
+The source audit now distinguishes:
+
+```text
+automation suitability
+```
+
+from:
+
+```text
+reader accessibility
+```
+
+Some premium publications may be useful production sources even when their public metadata cannot support a rich automated summary.
+
+A narrow exception is permitted when:
+
+- the publication has unusually high strategic value;
+- the user can legitimately access the linked article through Bocconi;
+- a legitimate public/automation-compatible discovery endpoint exists;
+- the pipeline does not authenticate as the user;
+- premium article bodies are not automatically retrieved;
+- thinner report context is an accepted source-specific trade-off.
+
+Current strongest strategic candidates:
+
+```text
+Financial Times
+Il Sole 24 Ore
+```
+
+The exception does not automatically approve either source technically.
 
 ---
 
@@ -1300,543 +1022,728 @@ Obsidian or another reading interface may be considered later only if it reduces
 
 Improve the information inputs before adding richer report logic.
 
-The immediate problem is not pipeline reliability.
+The infrastructure is no longer the main problem.
 
-The immediate problem is that some current sources may be inaccessible, too thin in metadata, overly concentrated, or insufficient for the intended intelligence workflow.
+The active problem is:
 
-### Required Work
+- weak or inaccessible sources;
+- missing high-value domains;
+- classification recall/precision;
+- uneven metadata richness;
+- source concentration;
+- information gaps.
 
-- review all seven current production sources;
-- investigate Sifted accessibility and public metadata quality;
-- distinguish automated-source eligibility from personal reading accessibility;
-- use Bocconi access as a manual reading factor only;
-- obtain source/domain priorities from the Career Agent;
-- evaluate candidate sources technically;
-- reconsider Financial Markets, Italy, and Milan/Bocconi domains;
-- identify replacements for weak sources where appropriate;
-- avoid adding sources merely to increase count;
-- preserve zero recurring cost;
-- preserve public-repository and credential safety.
+---
 
-### Validation Checklist
+## Milestone 4 Completed Work
 
-- [ ] Current source registry reviewed systematically.
-- [ ] Sifted keep/replace/remove decision made.
-- [ ] Source accessibility recorded.
-- [ ] Public metadata richness recorded.
-- [ ] Automation permission/access model recorded.
-- [ ] Candidate source overlap assessed.
-- [ ] Candidate source reliability assessed.
-- [ ] Candidate source maintenance cost assessed.
-- [ ] Career Agent source/domain priorities incorporated.
-- [ ] Financial Markets domain decision made.
-- [ ] Italy domain decision made.
-- [ ] Milan/Bocconi domain decision made.
-- [ ] Source configuration changes are minimal and justified.
-- [ ] Configuration tests pass.
-- [ ] Full automated suite passes.
-- [ ] Real collection works.
-- [ ] New reports are manually inspected.
-- [ ] No credential or premium-content ingestion is introduced.
-- [ ] Zero recurring monetary cost remains intact.
+- [x] Career Agent source/domain strategy completed.
+- [x] Bocconi access model incorporated into source policy.
+- [x] Premium Bocconi Exception defined.
+- [x] Sifted accessibility problem investigated.
+- [x] Sifted metadata quality tested.
+- [x] Tech.eu investigated as replacement.
+- [x] Tech.eu collected through real project collector.
+- [x] Tech.eu normalisation validated.
+- [x] Tech.eu metadata richness inspected.
+- [x] Tech.eu vs Sifted direct comparison completed.
+- [x] Sifted replacement decision made.
+- [x] Tech.eu configured without a blanket source default.
+- [x] Evidence-backed keyword additions simulated.
+- [x] Three-day classification regression completed.
+- [x] Generic `startup` keyword removed after false-positive evidence.
+- [x] Financial Markets strategically approved.
+- [x] Financial Markets implemented conservatively.
+- [x] Targeted configuration tests passed.
+- [x] Full 110-test suite passed.
+- [x] Real 17 August 2026 collection completed successfully.
+- [x] Generated 17 August report manually inspected.
+- [x] No paid API introduced.
+- [x] No private credential introduced.
+- [x] No premium-content ingestion introduced.
+- [x] Zero recurring monetary cost preserved.
 
-### Completion Action
+---
 
-When the source/domain universe is corrected and validated:
+## Milestone 4 Remaining Work
 
-> Begin the dedicated richer-report design phase before implementing summary or context-generation logic.
+- [ ] Commit the validated Tech.eu / Financial Markets checkpoint after canonical documentation reconciliation.
+- [ ] Audit Financial Times technically.
+- [ ] Audit Il Sole 24 Ore technically.
+- [ ] Audit Bank of Italy technically.
+- [ ] Audit Reuters if a clean zero-cost structured endpoint remains plausible.
+- [ ] Decide whether stronger business coverage justifies removing BBC Business.
+- [ ] Continue monitoring Tech.eu production value and noise.
+- [ ] Design and validate Italy classification/source coverage.
+- [ ] Technically audit B4i.
+- [ ] Technically audit Bocconi Career Services.
+- [ ] Technically audit Bocconi News & Events.
+- [ ] Implement Milan/Bocconi macroarea only after source architecture is validated.
+- [ ] Reassess remaining classification misses from real reports.
+- [ ] Confirm the smallest useful final Phase 4 source universe.
+
+---
+
+# Phase 4 Completion Criteria
+
+Phase 4 is complete when:
+
+- every active source has a deliberate strategic and technical role;
+- weak sources have explicit retain/replace/remove decisions;
+- Sifted replacement is fully committed and production-observed;
+- Financial Markets is stable in production;
+- Italy has a validated implementation decision;
+- Milan/Bocconi has a validated low-maintenance implementation;
+- high-priority premium candidates have explicit technical decisions;
+- the smallest useful source universe has been selected;
+- source/default/keyword changes have regression evidence;
+- full automated tests pass;
+- real collection remains reliable;
+- reports are manually inspected;
+- source concentration and accessibility are acceptable;
+- no credentials or restricted article bodies are introduced;
+- zero recurring monetary cost remains intact.
+
+Phase 4 does **not** require every possible strategically useful source to be implemented.
+
+It requires the information universe to be good enough that richer-report design becomes the next highest-value bottleneck.
+
+## Status
+
+**Active — first validated source/taxonomy correction completed locally; checkpoint pending documentation reconciliation and commit.**
+
+---
+
+# Phase 5 — Richer-Report Product Design
+
+## Objective
+
+Design a report that provides enough lawful context for understanding key developments without requiring immediate click-through.
+
+## Validated Problem
+
+Current items typically contain:
+
+- headline;
+- source;
+- timestamp;
+- relevance score;
+- optional secondary domains;
+- feed-provided description;
+- link.
+
+The current maximum description length is:
+
+```text
+300 characters
+```
+
+This is insufficient for some sources and stories.
+
+Desired workflow:
+
+```text
+report
+→ understand core development
+→ selectively click for deeper reading
+```
+
+not:
+
+```text
+report
+→ see headline
+→ click everything to understand it
+```
+
+## Entry Condition
+
+Phase 4 source/domain correction must be sufficiently mature.
+
+Do not begin implementation merely because the richer-context problem is already validated.
+
+## Design Questions
+
+Determine:
+
+- what “enough context” means;
+- target context length;
+- acceptable total report length;
+- which public feed fields exist;
+- which sources provide richer summaries;
+- which official/free APIs provide lawful structured context;
+- source-specific fallback behaviour;
+- treatment of Premium Bocconi Exception sources;
+- copyright boundaries;
+- source attribution;
+- inaccessible-link behaviour;
+- objective acceptance tests.
+
+## Preferred Solution Order
+
+1. richer RSS/Atom fields;
+2. public structured metadata;
+3. official free APIs;
+4. limited permitted deterministic public extraction if justified;
+5. more complex methods only if simpler mechanisms fail.
+
+Do not assume AI summarisation is required.
+
+## Status
+
+**Not started. Validated requirement, intentionally deferred behind Phase 4.**
+
+---
+
+# Phase 6 — Richer-Report Implementation and Evaluation
+
+## Objective
+
+Implement the smallest compliant richer-report solution selected in Phase 5.
+
+## Entry Condition
+
+Phase 5 design complete.
+
+## Validation
+
+Must include:
+
+- deterministic tests;
+- source-specific fixtures where appropriate;
+- missing-context cases;
+- malformed-input cases;
+- real report inspection;
+- copyright-safe output review;
+- report-length comparison;
+- source accessibility review;
+- source concentration review;
+- classification/ranking regression;
+- repeated real-use evaluation.
+
+## Status
+
+**Deferred**
+
+---
+
+# Phase 7 — Optional Delivery and Interface Improvements
+
+## Objective
+
+Improve access only if repository-native Markdown becomes a demonstrated usability constraint.
+
+Potential future options:
+
+- stable latest-report link;
+- GitHub Issues;
+- GitHub Pages;
+- weekly archive summaries;
+- opportunity-specific views.
+
+Excluded by default:
+
+- paid APIs;
+- automated ChatGPT integration;
+- authenticated premium-content ingestion;
+- private email ingestion;
+- unrestricted article extraction;
+- autonomous agents;
+- RAG;
+- vector databases;
+- complex cloud infrastructure;
+- sophisticated frontend;
+- dedicated mobile application.
+
+## Status
+
+**Deferred**
 
 ---
 
 # Active Product-Quality Findings
 
-The following findings are now validated enough to guide development.
+## 1. Source Metadata Quality Is a Product Requirement
 
-## 1. Report Context Is Too Thin
+### Evidence
 
-Current report items can require immediate click-through before the user understands the development.
+Sifted and Tech.eu were both technically compatible.
 
-**Consequence:** richer report context is now a validated requirement.
+However:
+
+```text
+Sifted  → 0/24 descriptions
+Tech.eu → 20/20 descriptions
+```
+
+### Consequence
+
+Feed richness can determine source replacement even when both sources collect successfully.
+
+**Owner:** `03 Information Taxonomy and Source Policy.md`.
+
+---
+
+## 2. Reader Accessibility and Automation Eligibility Are Different
+
+A source can be:
+
+```text
+technically collectible
+but poor for the reader
+```
+
+or:
+
+```text
+excellent for the reader
+but unsuitable for automated ingestion
+```
+
+### Consequence
+
+Every source audit must treat the two dimensions separately.
+
+**Owner:** `03 Information Taxonomy and Source Policy.md`.
+
+---
+
+## 3. Bocconi Access Creates a Narrow Premium Exception
+
+Direct Bocconi access can justify a high-value premium publication appearing in the report even if the pipeline cannot create a rich summary.
+
+It does not permit:
+
+- authenticated automated retrieval;
+- credential storage;
+- paywall bypass;
+- premium article-body storage.
+
+### Consequence
+
+FT and Il Sole 24 Ore deserve technical investigation despite potentially thinner public metadata.
+
+**Owner:** `03 Information Taxonomy and Source Policy.md`.
+
+---
+
+## 4. Classification Rate Is Not a Product KPI
+
+The 17 August run produced:
+
+```text
+30 unique records
+26 unclassified
+4 displayed
+```
+
+Manual inspection showed that most unclassified records were correctly excluded.
+
+### Consequence
+
+Do not optimize for a higher classified percentage.
+
+Optimize for:
+
+- valuable stories included;
+- low-value stories excluded;
+- correct domain assignment;
+- useful ranking.
+
+---
+
+## 5. Broad Keywords Can Damage Ranking
+
+Because relevance score contains:
+
+```text
++ 2 per domain
++ 1 per matched keyword
+```
+
+careless keyword expansion can inflate relevance.
+
+### Evidence
+
+Testing morphological acquisition variants showed that multiple related keywords could match the same story.
+
+### Consequence
+
+Keyword expansion must remain simulation-driven.
+
+---
+
+## 6. Financial Markets Needs Causal, Not Trading, Coverage
+
+The domain is now implemented.
+
+Its objective is to capture:
+
+- repricing mechanisms;
+- rates;
+- bonds;
+- credit;
+- liquidity;
+- capital markets;
+- financial stability;
+- meaningful market reactions.
+
+It should not become:
+
+- daily index recaps;
+- trading tips;
+- technical analysis;
+- speculative price commentary.
+
+---
+
+## 7. Milan/Bocconi Is a Fixed Requirement
+
+Milan/Bocconi is no longer an optional domain candidate.
+
+The remaining question is implementation, not product validity.
+
+### Consequence
+
+Phase 4 must eventually establish a safe, structured and selective source architecture.
+
+---
+
+## 8. Report Context Remains Too Thin
+
+The richer-context need remains validated.
+
+It should not yet distract from source/domain correction.
 
 **Owner:** `01 Product Requirements.md`.
 
-**Next action:** design in Phase 5 after source/domain correction.
+**Implementation phase:** Phase 5 design → Phase 6 implementation.
 
 ---
 
-## 2. Source Accessibility Matters
+## 9. Scheduler Latency Remains an Operational Limitation
 
-A technically valid feed can link to content the user cannot access.
+GitHub scheduled execution may start materially late.
 
-Sifted provided a concrete example through a production-selected article requiring Sifted Pro.
+The rolling 24-hour report window remains anchored to actual execution.
 
-**Consequence:** accessibility and metadata richness must become explicit source-quality criteria.
+### Consequence
 
-**Owner:** `03 Information Taxonomy and Source Policy.md`.
+Continue observing.
 
-**Next action:** review current and candidate sources during Milestone 4.
-
----
-
-## 3. Bocconi Access Expands Manual Reading but Not Automation Rights
-
-The user has institutional access to high-value publications and research databases.
-
-This materially improves manual follow-up possibilities.
-
-It does not justify automated authenticated ingestion.
-
-**Consequence:** source evaluation must distinguish personal accessibility from production ingestion permission.
-
-**Owner:** `03 Information Taxonomy and Source Policy.md`.
+Do not redesign the reporting window without stronger repeated evidence.
 
 ---
 
-## 4. Scheduled Runs Can Be Delayed
+# Current Source Audit Queue
 
-GitHub scheduled workflows have been observed to start materially later than their configured time.
+Use this order unless new evidence changes priorities.
 
-**Consequence:** production schedule has been moved earlier to 06:05 Europe/Rome.
+## 1. Financial Times
 
-**Owner:** `02 System Architecture.md`.
+Why first:
 
----
+- highest strategic cross-domain value;
+- direct Bocconi reader access;
+- potential coverage of markets, companies, macro, geopolitics and technology;
+- could reduce the future need for BBC Business and other overlapping publications.
 
-## 5. Scheduler Delay Can Shift Report Composition
+Audit must establish:
 
-The current rolling 24-hour window is anchored to actual execution time.
+- legitimate public structured discovery endpoint;
+- metadata richness;
+- timestamps;
+- automation suitability;
+- terms/licence compatibility;
+- collector compatibility;
+- likely report volume;
+- overlap;
+- value of Premium Bocconi Exception.
 
-A delayed scheduled run therefore changes the monitored period.
+## 2. Il Sole 24 Ore
 
-**Consequence:** deterministic reporting cutoff is now an evidence-based design question.
+Potential role:
 
-**Owner:** `02 System Architecture.md` and future Product Requirements if behavior changes.
+- Italy;
+- Financial Markets;
+- Italian companies;
+- policy/regulation.
 
----
+Could anchor the future Italy domain.
 
-## 6. Technical Success Does Not Guarantee a Good Report
+## 3. Bank of Italy
 
-A recent production run completed successfully with all sources healthy but produced a much shorter and more concentrated report than previous days.
+Potential role:
 
-**Consequence:** report length, source concentration and domain coverage must remain product-quality metrics rather than purely operational metrics.
+- Italian banking;
+- financial stability;
+- macroeconomic evidence;
+- markets.
 
-**Owner:** this roadmap for prioritization; `01 Product Requirements.md` for acceptance criteria.
+Likely primary-source complement.
 
----
+## 4. Reuters
 
-# Deferred Features
+Strategically strong cross-domain candidate.
 
-| Feature | Status | Reason |
-|---|---|---|
-| Near-duplicate clustering | Deferred pending repeated evidence | Exact deduplication remains sufficient until real repetition materially reduces usefulness |
-| Multi-source story clustering | Deferred pending evidence | Adds false-merge risk and complexity |
-| Geographic classification | Deferred pending evidence | Topic-level geography logic has not yet become the main bottleneck |
-| Entity tracking | Deferred pending evidence | No demonstrated current requirement |
-| Content-type classification | Deferred pending evidence | Source correction and report context have higher priority |
-| Source-health history | Deferred pending repeated operational need | Current run summaries expose per-run health sufficiently |
-| Advanced ranking | Deferred pending stronger evidence | Current source and context limitations are more urgent |
-| GitHub Issues delivery | Deferred | Repository-native reports should be used first |
-| GitHub Pages | Deferred | Delivery interface is not yet the main problem |
-| Obsidian-specific production delivery | Deferred | Mobile reading friction has not yet justified additional sync complexity |
-| Newsletter-email ingestion | Rejected for core system | Adds privacy, authentication and workflow complexity |
-| Public newsletter feeds | Possible later | May be evaluated as ordinary public structured sources |
-| LLM summaries | Not selected | Richer context is validated, but implementation design has not established a need for LLMs |
-| Automated ChatGPT integration | Rejected for core system | Violates deterministic zero-cost architecture |
-| Machine-learning classification | Rejected for current scope | Deterministic logic remains default |
-| Embeddings and semantic search | Rejected for current scope | No validated need |
-| RAG | Rejected for current scope | No validated workflow problem |
-| Autonomous agents | Rejected for current scope | Adds complexity without current value |
-| Cloud database | Rejected for current scope | Repository-native JSONL remains sufficient |
-| Authenticated premium-source ingestion | Rejected | Conflicts with credential, licensing and public-repository constraints |
-| Multi-user support | Rejected for current scope | Product remains single-user |
+Do not allow Reuters investigation to block progress if no clean free production endpoint exists.
 
----
+## 5. Milan/Bocconi Sources
 
-# Project Risks
+After the core source upgrade:
 
-## Source Expansion Without Discipline
+```text
+B4i
+→ Bocconi Career Services
+→ Bocconi News & Events
+```
 
-Expanding the source universe can increase noise, duplication and maintenance faster than it increases intelligence value.
-
-**Control:** every new source must pass explicit automation, quality, accessibility, overlap and maintenance criteria.
+Then consider narrower complements only if gaps remain.
 
 ---
 
-## Prestige Bias in Source Selection
+# Current Files in the Phase 4A Checkpoint
 
-High-prestige publications may appear attractive even when they cannot be ingested safely or provide insufficient public structured metadata.
+Validated implementation changes:
 
-**Control:** separate source prestige and personal reading value from production automation eligibility.
+```text
+config/sources.yaml
+config/domains.yaml
+tests/test_feed_fixture.py
+tests/test_domain_config.py
+```
 
----
+Canonical documentation reconciliation includes:
 
-## Paywalled Follow-Up
+```text
+docs/project/03 Information Taxonomy and Source Policy.md
+docs/project/04 Development Roadmap and Status.md
+```
 
-A report item may appear useful but lead to inaccessible source content.
+Additional canonical documents should be updated only where their owned information became stale.
 
-**Control:** evaluate user accessibility and public context richness during source selection; replace weak sources when better alternatives exist.
+Generated 17 August validation artifacts:
 
----
+```text
+data/processed/2026/08/2026-08-17.jsonl
+data/runs/2026/08/2026-08-17.json
+reports/daily/2026/08/2026-08-17.md
+```
 
-## Misuse of Institutional Access
+Unrelated local file:
 
-Bocconi access may tempt the project to treat authenticated premium content as an automated input.
+```text
+.obsidian/workspace.json
+```
 
-**Control:** Bocconi resources remain personal reading/research tools unless a source explicitly provides a separate automation-permitted public interface.
+must remain outside the Phase 4 commit.
 
----
-
-## Weak Information Quality
-
-The pipeline may run correctly while producing a sparse, concentrated, repetitive or context-poor report.
-
-**Control:** technical success and product usefulness remain separate validation dimensions.
-
----
-
-## Scheduler Latency
-
-GitHub cron execution may start substantially later than configured.
-
-**Control:** schedule earlier than the desired reading time; keep scheduler latency visible; investigate deterministic reporting cutoff only if production evidence justifies it.
-
----
-
-## Reporting-Window Drift
-
-Because the current window is relative to actual start time, scheduler delay can change eligible content.
-
-**Control:** record actual monitored windows and evaluate whether fixed cutoff semantics are needed.
+Historical 14 August outputs that were accidentally overwritten during local testing were restored to their committed state.
 
 ---
 
-## Network and Feed Instability
+# Current Validation Record
 
-Real RSS/Atom sources may fail, hang, change format or publish inconsistent metadata.
+## Configuration / Regression
 
-**Control:** source-level isolation, 10-second timeout, explicit request headers, visible warnings and conservative source selection.
+- Tech.eu direct collection probe: passed.
+- Tech.eu normalisation: 20/20 passed.
+- Tech.eu description availability: 20/20.
+- Sifted comparison description availability: 0/24.
+- Tech.eu no-default simulation completed.
+- Candidate keyword simulation completed.
+- 114-record regression completed.
+- Financial Markets simulation completed.
+- `startup` removal simulation completed.
+- `tariffs` recovery validated.
 
----
+## Automated Tests
 
-## Repository Growth
+```text
+targeted source/domain tests → passed
+domain config tests          → 5 passed
+full suite                   → 110 passed
+```
 
-Daily JSON and Markdown files may accumulate indefinitely.
+## Real Pipeline
 
-**Control:** keep the initial repository-native storage model and review retention only after real production history becomes large enough to create a demonstrated problem.
+17 August 2026:
 
----
+```text
+7 active sources
+7 successful
+1281 valid records
+32 window-eligible
+30 unique
+26 unclassified
+4 displayed
+status: success
+```
 
-## Maintenance Burden
+## Manual Product Review
 
-Poor sources may create recurring debugging or manual review work.
+Completed.
 
-**Control:** prefer stable structured sources and replace low-value sources rather than compensating with complex source-specific logic.
+Result:
 
----
+> **Selective but acceptable checkpoint.**
 
-## Misleading Success States
-
-A technically completed run may conceal failed sources or poor information quality.
-
-**Control:** preserve structured operational status while separately inspecting report quality.
-
----
-
-## Installed-Package Freshness During Local Development
-
-A locally installed package may lag behind the source tree even when source-based tests pass.
-
-**Control:** remember that pytest can exercise repository source while `python -m daily_intelligence.cli` may execute an installed package copy. Refresh the installation when CLI behaviour does not reflect validated source changes.
-
----
-
-# Decision Gates
-
-The following gates prevent premature complexity.
-
-## Gate 1 — Begin Implementation
-
-**Status: passed**
-
-Required:
-
-- core project documents existed;
-- repository foundations existed;
-- no major unresolved blocker prevented the local slice.
+No evidence justified reverting Tech.eu or forcing broad classification expansion before commit.
 
 ---
 
-## Gate 2 — Complete the Local Vertical Slice
+# Immediate Next Actions
 
-**Status: passed**
+## Current Action
 
-Required:
+Finish the documentation reconciliation for the validated Phase 4A checkpoint.
 
-- local end-to-end pipeline works;
-- collection-window filtering works;
-- exact duplicate handling works;
-- deterministic classification and ranking work;
-- output is inspectable;
-- failures are visible;
-- initial tests pass;
-- one-command local execution works.
+Then:
 
----
-
-## Gate 3 — Add GitHub Actions
-
-**Status: passed**
-
-Evidence:
-
-- seven real public feeds validated;
-- remote requests bounded by a 10-second timeout;
-- User-Agent requirement observed and implemented;
-- real reports generated repeatedly;
-- classification noise identified and corrected conservatively;
-- real degraded-source behaviour validated;
-- 110 automated tests passing;
-- zero recurring monetary cost preserved.
+1. inspect final working-tree diff;
+2. confirm only intended files are staged;
+3. exclude `.obsidian/workspace.json`;
+4. run final tests if documentation edits do not touch application/config logic;
+5. commit the checkpoint;
+6. push;
+7. begin Financial Times technical audit.
 
 ---
 
-## Gate 4 — Enable Scheduled Production
+# Next Highest-ROI Step
 
-**Status: passed**
+After the Phase 4A checkpoint is committed:
 
-Required:
+> **Technically audit Financial Times under the source scorecard and Premium Bocconi Exception.**
 
-- manual Actions execution works;
-- package installation works;
-- tests pass in Actions;
-- logs are visible;
-- outputs validate;
-- persistence works;
-- no-change behavior works;
-- degraded behavior works;
-- critical-failure behavior works;
-- concurrency behavior is acceptable.
+Do not simultaneously:
 
-Evidence:
+- add FT;
+- add Il Sole;
+- remove BBC Business;
+- implement Italy;
+- implement Milan/Bocconi;
+- redesign report summaries.
 
-- manual production workflow validated;
-- bot persistence validated;
-- no-change commit guard validated;
-- deliberate critical configuration failure validated;
-- deliberate degraded source run validated;
-- scheduled run observed successfully.
+Proceed one controlled source decision at a time.
 
 ---
 
-## Gate 5 — Correct and Expand Sources / Domains
+# Stop Condition Before Phase 5
 
-**Status: passed for controlled expansion**
+Do not begin richer-report implementation until Phase 4 has produced a sufficiently strong source/domain universe.
 
-This gate is no longer blocked because concrete production evidence now exists.
+The switch to Phase 5 should occur when further source/domain work has lower expected value than improving context within already-selected stories.
 
-Evidence includes:
-
-- Sifted accessibility problem;
-- thin report context;
-- source concentration;
-- sparse production report;
-- deferred strategic domains;
-- substantial available Bocconi reading universe;
-- current seven-source set proven sufficient for automation but not necessarily for mature intelligence quality.
-
-Passing this gate does not authorize indiscriminate source expansion.
-
-Every new source still requires individual validation.
+That decision should be based on repeated report evidence, not a preselected date or source count.
 
 ---
 
-## Gate 6 — Implement Richer Report Context
+# Current Status Summary
 
-**Status: not yet passed**
+```text
+Phase 0  Complete
+Phase 1  Complete
+Phase 2  Complete
+Phase 3  Complete
+Phase 4  Active
+Phase 5  Deferred
+Phase 6  Deferred
+Phase 7  Optional
+```
 
-Required:
+Current validated production direction:
 
-- richer-context requirement is precisely defined;
-- current source metadata is inspected;
-- content-use boundaries are clear;
-- simpler structured-data solutions are evaluated;
-- acceptance criteria exist;
-- zero-cost constraint is preserved.
+```text
+collect
+→ normalize
+→ deduplicate
+→ classify selectively
+→ rank deterministically
+→ store
+→ report
+→ inspect real usefulness
+→ correct sources/domains from evidence
+```
 
-Current evidence validates the problem, but not yet the implementation method.
+Current Phase 4 checkpoint:
 
----
+```text
+Sifted replaced by Tech.eu
+Financial Markets implemented
+keyword precision/recall improved conservatively
+110 tests passing
+17 August real run successful
+documentation reconciliation in progress
+```
 
-## Gate 7 — Add Delivery Features
+Current immediate priority:
 
-**Status: not yet passed**
-
-Required:
-
-- reports are being used;
-- repository or mobile reading is a demonstrated usability limitation;
-- proposed delivery improvement remains zero-cost and low-maintenance.
-
----
-
-# Status Tracking
-
-## Current Phase
-
-Phase 4 — Source and Domain Correction / Expansion.
-
-## Current Milestone
-
-Milestone 4 — Correct and Expand the Source and Domain Universe.
-
-## Completed Since Last Documentation Baseline
-
-- implemented `.github/workflows/daily-intelligence.yml`;
-- added manual `workflow_dispatch`;
-- used Python 3.12 in GitHub Actions;
-- executed 110 automated tests successfully in Actions;
-- added production CLI logging configuration;
-- validated all seven real sources in hosted execution;
-- validated JSONL, Markdown and JSON run-summary generation in Actions;
-- added output validation before persistence;
-- enabled automated repository output commits;
-- validated `github-actions[bot]` persistence;
-- validated no-empty-commit logic;
-- deliberately triggered and validated a critical configuration failure;
-- deliberately triggered and validated a degraded source run;
-- confirmed degraded output remains usable and is persisted;
-- added `contents: write` permission required for repository persistence;
-- added explicit workflow timeout;
-- added concurrency protection;
-- enabled timezone-aware scheduled execution;
-- observed successful scheduled execution;
-- observed substantial GitHub scheduling delay;
-- moved production schedule to 06:05 Europe/Rome to create delivery buffer;
-- accumulated real production report history;
-- identified that current reports can be too thin;
-- identified Sifted paywall/accessibility friction;
-- identified source accessibility as a production-quality criterion;
-- identified Bocconi access as a useful personal-reading layer but not an automation permission;
-- observed a technically healthy but unusually sparse and concentrated scheduled report;
-- identified scheduler-latency/report-window coupling as a future design question.
-
-## Active Work
-
-- reconcile canonical project documentation with completed Phase 3;
-- review and correct the existing source set;
-- plan source/domain expansion;
-- use the Career Agent to define information priorities and candidate sources;
-- return to this Development project for technical source evaluation;
-- prepare the later richer-report design phase.
-
-## Blockers
-
-No infrastructure blocker exists.
-
-The main constraints are now product-quality decisions:
-
-- which current sources should remain;
-- which weak or inaccessible sources should be replaced;
-- which new domains should become active;
-- which candidate sources are suitable for public automated collection;
-- what minimum metadata richness is required;
-- how personal Bocconi access should influence follow-up reading without entering automation.
-
-## Next Highest-Priority Action
-
-After this canonical documentation refresh:
-
-> Use the Career Agent to define the desired expanded source/domain universe, beginning from the observed weaknesses of the current seven-source set, then return to the Development project to evaluate each candidate for automation suitability, accessibility, metadata richness, reliability and maintenance cost.
-
-The first concrete current-source review should include Sifted.
-
-## After Milestone 4
-
-When the source/domain universe is corrected:
-
-> Begin the richer-report product-design phase and spend sufficient time defining the requirement, safe information boundaries, metadata strategy, fallback behaviour and acceptance tests before implementing anything.
-
----
-
-# Deferred Until Later
-
-- richer-report implementation until design is complete;
-- fixed reporting-cutoff implementation until timing evidence is stronger;
-- near-duplicate logic;
-- multi-source clustering;
-- entities;
-- geography classification;
-- content types;
-- source-health history;
-- advanced ranking;
-- GitHub Pages;
-- GitHub Issues delivery;
-- dedicated mobile delivery;
-- AI-generated summaries;
-- authenticated premium-content ingestion.
+> **Commit this stable checkpoint, then audit Financial Times.**
 
 ---
 
 # Changelog
 
-## 2026-08-14 — Phase 3 GitHub Automation Completed and Source/Domain Review Activated
+## 2026-08-17 — Phase 4A Tech.eu Replacement and Financial Markets Activation
 
-- Implemented and validated the GitHub Actions production workflow.
-- Validated manual `workflow_dispatch`.
-- Validated dependency installation and 110 automated tests in GitHub Actions.
-- Added CLI logging configuration after the first hosted run exposed missing INFO-level application logs.
-- Validated full seven-source production execution in Actions.
-- Validated generated JSONL, Markdown and run-summary outputs.
-- Implemented output validation and repository-native automated persistence.
-- Validated `github-actions[bot]` output commits.
-- Validated no-empty-commit behaviour.
-- Validated deliberate critical configuration failure.
-- Validated deliberate degraded source failure with successful-source preservation.
-- Added concurrency protection.
-- Enabled scheduled execution.
-- Observed successful scheduled runs.
-- Observed substantial GitHub scheduler delay and moved the production trigger to 06:05 Europe/Rome.
-- Identified that actual execution time currently shifts the rolling 24-hour content window.
-- Observed a technically healthy but unusually sparse scheduled report.
-- Identified richer per-story context as a new validated product requirement.
-- Identified source accessibility as a source-quality requirement after a Sifted report item required Sifted Pro access.
-- Recorded that Bocconi institutional access expands the user's personal reading universe but does not authorize automated ingestion.
-- Passed the gate for controlled source/domain expansion.
-- Made source/domain correction and expansion the next active milestone.
-- Deferred richer-report implementation until a deliberate design phase is complete.
+- Incorporated the completed Career Agent strategic source/domain audit into the development sequence.
+- Formalised the narrow Premium Bocconi Exception while preserving the prohibition on authenticated automated ingestion.
+- Directly compared Tech.eu and Sifted through the real collector.
+- Observed 20/20 Tech.eu descriptions versus 0/24 Sifted descriptions.
+- Approved Tech.eu as the replacement for Sifted.
+- Removed Sifted from the active source registry.
+- Added Tech.eu as Tier 2, Europe, with no source-default domain.
+- Tested Tech.eu with and without a Startups/VC source default.
+- Rejected the blanket Startups/VC default because Tech.eu is a heterogeneous technology/startup/business source.
+- Added `acquired` to Companies and Corporate Strategy after a real M&A recall gap.
+- Added `early-stage fund` and `funding market` to Startups/VC after real Tech.eu evidence.
+- Removed generic `startup` because it promoted weak startup profiles too easily.
+- Added `tariffs` to Global Politics and Geopolitics after a relevant BBC trade/geopolitics miss.
+- Activated Financial Markets as the eighth domain with a conservative first keyword set.
+- Validated candidate taxonomy changes against 114 stored production records.
+- Confirmed all observed changes were interpretable.
+- Confirmed 110/110 automated tests passed.
+- Completed a real 17 August 2026 pipeline run with 7/7 sources successful.
+- Manually inspected the generated report and all 30 unique records.
+- Recorded that classification rate alone is not a useful product-quality KPI.
+- Confirmed that most 17 August unclassified records were correctly excluded.
+- Restored accidentally overwritten 14 August production artifacts before preparing the checkpoint.
+- Preserved zero recurring cost, deterministic processing, credential safety and public-repository constraints.
+- Set Financial Times technical audit as the next source-level task after checkpoint commit.
 
-## 2026-08-11 — Phase 2 Real-Source Production Readiness Completed
+## 2026-08-14 — Phase 3 Production Closeout and Phase 4 Entry
 
-- Selected and validated seven public real-source RSS feeds.
-- Hardened remote collection with explicit request headers and a 10-second timeout.
-- Confirmed normal SSL verification and real-source redirect behaviour.
-- Kept retry logic absent because current evidence did not justify it.
-- Validated real feed metadata and publication timestamps through the existing normalizer.
-- Expanded the implemented taxonomy from two to seven domains without expanding the full target taxonomy.
-- Added support for empty `default_domains` for broad heterogeneous sources.
-- Replaced misleading broad source defaults with conservative source-wide defaults.
-- Used real report inspection to identify classification false positives.
-- Added `war`, `conflict` and `parliament` only after testing candidate keywords against real processed records.
-- Generated and manually inspected real JSONL, Markdown and run-summary outputs.
-- Improved the real report from a noisy initial version to a smaller, more credible output.
-- Validated deliberate real-network partial-source failure and degraded-run behaviour.
-- Reached 110 passing automated tests.
-- Marked Phase 2 complete.
-- Passed Gate 3 and made Phase 3 GitHub Automation the active phase.
+- Reconciled the roadmap with completed GitHub Actions automation.
+- Recorded manual and scheduled production execution.
+- Recorded automated repository persistence.
+- Recorded degraded and critical failure validation.
+- Recorded GitHub scheduler latency.
+- Recorded source accessibility and metadata richness as active product-quality concerns.
+- Recorded Bocconi reading access as separate from automated-ingestion permission.
+- Made source/domain correction the active milestone.
+- Deferred richer-report design until after source correction.
 
-## 2026-08-11 — Phase 1 Local Vertical Slice Completed
+## 2026-08-11 — Phase 2 Real-Source Validation
 
-- Replaced the stale Phase 0 implementation status with the validated repository state.
-- Marked Phase 0 and Phase 1 complete.
-- Recorded the implemented local pipeline, CLI, collection-window filtering, operational reporting and logging.
-- Recorded 104 passing tests at Phase 1 closeout.
-- Reordered the roadmap so minimal real-source production-readiness validation preceded GitHub Actions.
-- Moved speculative quality features behind evidence from real reports.
-- Preserved zero recurring cost, deterministic processing, negligible daily manual work and public-repository safety as fixed constraints.
-- Defined Milestone 2 as the next active development milestone.
+- Validated seven real public RSS sources.
+- Expanded the taxonomy to seven implemented domains.
+- Added bounded HTTP retrieval and explicit request headers.
+- Corrected broad source-default classification.
+- Added evidence-backed politics keywords.
+- Validated degraded real-source behaviour.
+- Reached 110 passing tests.
 
-## 2026-08-05 — Initial Roadmap Baseline
+## 2026-08-11 — Phase 1 Local Vertical Slice
 
-- Restored the original project roadmap and project-control structure.
-- Defined the local vertical slice as the first implementation phase.
-- Deferred automation, delivery features and production AI until the deterministic core was validated.
+- Completed local deterministic collection-to-report pipeline.
+- Added collection-window enforcement.
+- Added deterministic identity, deduplication, classification, ranking, storage and reporting.
+- Added run summaries and logging.
+- Reached 104 passing tests.
+
+## Initial Baseline
+
+- Defined the implementation phases.
+- Defined the zero-cost, low-maintenance and deterministic development philosophy.
+- Established Git and tests as the verification layer.

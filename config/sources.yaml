@@ -68,13 +68,12 @@ sources:
       - Global
     active: true
 
-  - id: sifted_articles
-    name: Sifted
-    feed_url: https://sifted.eu/feed?post_type=article
+  - id: tech_eu
+    name: Tech.eu
+    feed_url: https://tech.eu/feed/
     source_type: rss
     source_tier: 2
-    default_domains:
-      - startups_venture_capital
+    default_domains: []
     language: en
     geographic_scope:
       - Europe
