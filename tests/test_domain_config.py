@@ -18,7 +18,7 @@ def test_load_valid_domain_configuration() -> None:
 
     domains = load_domains(CONFIG_PATH)
 
-    assert len(domains) == 10
+    assert len(domains) == 11
 
     assert tuple(domain.id for domain in domains) == (
         "global_politics_geopolitics",
@@ -55,6 +55,7 @@ def test_load_valid_domain_configuration() -> None:
         for domain in domains
         if domain.id == "artificial_intelligence"
     )
+    assert "IA" in artificial_intelligence.keywords
 
     companies = next(
         domain
@@ -62,6 +63,8 @@ def test_load_valid_domain_configuration() -> None:
         if domain.id == "companies_corporate_strategy"
     )
     assert "acquired" in companies.keywords
+    assert "fusione e acquisizione" in companies.keywords
+    assert "piano industriale" in companies.keywords
 
     startups = next(
         domain
@@ -97,6 +100,7 @@ def test_load_valid_domain_configuration() -> None:
     assert "FOMC" in financial_markets.keywords
     assert "Federal Open Market Committee" in financial_markets.keywords
     assert "discount rate" in financial_markets.keywords
+    assert "mercati dei capitali" in financial_markets.keywords
 
     milan_bocconi = next(
         domain

@@ -116,3 +116,17 @@ sources:
     geographic_scope:
       - Italy
     active: true
+
+  - id: lavoce_imprese
+    name: Lavoce.info Imprese
+    feed_url: https://lavoce.info/archives/category/argomenti/imprese/feed/
+    source_type: rss
+    source_tier: 2
+    default_domains:
+      - italy
+    language: it
+    geographic_scope:
+      - Italy
+      - Europe
+    active: true
+    

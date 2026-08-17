@@ -44,6 +44,8 @@ domains:
       - accordo di sviluppo
       - quadro industriale
       - rilevanza strategica
+      - fusione e acquisizione
+      - piano industriale
     active: true
 
   - id: artificial_intelligence
@@ -55,6 +57,7 @@ domains:
       - large language model
       - foundation model
       - model release
+      - IA
     active: true
 
   - id: technology
@@ -113,6 +116,7 @@ domains:
       - FOMC
       - Federal Open Market Committee
       - discount rate
+      - mercati dei capitali
     active: true
 
   - id: milan_bocconi_ecosystem

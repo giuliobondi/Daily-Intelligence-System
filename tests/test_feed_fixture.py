@@ -48,7 +48,7 @@ def test_load_valid_source_configuration() -> None:
 
     sources = load_sources(CONFIG_PATH)
 
-    assert len(sources) == 10
+    assert len(sources) == 11
 
     assert tuple(source.id for source in sources) == (
         "bbc_world",
@@ -61,6 +61,7 @@ def test_load_valid_source_configuration() -> None:
         "tech_europe_foundation",
         "federal_reserve_monetary",
         "mimit_news",
+        "lavoce_imprese",
     )
 
     openai = next(
@@ -157,6 +158,26 @@ def test_load_valid_source_configuration() -> None:
     assert mimit_news.geographic_scope == ("Italy",)
     assert mimit_news.active is True    
 
+    lavoce_imprese = next(
+        source
+        for source in sources
+        if source.id == "lavoce_imprese"
+    )
+
+    assert (
+        lavoce_imprese.feed_url
+        == "https://lavoce.info/archives/category/argomenti/imprese/feed/"
+    )
+    assert lavoce_imprese.source_type == "rss"
+    assert lavoce_imprese.source_tier == 2
+    assert lavoce_imprese.default_domains == ("italy",)
+    assert lavoce_imprese.language == "it"
+    assert lavoce_imprese.geographic_scope == (
+        "Italy",
+        "Europe",
+    )
+    assert lavoce_imprese.active is True
+    
 def test_missing_source_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete source entry fails with a clear configuration error."""
 
