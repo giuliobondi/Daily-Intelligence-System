@@ -93,6 +93,9 @@ def test_load_valid_domain_configuration() -> None:
     assert financial_markets.active is True
     assert "stock market" in financial_markets.keywords
     assert "financial stability" in financial_markets.keywords
+    assert "FOMC" in financial_markets.keywords
+    assert "Federal Open Market Committee" in financial_markets.keywords
+    assert "discount rate" in financial_markets.keywords
 
     milan_bocconi = next(
         domain
@@ -198,3 +201,4 @@ domains:
 
     assert len(domains) == 1
     assert domains[0].keywords == ()
+    

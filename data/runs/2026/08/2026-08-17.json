@@ -1,20 +1,20 @@
 {
-  "active_sources": 7,
+  "active_sources": 9,
   "collection_window": [
-    "2026-08-16T04:53:32.313668+00:00",
-    "2026-08-17T04:53:32.313668+00:00"
+    "2026-08-16T14:49:24.814942+00:00",
+    "2026-08-17T14:49:24.814942+00:00"
   ],
-  "completed_at": "2026-08-17T04:53:32.313668+00:00",
-  "displayed_items": 2,
-  "duplicate_items": 1,
+  "completed_at": "2026-08-17T14:49:24.814942+00:00",
+  "displayed_items": 9,
+  "duplicate_items": 3,
   "empty_sources": 0,
   "failed_sources": 0,
   "invalid_items": 0,
-  "raw_items": 1282,
-  "run_id": "20260817T045332Z",
-  "started_at": "2026-08-17T04:53:32.313668+00:00",
+  "raw_items": 1310,
+  "run_id": "20260817T144924Z",
+  "started_at": "2026-08-17T14:49:24.814942+00:00",
   "status": "success",
-  "successful_sources": 7,
-  "valid_items": 1282,
+  "successful_sources": 9,
+  "valid_items": 1310,
   "warnings": []
 }

@@ -48,7 +48,7 @@ def test_load_valid_source_configuration() -> None:
 
     sources = load_sources(CONFIG_PATH)
 
-    assert len(sources) == 8
+    assert len(sources) == 9
 
     assert tuple(source.id for source in sources) == (
         "bbc_world",
@@ -59,6 +59,7 @@ def test_load_valid_source_configuration() -> None:
         "openai_news",
         "tech_eu",
         "tech_europe_foundation",
+        "federal_reserve_monetary",
     )
 
     openai = next(
@@ -113,6 +114,27 @@ def test_load_valid_source_configuration() -> None:
         "Milan",
     )
     assert tech_europe_foundation.active is True
+
+    federal_reserve_monetary = next(
+        source
+        for source in sources
+        if source.id == "federal_reserve_monetary"
+    )
+
+    assert (
+        federal_reserve_monetary.feed_url
+        == "https://www.federalreserve.gov/feeds/press_monetary.xml"
+    )
+    assert federal_reserve_monetary.source_type == "rss"
+    assert federal_reserve_monetary.source_tier == 1
+    assert federal_reserve_monetary.default_domains == (
+        "economics_macroeconomics",
+    )
+    assert federal_reserve_monetary.language == "en"
+    assert federal_reserve_monetary.geographic_scope == (
+        "United States",
+    )
+    assert federal_reserve_monetary.active is True
 
 def test_missing_source_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete source entry fails with a clear configuration error."""

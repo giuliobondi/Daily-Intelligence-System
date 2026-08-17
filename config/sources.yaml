@@ -92,3 +92,15 @@ sources:
       - Italy
       - Milan
     active: true
+
+  - id: federal_reserve_monetary
+    name: Federal Reserve Board Monetary Policy
+    feed_url: https://www.federalreserve.gov/feeds/press_monetary.xml
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - economics_macroeconomics
+    language: en
+    geographic_scope:
+      - United States
+    active: true

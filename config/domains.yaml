@@ -105,6 +105,9 @@ domains:
       - equities
       - asset management
       - ipo
+      - FOMC
+      - Federal Open Market Committee
+      - discount rate
     active: true
 
   - id: milan_bocconi_ecosystem
