@@ -56,14 +56,15 @@ def classify_record(
 
 
 def _contains_keyword(text: str, keyword: str) -> bool:
-    """Match a keyword case-insensitively without partial-word matches."""
+    """Match whole keywords, preserving intentional uppercase sensitivity."""
 
     pattern = rf"(?<!\w){re.escape(keyword)}(?!\w)"
+    flags = 0 if any(char.isupper() for char in keyword) else re.IGNORECASE
 
     return re.search(
         pattern,
         text,
-        flags=re.IGNORECASE,
+        flags=flags,
     ) is not None
 
 

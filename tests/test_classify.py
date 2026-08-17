@@ -79,7 +79,7 @@ def _domains() -> tuple[DomainConfig, ...]:
             name="Artificial Intelligence",
             keywords=(
                 "artificial intelligence",
-                "ai",
+                "AI",
                 "machine learning",
                 "model release",
             ),
@@ -118,7 +118,7 @@ def test_title_keyword_assigns_domain() -> None:
 
     assert result.domains == ("artificial_intelligence",)
     assert result.matched_keywords == (
-        "ai",
+        "AI",
         "model release",
     )
 
@@ -159,7 +159,7 @@ def test_multiple_domains_can_be_assigned() -> None:
     )
     assert result.matched_keywords == (
         "software",
-        "ai",
+        "AI",
     )
 
 
@@ -180,7 +180,7 @@ def test_source_default_and_keyword_domain_are_combined() -> None:
         "technology",
         "artificial_intelligence",
     )
-    assert result.matched_keywords == ("ai",)
+    assert result.matched_keywords == ("AI",)
 
 
 def test_unmatched_record_remains_unclassified() -> None:
@@ -206,7 +206,7 @@ def test_inactive_domain_is_ignored() -> None:
     inactive_domain = DomainConfig(
         id="artificial_intelligence",
         name="Artificial Intelligence",
-        keywords=("ai",),
+        keywords=("AI",),
         active=False,
     )
 
@@ -240,6 +240,39 @@ def test_keyword_matching_does_not_use_partial_words() -> None:
     assert result.domains == ()
     assert result.matched_keywords == ()
 
+def test_uppercase_keyword_matching_is_case_sensitive() -> None:
+    """Intentional uppercase keywords preserve acronym case."""
+
+    record = _record(
+        title="Company plans to use AI for customer support",
+    )
+
+    result = classify_record(
+        record,
+        _source(default_domains=()),
+        _domains(),
+    )
+
+    assert result.domains == ("artificial_intelligence",)
+    assert result.matched_keywords == ("AI",)
+
+
+def test_uppercase_keyword_does_not_match_lowercase_italian_word() -> None:
+    """The AI acronym does not match the Italian lowercase word 'ai'."""
+
+    record = _record(
+        title="Incentivi ai nuovi residenti",
+        description="Ai cittadini vengono offerti nuovi bonus.",
+    )
+
+    result = classify_record(
+        record,
+        _source(default_domains=()),
+        _domains(),
+    )
+
+    assert result.domains == ()
+    assert result.matched_keywords == ()
 
 def test_existing_record_is_not_mutated() -> None:
     """Classification returns an enriched immutable record."""
@@ -278,6 +311,6 @@ def test_existing_classification_is_replaced_deterministically() -> None:
 
     assert result.domains == ("artificial_intelligence",)
     assert result.matched_keywords == (
-        "ai",
+        "AI",
         "model release",
     )

@@ -134,7 +134,7 @@ def test_pipeline_runs_end_to_end(
         "technology",
         "artificial_intelligence",
     )
-    assert record.matched_keywords == ("ai",)
+    assert record.matched_keywords == ("AI",)
     assert record.relevance_score == 9
     assert record.score_components == (
         ("source_tier", 4),
