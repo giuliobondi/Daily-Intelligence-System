@@ -72,7 +72,7 @@ The project should not move to the next phase until the current phase has a clea
 | Current Product-Quality Finding | Information breadth remains insufficient despite technical stability; Financial Markets, Companies, Italy and independent AI coverage remain structurally weak |
 | Current Blockers | No automation blocker; source/domain breadth and information quality are the active constraints |
 | Current Priority | Begin the next domain-gap-driven source-audit batch; Nasdaq first |
-| Current Git State | Latest implementation checkpoint pushed; canonical documentation reconciliation in progress |
+| Current Git State | Latest implementation and documentation checkpoints pushed |
 
 ---
 
@@ -2412,7 +2412,7 @@ Italian Tech Alliance
 
 Current immediate priority:
 
-> **Finish canonical documentation reconciliation, then begin the Nasdaq technical audit in a new Development chat.**
+> **Begin the Nasdaq technical audit in a new Development chat**
 
 ---
 
