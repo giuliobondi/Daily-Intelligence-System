@@ -48,7 +48,7 @@ def test_load_valid_source_configuration() -> None:
 
     sources = load_sources(CONFIG_PATH)
 
-    assert len(sources) == 7
+    assert len(sources) == 8
 
     assert tuple(source.id for source in sources) == (
         "bbc_world",
@@ -58,6 +58,7 @@ def test_load_valid_source_configuration() -> None:
         "istat_press_en",
         "openai_news",
         "tech_eu",
+        "tech_europe_foundation",
     )
 
     openai = next(
@@ -89,6 +90,29 @@ def test_load_valid_source_configuration() -> None:
     assert tech_eu.language == "en"
     assert tech_eu.geographic_scope == ("Europe",)
     assert tech_eu.active is True
+
+    tech_europe_foundation = next(
+        source
+        for source in sources
+        if source.id == "tech_europe_foundation"
+    )
+
+    assert (
+        tech_europe_foundation.feed_url
+        == "https://tef.tech/news/feed/"
+    )
+    assert tech_europe_foundation.source_type == "rss"
+    assert tech_europe_foundation.source_tier == 1
+    assert tech_europe_foundation.default_domains == (
+        "milan_bocconi_ecosystem",
+    )
+    assert tech_europe_foundation.language == "en"
+    assert tech_europe_foundation.geographic_scope == (
+        "Europe",
+        "Italy",
+        "Milan",
+    )
+    assert tech_europe_foundation.active is True
 
 def test_missing_source_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete source entry fails with a clear configuration error."""

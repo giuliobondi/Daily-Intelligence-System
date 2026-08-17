@@ -78,3 +78,17 @@ sources:
     geographic_scope:
       - Europe
     active: true
+
+  - id: tech_europe_foundation
+    name: Tech Europe Foundation
+    feed_url: https://tef.tech/news/feed/
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - milan_bocconi_ecosystem
+    language: en
+    geographic_scope:
+      - Europe
+      - Italy
+      - Milan
+    active: true

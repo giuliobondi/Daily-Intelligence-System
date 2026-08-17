@@ -18,7 +18,7 @@ def test_load_valid_domain_configuration() -> None:
 
     domains = load_domains(CONFIG_PATH)
 
-    assert len(domains) == 8
+    assert len(domains) == 9
 
     assert tuple(domain.id for domain in domains) == (
         "global_politics_geopolitics",
@@ -29,6 +29,7 @@ def test_load_valid_domain_configuration() -> None:
         "startups_venture_capital",
         "europe_eu",
         "financial_markets",
+        "milan_bocconi_ecosystem",
     )
 
     technology = next(
@@ -92,6 +93,16 @@ def test_load_valid_domain_configuration() -> None:
     assert financial_markets.active is True
     assert "stock market" in financial_markets.keywords
     assert "financial stability" in financial_markets.keywords
+
+    milan_bocconi = next(
+        domain
+        for domain in domains
+        if domain.id == "milan_bocconi_ecosystem"
+    )
+
+    assert milan_bocconi.name == "Milan and Bocconi Ecosystem"
+    assert milan_bocconi.keywords == ()
+    assert milan_bocconi.active is True
 
     assert (
         artificial_intelligence.name
@@ -163,3 +174,27 @@ def test_domain_active_flag_must_be_boolean(tmp_path: Path) -> None:
         match="field 'active' must be true or false",
     ):
         load_domains(invalid_config)
+
+def test_empty_domain_keywords_are_allowed(
+    tmp_path: Path,
+) -> None:
+    """A domain may rely entirely on source-default classification."""
+
+    config_path = tmp_path / "domains.yaml"
+
+    config_path.write_text(
+        """
+domains:
+  - id: source_defined_domain
+    name: Source Defined Domain
+    keywords: []
+    active: true
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    domains = load_domains(config_path)
+
+    assert len(domains) == 1
+    assert domains[0].keywords == ()

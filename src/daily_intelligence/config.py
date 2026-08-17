@@ -326,6 +326,7 @@ def _validate_domain(
         raw_domain,
         "keywords",
         index,
+        allow_empty=True,
     )
 
     active = raw_domain["active"]

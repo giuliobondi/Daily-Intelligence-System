@@ -106,3 +106,8 @@ domains:
       - asset management
       - ipo
     active: true
+
+  - id: milan_bocconi_ecosystem
+    name: Milan and Bocconi Ecosystem
+    keywords: []
+    active: true
