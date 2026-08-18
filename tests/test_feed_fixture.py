@@ -48,7 +48,7 @@ def test_load_valid_source_configuration() -> None:
 
     sources = load_sources(CONFIG_PATH)
 
-    assert len(sources) == 11
+    assert len(sources) == 12
 
     assert tuple(source.id for source in sources) == (
         "bbc_world",
@@ -62,6 +62,7 @@ def test_load_valid_source_configuration() -> None:
         "federal_reserve_monetary",
         "mimit_news",
         "lavoce_imprese",
+        "google_deepmind_news",
     )
 
     openai = next(
@@ -177,7 +178,27 @@ def test_load_valid_source_configuration() -> None:
         "Europe",
     )
     assert lavoce_imprese.active is True
-    
+
+    google_deepmind = next(
+        source
+        for source in sources
+        if source.id == "google_deepmind_news"
+    )
+
+    assert google_deepmind.name == "Google DeepMind News"
+    assert (
+        google_deepmind.feed_url
+        == "https://deepmind.google/blog/rss.xml"
+    )
+    assert google_deepmind.source_type == "rss"
+    assert google_deepmind.source_tier == 1
+    assert google_deepmind.default_domains == (
+        "artificial_intelligence",
+    )
+    assert google_deepmind.language == "en"
+    assert google_deepmind.geographic_scope == ("Global",)
+    assert google_deepmind.active is True
+
 def test_missing_source_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete source entry fails with a clear configuration error."""
 

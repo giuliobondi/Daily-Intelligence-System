@@ -129,4 +129,15 @@ sources:
       - Italy
       - Europe
     active: true
-    
+
+  - id: google_deepmind_news
+    name: Google DeepMind News
+    feed_url: https://deepmind.google/blog/rss.xml
+    source_type: rss
+    source_tier: 1
+    default_domains:
+      - artificial_intelligence
+    language: en
+    geographic_scope:
+      - Global
+    active: true
