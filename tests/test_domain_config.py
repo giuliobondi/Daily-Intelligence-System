@@ -18,7 +18,7 @@ def test_load_valid_domain_configuration() -> None:
 
     domains = load_domains(CONFIG_PATH)
 
-    assert len(domains) == 11
+    assert len(domains) == 10
 
     assert tuple(domain.id for domain in domains) == (
         "global_politics_geopolitics",
