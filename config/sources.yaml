@@ -141,3 +141,15 @@ sources:
     geographic_scope:
       - Global
     active: true
+  - id: ispi_geoeconomics
+    name: ISPI Geoeconomics
+    feed_url: https://www.ispionline.it/it/ricerca/geoeconomia/feed
+    source_type: rss
+    source_tier: 3
+    default_domains: []
+    language: it
+    geographic_scope:
+      - Global
+      - Europe
+      - Italy
+    active: true

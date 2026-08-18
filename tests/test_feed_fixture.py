@@ -48,7 +48,7 @@ def test_load_valid_source_configuration() -> None:
 
     sources = load_sources(CONFIG_PATH)
 
-    assert len(sources) == 12
+    assert len(sources) == 13
 
     assert tuple(source.id for source in sources) == (
         "bbc_world",
@@ -63,6 +63,7 @@ def test_load_valid_source_configuration() -> None:
         "mimit_news",
         "lavoce_imprese",
         "google_deepmind_news",
+        "ispi_geoeconomics",
     )
 
     openai = next(
@@ -198,6 +199,28 @@ def test_load_valid_source_configuration() -> None:
     assert google_deepmind.language == "en"
     assert google_deepmind.geographic_scope == ("Global",)
     assert google_deepmind.active is True
+
+    ispi_geoeconomics = next(
+        source
+        for source in sources
+        if source.id == "ispi_geoeconomics"
+    )
+
+    assert ispi_geoeconomics.name == "ISPI Geoeconomics"
+    assert (
+        ispi_geoeconomics.feed_url
+        == "https://www.ispionline.it/it/ricerca/geoeconomia/feed"
+    )
+    assert ispi_geoeconomics.source_type == "rss"
+    assert ispi_geoeconomics.source_tier == 3
+    assert ispi_geoeconomics.default_domains == ()
+    assert ispi_geoeconomics.language == "it"
+    assert ispi_geoeconomics.geographic_scope == (
+        "Global",
+        "Europe",
+        "Italy",
+    )
+    assert ispi_geoeconomics.active is True
 
 def test_missing_source_fields_are_rejected(tmp_path: Path) -> None:
     """An incomplete source entry fails with a clear configuration error."""

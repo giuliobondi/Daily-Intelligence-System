@@ -51,9 +51,10 @@ Development should follow these rules:
 - Preserve durable source-audit conclusions in `03 Information Taxonomy and Source Policy.md` rather than reconstructing them from chat history.
 - Use GitHub Copilot selectively for narrow mechanical multi-file edits when it materially reduces repetitive work.
 - Keep ChatGPT responsible for reasoning, scope and drafting; keep Git/tests responsible for verification.
-- Do not keep extending Phase 4 merely because more candidate sources exist.
+- Do not keep extending source research merely because more candidate publishers exist.
+- Reopen source work only when real product use reveals a sufficiently costly information gap or a materially cleaner endpoint becomes available.
 
-The project should not move to the next phase until the current phase has a clear completion condition or there is evidence that a different immediate priority creates materially more user value.
+The project should not move to implementation of a new phase until the current design requirement has a clear acceptance condition.
 
 ---
 
@@ -61,21 +62,22 @@ The project should not move to the next phase until the current phase has a clea
 
 | Field | Current Status |
 |---|---|
-| Project Phase | Phase 4 — Source and Domain Correction / Expansion |
-| Current Milestone | Milestone 4 — Complete the smallest high-value source/domain universe and determine whether further expansion still beats richer report context |
+| Project Phase | Phase 5 — Richer-Report Product Design |
+| Current Milestone | Milestone 5 — Design the smallest lawful, deterministic and zero-cost richer-context mechanism before implementation |
 | Repository Status | Public Python repository with automated GitHub-native daily execution and repository-native historical outputs |
 | Implementation Status | Deterministic collect → normalize → validate → filter → deduplicate → classify → rank → store → report pipeline implemented and production-validated |
 | Automation Status | GitHub Actions implemented; manual and scheduled execution validated; outputs persisted automatically |
 | Production Schedule | Daily at 06:05 Europe/Rome; GitHub scheduling latency remains an observed operational limitation |
-| Source Registry | Twelve active production sources |
-| Taxonomy Status | Ten implemented domains; all ten strategic macroareas now have production configuration |
-| Testing Status | Targeted and full automated suites passing at the latest implementation checkpoints |
-| Latest Local Validation | Real 18 August 2026 pipeline run completed successfully with 12/12 sources successful |
-| Latest Integration Result | Google DeepMind News collected 100 items successfully; no stale DeepMind records entered the tested 24-hour window |
-| Current Product-Quality Finding | Technical stability is strong; remaining limitations are concentrated in a smaller number of information-function gaps rather than missing basic architecture |
-| Current Blockers | No automation blocker; remaining issue is whether another source batch still creates more value than richer report context |
-| Current Priority | Complete this documentation checkpoint, commission a fresh Career Agent source-research pass, then start a new controlled Development audit batch |
-| Current Git State | Latest implementation checkpoint through Google DeepMind validated and pushed; documentation checkpoint in progress |
+| Source Registry | Thirteen active production sources |
+| Taxonomy Status | Ten implemented domains; all ten strategic macroareas have production configuration |
+| Domain Maturity | All ten domains are sufficient for the current MVP boundary, but several remain intentionally incomplete |
+| Testing Status | 118 automated tests passed at the latest implementation checkpoint |
+| Latest Local Validation | Real 18 August 2026 production-equivalent run completed successfully with 13/13 sources successful |
+| Latest Integration Result | ISPI Geoeconomics collected successfully through the standard pipeline; its current feed records were outside the tested 24-hour window and did not leak into current outputs |
+| Current Product-Quality Finding | Further speculative source expansion now has lower expected value than improving the context of already-selected stories |
+| Current Blockers | No automation blocker; Phase 5 requires a careful richer-context design before implementation |
+| Current Priority | Complete and commit the Phase 4 closeout checkpoint, refresh canonical project sources, then begin richer-report design |
+| Current Git State | ISPI implementation validated locally; documentation closeout in progress; unrelated `.obsidian/workspace.json` change must remain excluded |
 
 ---
 
@@ -159,12 +161,15 @@ Production must remain independent from Copilot.
 - A source may be replaced or deferred instead of receiving source-specific complexity.
 - Report quality must be evaluated independently from run success.
 - Source expansion should solve information-function gaps rather than target publisher count.
-- Phase 4 does not require an arbitrary number of sources per domain.
 - Strong primary evidence and strong independent interpretation are different information roles.
 - Missing global FT/Reuters-style corporate reporting can remain an explicit limitation rather than being filled with inferior substitutes.
 - Public RSS availability does not automatically mean that full feed payloads are suitable for permanent public Git persistence.
 - Missing publication timestamps do not justify substituting retrieval time.
-- Full-content feeds do not justify source-specific truncation simply to activate a prestigious source.
+- Full-content feeds do not justify source-specific truncation merely to activate a prestigious source.
+- Event publication time must not be assumed to equal event date or application deadline.
+- Access-control interstitials must not be treated as valid structured content merely because they return HTTP `200`.
+- A source should not receive source-specific ranking penalties or filters merely to compensate for a broad/noisy upstream feed.
+- Long page-like descriptions can distort deterministic classification and ranking through incidental keyword matches.
 
 ---
 
@@ -180,6 +185,7 @@ Production must remain independent from Copilot.
 - Premium sources still require a legitimate public or automation-compatible discovery endpoint.
 - Financial Times and Il Sole 24 Ore have been audited under this model and remain inactive.
 - Private Bocconi Career Services remains a complementary manual layer rather than a production dependency.
+- Public Career Services pages may be used manually, but authenticated `yoU@B` / JobGate automation remains prohibited.
 
 ---
 
@@ -293,7 +299,7 @@ Local execution:
 python -m daily_intelligence.cli run
 ```
 
-Phase 1 also established the development pattern:
+Phase 1 established the development pattern:
 
 ```text
 run real workflow
@@ -356,8 +362,6 @@ Phase 2 validated seven domains:
 - A degraded source should not necessarily fail the whole run.
 - Real feed behaviour must be tested before automation.
 - Classification rate is not itself the goal.
-
-## Validation
 
 At Phase 2 closeout:
 
@@ -422,22 +426,29 @@ Do not redesign this without repeated evidence that the latency materially harms
 
 ## Objective
 
-Build the smallest source and domain universe strong enough for actual daily use before investing in richer report-context logic.
+Build the smallest source/domain universe sufficiently strong for daily MVP use before investing in richer-report context.
 
-Infrastructure is no longer the main bottleneck.
+The phase was not intended to:
 
-The active questions are:
+- maximise source count;
+- eliminate every information gap;
+- reproduce premium journalism;
+- automate private Career Services;
+- create new architectures for every attractive source.
 
-- which information functions remain materially under-covered;
-- which gaps justify another source;
-- which sources remain too noisy, inaccessible or legally awkward;
-- whether another source now creates more value than richer context.
+The governing question became:
 
-Current philosophy:
+> **Would another source/domain change create more user value than improving the context of stories already being selected?**
 
-> **Correct information-function gaps before correcting publisher-count gaps.**
+After the final gap-driven audits, the answer is now:
 
-Phase 4 is now substantially more mature than at its previous checkpoint.
+> **No for the current MVP boundary.**
+
+## Status
+
+**Complete for the current MVP boundary**
+
+Residual information gaps remain documented and may be reopened when evidence changes.
 
 ---
 
@@ -482,8 +493,6 @@ Tech.eu → 20/20 tested entries with descriptions
 Sifted  → 0/24 tested entries with descriptions
 ```
 
-The replacement demonstrated that technical collectability alone is insufficient.
-
 ## Taxonomy Changes
 
 Added:
@@ -513,18 +522,6 @@ Added domain:
 Financial Markets
 ```
 
-Initial Financial Markets taxonomy remains intentionally conservative.
-
-## Historical Regression
-
-The final Phase 4A taxonomy was tested against:
-
-```text
-114 stored historical records
-```
-
-Observed changes were interpretable and no unexpected regression was identified.
-
 ## Status
 
 **Complete and pushed**
@@ -533,15 +530,11 @@ Observed changes were interpretable and no unexpected regression was identified.
 
 # Phase 4B — Premium, Institutional and Milan/Bocconi Source Research
 
-This work established several durable source decisions and the first Milan/Bocconi production architecture.
-
----
-
 ## Financial Times
 
 Strategically excellent.
 
-Official RSS exists, but FT RSS-specific terms conflict with the system's permanent archival model.
+Official RSS exists, but current RSS/persistence terms conflict with permanent archival use.
 
 ### Decision
 
@@ -553,15 +546,7 @@ Official RSS exists, but FT RSS-specific terms conflict with the system's perman
 
 Technically strong.
 
-Tested RSS feeds included:
-
-```text
-Italia
-Finanza
-Economia
-```
-
-Strongest product candidates:
+Strongest feed candidates:
 
 ```text
 Economia
@@ -590,8 +575,6 @@ vs
 Italian "ai"
 ```
 
-Production configuration and classifier semantics were corrected.
-
 Current convention:
 
 ```text
@@ -602,13 +585,7 @@ keyword containing uppercase
 → case-sensitive
 ```
 
-### Validation
-
-- historical AI records reviewed;
-- useful English recall preserved;
-- false Italian AI matches removed;
-- targeted tests passed;
-- full suite passed.
+Validation preserved useful English recall while removing false Italian matches.
 
 ### Status
 
@@ -618,7 +595,7 @@ keyword containing uppercase
 
 ## Bank of Italy RSS
 
-Official narrow RSS feeds collected and normalised successfully.
+Official narrow feeds collected and normalised successfully.
 
 Main weakness:
 
@@ -641,7 +618,7 @@ A proper integration would require:
 ```text
 series
 → observations
-→ change/release detection
+→ release/change detection
 → revisions
 → significance rules
 → intelligence event
@@ -672,7 +649,7 @@ No clean official zero-cost machine-delivery route compatible with the current a
 
 Milan/Bocconi is a fixed strategic macroarea.
 
-The desired information function is:
+The target is:
 
 > **Professional Ecosystem Intelligence**
 
@@ -684,7 +661,9 @@ not generic local news.
 
 ### Decision
 
-> **Legacy / superseded by Tech Europe Foundation.**
+> **Legacy / superseded by Tech Europe Foundation for the first general startup/innovation sensor.**
+
+B4i may only be revisited later if a different structured information function becomes evident, such as high-value programmes/deadlines.
 
 ---
 
@@ -695,8 +674,6 @@ Official RSS:
 ```text
 https://tef.tech/news/feed/
 ```
-
-Technical validation passed.
 
 Without a source default:
 
@@ -728,40 +705,13 @@ Tech Europe Foundation
 
 No separate opportunity/event architecture was introduced.
 
-### Real Validation
-
-17 August 2026 run:
-
-```text
-8 active
-8 successful
-0 failed
-0 invalid
-
-1295 valid
-40 window-eligible
-37 unique
-29 unclassified
-8 displayed
-
-status: success
-```
-
-TEF current-window records:
-
-```text
-0
-```
-
-expected because feed items were older than the monitored window.
-
 ### Status
 
 **Complete and pushed**
 
 ---
 
-## Bocconi Career Services
+## Bocconi Career Services — Initial Decision
 
 ### Decision
 
@@ -773,6 +723,8 @@ Do not automate:
 yoU@B
 JobGate
 ```
+
+Later Phase 4 research refined this decision by separately testing the public layer.
 
 ---
 
@@ -794,7 +746,7 @@ Official RSS:
 https://www.italiantechalliance.com/blog-feed.xml
 ```
 
-Technical sample:
+Initial technical sample:
 
 ```text
 20 entries
@@ -818,30 +770,15 @@ Product weaknesses:
 - extremely thin descriptions;
 - repeated press-clipping stories around the same underlying developments.
 
-Candidate Startups/VC terms:
-
-```text
-round
-scaleup fund
-```
-
-passed historical regression.
-
-### Decision
+### Initial Decision
 
 > **Production-readiness candidate.**
 
-Do not restart basic source discovery.
-
-Remaining question:
-
-> Does its differentiated Italian VC/opportunity value justify activation despite thin descriptions and repetition?
+The candidate was revisited during the final Milan/Bocconi gap audit.
 
 ---
 
 # Phase 4E — First Gap-Driven Source Audit Batch
-
-A Career Agent research pass identified a controlled candidate set based on information-function gaps rather than publisher prestige.
 
 Audit batch:
 
@@ -856,40 +793,19 @@ Ars Technica
 Google DeepMind
 ```
 
-This batch is now complete.
+This batch is complete.
 
 ---
 
 ## Nasdaq
 
-### Expected Role
+Strategically valuable for Financial Markets.
 
-- Financial Markets;
-- capital markets;
-- IPOs;
-- market structure;
-- selected corporate finance.
-
-### Outcome
-
-Strategically valuable.
-
-However, current Nasdaq legal terms conflict with:
-
-```text
-automated retrieval
-→ JSONL persistence
-→ Markdown persistence
-→ permanent public Git history
-```
-
-Broad Markets/investing feeds would also introduce unwanted retail/prediction noise.
+Current persistence/legal conditions do not fit permanent public Git archival use.
 
 ### Decision
 
 > **Standby — access/persistence conflict.**
-
-No repository changes.
 
 ---
 
@@ -908,15 +824,6 @@ Technical sample:
 15 normalized
 15 timestamps
 15 descriptions
-```
-
-Descriptions are often thin/title-like but evidence value is high.
-
-Without source default:
-
-```text
-14/15
-→ unclassified
 ```
 
 Added:
@@ -940,27 +847,6 @@ Historical regression:
 0 unintended matches
 ```
 
-Targeted tests:
-
-```text
-passed
-```
-
-Full suite:
-
-```text
-passed
-```
-
-Real production-equivalent run:
-
-```text
-9 active
-9 successful
-0 invalid
-status: success
-```
-
 ### Decision
 
 > **Active.**
@@ -971,14 +857,6 @@ status: success
 
 Technically valid but heterogeneous.
 
-Sample included:
-
-- stress tests;
-- capital framework;
-- stablecoins;
-- narrow regulatory announcements;
-- administrative/enforcement material.
-
 ### Decision
 
 > **Standby.**
@@ -988,18 +866,6 @@ Sample included:
 ## MIMIT News
 
 Official News RSS was technically strong and strategically differentiated.
-
-Sample included:
-
-- R&D investment;
-- company crisis tables;
-- Investimenti sostenibili;
-- strategic industrial sites;
-- cloud/cyber incentives;
-- inflation/fuel monitoring;
-- Ex Ilva;
-- Ducati investment;
-- data centres.
 
 Added:
 
@@ -1032,12 +898,6 @@ Economics / Macroeconomics
 - inflazione
 ```
 
-Historical regression:
-
-```text
-0 unintended matches
-```
-
 MIMIT also exposed HTML descriptions.
 
 The fix was general:
@@ -1047,16 +907,6 @@ generic HTML-to-text normalization
 ```
 
 not a MIMIT-specific branch.
-
-Real production-equivalent run:
-
-```text
-10 active
-10 successful
-0 invalid
-0 warnings
-status: success
-```
 
 ### Decision
 
@@ -1076,8 +926,6 @@ Technically valid but more administrative, sparse and duplicative.
 
 ## Lavoce.info
 
-Three streams were evaluated.
-
 ### General Feed
 
 Technically strong but too broad.
@@ -1086,34 +934,17 @@ Technically strong but too broad.
 
 > **Rejected for production.**
 
----
-
 ### Banche e Finanza
 
-High quality but sparse and partly overlaps with stronger monetary/financial primary evidence.
+High quality but sparse and partly overlapping.
 
 ### Decision
 
 > **Standby.**
 
----
-
 ### Imprese
 
 Best differentiated production candidate.
-
-Sample included:
-
-- M&A and golden power;
-- Italian technology industry;
-- agentic AI;
-- Stellantis industrial plan;
-- cybersecurity;
-- patents;
-- greenwashing;
-- corporate governance/control;
-- capital markets;
-- public guarantees.
 
 Added source default:
 
@@ -1122,7 +953,7 @@ Lavoce.info Imprese
 → Italy
 ```
 
-Adopted minimal bilingual keyword set:
+Adopted:
 
 ```text
 Companies / Corporate Strategy
@@ -1140,17 +971,6 @@ Historical regression:
 
 ```text
 0 unintended matches
-for all adopted keywords
-```
-
-Real production-equivalent run:
-
-```text
-11 active
-11 successful
-0 invalid
-0 warnings
-status: success
 ```
 
 ### Decision
@@ -1161,68 +981,21 @@ status: success
 
 ## Bruegel
 
-Strategically excellent for independent European interpretation.
-
 ### General RSS
 
-Technically clean but dominated by:
-
-- sessions;
-- conference components;
-- lunch;
-- coffee breaks.
+Technically clean but dominated by sessions/conference components.
 
 ### Decision
 
 > **Rejected — wrong information function.**
 
----
+### Analysis / Publications
 
-### Analysis Feed
-
-HTTP succeeds.
-
-Current collector fails because of malformed:
-
-```text
-&nbsp;
-```
-
-Direct parser recovery showed:
-
-```text
-bozo/error mode
-```
-
-and descriptions up to:
-
-```text
-61,500 characters
-```
-
-with substantial/full-content material.
+Malformed feed entities plus very large/full-content descriptions.
 
 ### Decision
 
-> **Standby — malformed/full-content feed incompatible with current architecture.**
-
----
-
-### Publications Feed
-
-Same malformed-entity problem.
-
-One tested description exceeded:
-
-```text
-93,000 characters
-```
-
-Other items placed multi-thousand-character content in structured content fields.
-
-### Decision
-
-> **Standby — malformed/full-content feed incompatible with current architecture.**
+> **Standby — malformed/full-content feeds incompatible with current architecture.**
 
 No Bruegel-specific parser or persistence path justified.
 
@@ -1236,44 +1009,26 @@ Strategically strong for:
 - Milan/Lombardy industry;
 - local innovation;
 - manufacturing AI;
-- professional ecosystem;
 - exports;
 - infrastructure.
 
-Official RSS discovered for:
-
-```text
-News
-Comunicati stampa
-```
-
-No RSS found for:
-
-```text
-Centro Studi
-```
-
-### News Test
+Tested News:
 
 ```text
 15 collected
 15 normalized
 0/15 timestamps
 14/15 descriptions
-average description ≈ 109 chars
 ```
 
-### Comunicati Stampa Test
+Tested Comunicati Stampa:
 
 ```text
 15 collected
 15 normalized
 0/15 timestamps
 14/15 descriptions
-average description ≈ 89 chars
 ```
-
-Descriptions contain substantive publisher-authored text.
 
 ### Decision
 
@@ -1288,40 +1043,23 @@ Centro Studi
 → Manual/research layer
 ```
 
-Reason:
-
-```text
-missing timestamps
-+
-persistence incompatibility
-```
-
 Do not:
 
 - substitute retrieval time;
 - scrape dates from article pages;
-- discard descriptions only for Assolombarda.
+- introduce source-specific persistence rules.
 
 ---
 
 ## Ars Technica
 
-Strategically strong for:
+Strategically strong for independent technology/AI reporting.
 
-- independent AI reporting;
-- systems/software;
-- cybersecurity;
-- infrastructure.
-
-Official RSS exists.
-
-However, current Condé Nast/Ars terms do not provide a sufficiently clean basis for permanent public RSS-content persistence.
+Current persistence terms do not provide a sufficiently clean basis for permanent public feed-derived storage.
 
 ### Decision
 
 > **Standby — access/persistence conflict.**
-
-Do not create a source-specific title-only exception.
 
 ---
 
@@ -1333,20 +1071,14 @@ Official RSS:
 https://deepmind.google/blog/rss.xml
 ```
 
-Controlled technical test:
+Technical sample:
 
 ```text
 100 received
 100 normalized
 100 timestamps
 79 descriptions
-
-average description ≈ 119 chars
-max description = 354 chars
-0 > 500 chars
 ```
-
-This passed the metadata/persistence gate.
 
 Added source default:
 
@@ -1363,51 +1095,578 @@ AI only                 → 97/100
 multi-domain            → 3/100
 ```
 
-The three secondary classifications were sensible.
-
 No new keywords were required.
-
-Tests:
-
-```text
-passed
-```
-
-Real production-equivalent run — 18 August 2026:
-
-```text
-12 active sources
-12 successful
-0 failed
-0 invalid
-0 warnings
-
-1432 valid
-44 window-eligible
-42 unique
-37 unclassified
-5 displayed
-
-status: success
-```
-
-DeepMind collection:
-
-```text
-100
-```
-
-DeepMind current-window records:
-
-```text
-0
-```
-
-expected because the newest feed item was outside the monitored window.
 
 ### Decision
 
 > **Google DeepMind News active.**
+
+---
+
+# Phase 4F — Final Gap-Driven Audit and Phase 4 Closure
+
+## Objective
+
+Test whether the remaining highest-value information gaps could be improved through one or more clean public structured sources before deciding whether richer report context had become the higher-value limitation.
+
+The final controlled sequence focused on:
+
+```text
+ISPI
+DG Competition
+ESMA
+Milan/Bocconi complementary sources
+```
+
+The result was one additional source activation and several deliberate standby decisions.
+
+This batch provided the evidence required to close Phase 4.
+
+---
+
+# ISPI Audit
+
+## Target Information Functions
+
+ISPI was evaluated for two distinct roles:
+
+```text
+Geoeconomics
+→ economic security
+→ trade
+→ industrial policy
+→ strategic dependencies
+→ technology competition
+→ business implications of geopolitical developments
+
+Business Events
+→ Milan professional events
+→ business/geoeconomic events
+→ executive/networking opportunities
+```
+
+---
+
+## ISPI Geoeconomics
+
+Official RSS:
+
+```text
+https://www.ispionline.it/it/ricerca/geoeconomia/feed
+```
+
+Real collector probe:
+
+```text
+status: success
+items received: 10
+```
+
+Normalization:
+
+```text
+10 normalized
+0 errors
+```
+
+Initial classification with no source default:
+
+```text
+3 classified
+7 unclassified
+```
+
+The useful subset was recovered through existing AI/Technology evidence.
+
+Generic geopolitical material often remained unclassified.
+
+No new broad geoeconomic keywords were justified.
+
+Historical candidate-keyword searches found insufficient evidence to safely add terms such as:
+
+```text
+economic security
+industrial policy
+supply chain
+semiconductors
+foreign exchange
+```
+
+Ranking:
+
+```text
+Tier 3
+no source-specific boost
+no source default
+```
+
+No same-domain historical items were found within the tested ±3-day comparison window for the classified sample.
+
+Cadence was episodic/bursty rather than daily.
+
+### Decision
+
+> **Active.**
+
+Production configuration:
+
+```text
+ISPI Geoeconomics
+→ Tier 3
+→ no default domains
+→ Italian
+→ Global / Europe / Italy
+```
+
+No production Python changes.
+
+No `domains.yaml` changes.
+
+No new keywords.
+
+---
+
+## ISPI Business Events
+
+Narrow feed:
+
+```text
+https://www.ispionline.it/it/tipologia/eventi-per-le-imprese/feed
+```
+
+Collector result:
+
+```text
+success
+10 entries
+```
+
+The strategic information value was high.
+
+However, feed publication timestamps were not reliable proxies for:
+
+```text
+event date
+or
+actionability date
+```
+
+Some entries appeared after the event had occurred.
+
+### Decision
+
+> **Standby — event/actionability semantics.**
+
+Do not build event/deadline architecture solely for ISPI.
+
+---
+
+# DG Competition Audit
+
+## Target Information Function
+
+```text
+M&A
+antitrust
+competition
+Foreign Subsidies Regulation
+corporate strategy
+```
+
+Official broad RSS collected successfully:
+
+```text
+30 items
+30 normalized
+0 normalization errors
+```
+
+High-value examples included:
+
+- Paramount / Warner;
+- Saipem / Subsea7;
+- Baker Hughes / Chart Industries;
+- XXXLutz / Porta;
+- SAP competition commitments;
+- Amazon / Microsoft cloud/DMA developments;
+- cartel and antitrust investigations.
+
+However, the broad feed also contained substantial routine State-aid material.
+
+Current classifier:
+
+```text
+26 classified
+4 unclassified
+```
+
+Many routine State-aid records classified through:
+
+```text
+european commission
+→ Europe/EU
+```
+
+At Tier 1, routine records often scored:
+
+```text
+7
+```
+
+which was directly competitive with stronger existing Europe/EU items.
+
+Narrow feed candidates were tested for:
+
+```text
+Mergers
+Antitrust and Cartels
+Foreign Subsidies Regulation
+```
+
+All tested narrow RSS paths returned:
+
+```text
+404
+```
+
+### Decision
+
+> **Standby — product quality / feed breadth.**
+
+Do not:
+
+- remove `european commission` globally;
+- add a DG-specific ranking penalty;
+- add source-specific inclusion/exclusion rules;
+- build a custom Mergers/Antitrust scraper.
+
+---
+
+# ESMA Audit
+
+## Target Information Function
+
+```text
+market structure
+trading
+settlement
+funds
+market data
+financial supervision
+securities-market infrastructure
+```
+
+Official RSS:
+
+```text
+https://www.esma.europa.eu/rss.xml
+```
+
+Collector result:
+
+```text
+success
+10 items
+```
+
+Raw feed issue:
+
+```text
+published: None
+updated: None
+```
+
+Publication date existed only inside HTML description payloads.
+
+Descriptions were large:
+
+```text
+approximately 2,657–6,047 raw characters
+```
+
+Normalized records remained:
+
+```text
+approximately 997–2,402 characters
+```
+
+The current normalizer accepted the records structurally but left:
+
+```text
+published_at = None
+```
+
+so the current 24-hour filter would exclude them.
+
+A non-production simulation extracted embedded HTML dates to assess information quality.
+
+Result:
+
+```text
+10 items
+5 classified
+5 unclassified
+```
+
+Important Financial Markets items such as:
+
+- commodity derivatives reporting;
+- T+1 settlement;
+- ESAP data collection;
+
+remained unclassified.
+
+Long descriptions also caused incidental multi-domain matches.
+
+Example:
+
+```text
+bilateral margin requirements
+→ Global Politics + Europe/EU
+```
+
+through incidental occurrences of:
+
+```text
+parliament
+European Union
+European Commission
+European Parliament
+```
+
+### Decision
+
+> **Standby — architecture.**
+
+Do not add:
+
+- source-specific timestamp extraction;
+- source-specific description trimming;
+- ESMA-specific classification rules.
+
+A generic improvement may be reconsidered only if several high-value sources independently justify it.
+
+---
+
+# Phase 4G — Final Milan/Bocconi Gap Reassessment
+
+## Objective
+
+Determine whether Milan/Bocconi still lacked enough public-source research to block MVP maturity.
+
+The answer was:
+
+> **No.**
+
+The domain remains incomplete, but the highest-value missing roles now have documented public-source/current-architecture limits.
+
+---
+
+## Tech Europe Foundation
+
+Remains the active automated Milan/Bocconi sensor.
+
+Current role:
+
+```text
+startup ecosystem
+entrepreneurship
+deep tech
+university-linked innovation
+programmes/founder activity
+```
+
+### Decision
+
+> **Active.**
+
+---
+
+## Bocconi Career Services — Public Layer Reassessment
+
+Public pages expose strategically valuable information such as:
+
+- Investment Banking Days;
+- Bocconi&Jobs;
+- Banking / Financial Services / Fintech Recruiting Dates;
+- sector-specific employer events;
+- registration windows;
+- employer lists.
+
+However:
+
+- the most actionable layer remains partly inside `yoU@B` / JobGate;
+- no clean narrow public RSS/Atom/API was established;
+- event/application semantics do not naturally map to article publication time.
+
+### Decision
+
+> **High-value manual/private complementary layer; standby for automation.**
+
+Do not automate authenticated access.
+
+Do not build a broad Career Services scraper.
+
+---
+
+## Italian Tech Alliance — Deeper Probe
+
+Official RSS remained technically clean.
+
+Live 20-item sample showed:
+
+- complete timestamps;
+- stable links;
+- mostly extremely thin descriptions.
+
+Examples:
+
+```text
+Articolo su Corriere della Sera
+Articolo sul Sole24Ore
+Articolo su Repubblica
+```
+
+The feed contained repeated coverage of the same underlying Italian VC developments.
+
+A meaningful exception was:
+
+```text
+Venture Academy
+→ registrations open until 18 September 2026
+```
+
+which demonstrated occasional high-value opportunity/programme content.
+
+### Decision
+
+> **Deferred production-readiness candidate.**
+
+Do not activate merely for source diversification.
+
+Do not give Milan/Bocconi source default.
+
+---
+
+## Fintech District
+
+Strategic fit:
+
+```text
+Milan fintech
+finance ecosystem
+corporate innovation
+professional ecosystem
+```
+
+Structured endpoint probe:
+
+```text
+WordPress API routes → 404
+RSS/feed routes      → 404
+sitemap.xml          → 200
+```
+
+The site is a Next.js application.
+
+The sitemap is machine-readable but insufficient as a dated 24-hour article feed.
+
+### Decision
+
+> **Standby — structured-access limitation.**
+
+Do not reverse-engineer hidden/internal Next.js APIs.
+
+---
+
+## Camera di Commercio Milano Monza Brianza Lodi
+
+Strategic fit:
+
+```text
+local companies
+business demography
+Milan economic ecosystem
+business initiatives
+```
+
+Endpoint probes for:
+
+```text
+rss
+rss.xml
+feed
+feed.xml
+press-release feed variants
+sitemap.xml
+robots.txt
+```
+
+all returned the same:
+
+```text
+Incapsula / Imperva HTML interstitial
+```
+
+rather than usable structured content.
+
+### Decision
+
+> **Standby — access/architecture.**
+
+Do not bypass or work around the access-control layer.
+
+---
+
+# Phase 4 Completion Assessment
+
+The Phase 4 stopping condition is now met.
+
+## Why
+
+The system now has:
+
+```text
+13 active sources
+10 implemented domains
+```
+
+and:
+
+- every active source has a deliberate role;
+- Italy has a viable first production implementation;
+- AI primary-source diversity is implemented;
+- Financial Markets has dedicated monetary/rates evidence;
+- Companies/Corporate Strategy is materially improved;
+- Europe has strong primary evidence and now some independent geoeconomic interpretation;
+- Milan/Bocconi has more than nominal automated coverage;
+- the strongest obvious Milan/Bocconi complementary roles have been investigated;
+- several strategically excellent sources were deliberately rejected or deferred because of:
+  - feed breadth/noise;
+  - persistence constraints;
+  - missing timestamps;
+  - event/actionability semantics;
+  - missing structured endpoints;
+  - access controls;
+  - disproportionate source-specific complexity.
+
+The remaining source gaps are real.
+
+They are no longer evidence that Phase 4 source research is incomplete.
+
+They are accepted MVP maturity limitations.
+
+## Phase 4 Completion Decision
+
+> **Phase 4 complete for the current MVP boundary.**
+
+Future source work should reopen only when:
+
+1. repeated report use demonstrates a costly information gap;
+2. a previously blocked high-value source exposes a materially cleaner endpoint;
+3. licensing/persistence conditions improve;
+4. a new information need becomes validated;
+5. source concentration demonstrably harms report quality.
 
 ---
 
@@ -1426,14 +1685,15 @@ Current active production sources:
 9. Federal Reserve Board Monetary Policy;
 10. MIMIT News;
 11. Lavoce.info Imprese;
-12. Google DeepMind News.
+12. Google DeepMind News;
+13. ISPI Geoeconomics.
 
 Current working position:
 
 | Source | Current Position |
 |---|---|
 | BBC News World | Retain |
-| BBC News Business | Retain temporarily; reassess after stronger global company/markets coverage |
+| BBC News Business | Retain; broad business layer |
 | European Central Bank | Core |
 | European Commission Highlighted News | Core/selective institutional evidence |
 | Istat Press Releases | Core |
@@ -1444,12 +1704,13 @@ Current working position:
 | MIMIT News | Active Italy industrial/company-policy primary source |
 | Lavoce.info Imprese | Active independent Italian business-analysis source |
 | Google DeepMind News | Active second frontier-lab AI primary source |
+| ISPI Geoeconomics | Active specialist geoeconomic interpretation source |
 
 Current language balance:
 
 ```text
 English-language feeds → 10
-Italian-language feeds → 2
+Italian-language feeds → 3
 ```
 
 This is not a quota.
@@ -1473,6 +1734,10 @@ Implemented:
 
 All ten strategic macroareas now have production configuration.
 
+All ten are sufficient for the current MVP boundary.
+
+This does **not** mean they are equally mature or complete.
+
 ---
 
 # Current Domain Coverage Diagnosis
@@ -1484,13 +1749,14 @@ Current:
 ```text
 BBC World
 + European Commission spillover
++ selective ISPI Geoeconomics contribution
 ```
 
 Assessment:
 
-> Acceptable for now, but publisher-concentrated.
+> **MVP-sufficient, publisher-concentrated.**
 
-Not the highest current opportunity cost.
+Not a current development priority.
 
 ---
 
@@ -1505,17 +1771,16 @@ Istat
 European Commission
 BBC Business
 Lavoce.info spillover
+ISPI Geoeconomics spillover
 ```
 
 Assessment:
 
-> Strong primary evidence; independent interpretation remains thinner.
+> **Strong primary evidence and sufficient MVP maturity.**
 
-The earlier US monetary-policy gap is materially closed.
+Independent interpretation remains thinner than institutional evidence.
 
-Remaining useful role:
-
-- independent European/global economic interpretation.
+ISPI partially improves the geoeconomic-analysis role.
 
 ---
 
@@ -1532,22 +1797,21 @@ Lavoce.info Imprese
 
 Assessment:
 
-> **Materially improved, still globally incomplete.**
-
-MIMIT and Lavoce solve meaningful Italy/company roles.
+> **MVP-sufficient baseline, globally incomplete.**
 
 Remaining gap:
 
 ```text
-global corporate strategy
+international corporate strategy
 M&A
 capital allocation
 corporate financing
-restructuring
-major international company developments
+major company developments
 ```
 
-Do not attempt to reconstruct FT/Reuters with weak general-news sources.
+DG Competition validated the information function but failed the current product-quality threshold.
+
+Do not fill the gap with inferior broad feeds solely for completeness.
 
 ---
 
@@ -1564,9 +1828,7 @@ BBC Business spillover
 
 Assessment:
 
-> **Partially solved.**
-
-Dedicated monetary/rates evidence now exists.
+> **MVP-sufficient baseline, broader markets incomplete.**
 
 Remaining gap:
 
@@ -1575,11 +1837,11 @@ capital markets
 credit
 corporate financing
 market structure
-IPOs
-broader company/market interaction
+settlement
+broader securities-market supervision
 ```
 
-This is no longer a zero-source domain.
+ESMA validated the information value but failed current architecture compatibility.
 
 ---
 
@@ -1591,18 +1853,12 @@ Current:
 OpenAI News
 Google DeepMind News
 Tech.eu/BBC spillover
+ISPI selective spillover
 ```
 
 Assessment:
 
-> **Primary-source diversification achieved.**
-
-Current structure:
-
-```text
-OpenAI
-+ Google DeepMind
-```
+> **Primary-source diversity achieved and MVP-sufficient.**
 
 Remaining role:
 
@@ -1610,7 +1866,7 @@ Remaining role:
 independent reporting / scrutiny
 ```
 
-Do not add additional first-party labs merely to increase publisher count.
+Do not add more first-party labs merely to increase source count.
 
 ---
 
@@ -1623,13 +1879,14 @@ Tech.eu
 OpenAI spillover
 DeepMind spillover
 BBC spillover
+ISPI spillover
 ```
 
 Assessment:
 
-> Moderate.
+> **Moderate and MVP-sufficient.**
 
-Independent systems/software reporting remains desirable if a clean source exists.
+Independent systems/software reporting remains desirable but non-blocking.
 
 ---
 
@@ -1639,16 +1896,16 @@ Current:
 
 ```text
 Tech.eu
-Tech Europe Foundation selective ecosystem activity
+Tech Europe Foundation
 ```
 
 Assessment:
 
-> Still dependent on a small number of specialist roles.
+> **MVP-sufficient, still concentrated.**
 
-Italian Tech Alliance remains the strongest partly-audited complement.
+Italian Tech Alliance remains a deferred production-readiness candidate.
 
-Do not add several funding-round feeds.
+Do not add additional funding-round publishers without differentiated value.
 
 ---
 
@@ -1660,15 +1917,16 @@ Current:
 ECB
 European Commission
 Tech.eu selective coverage
+ISPI Geoeconomics
 ```
 
 Assessment:
 
-> Strong primary evidence; independent interpretation remains weak.
+> **Strong primary evidence; independent interpretation partially improved.**
 
-Bruegel failed current production compatibility.
+ISPI closes part of the previous analytical gap.
 
-A replacement role may be worth researching.
+Broader independent Europe interpretation remains incomplete but non-blocking.
 
 ---
 
@@ -1680,13 +1938,12 @@ Current:
 Istat
 MIMIT News
 Lavoce.info Imprese
+ISPI selective spillover
 ```
 
 Assessment:
 
-> **Viable first implementation achieved.**
-
-Italy is no longer a structural unimplemented gap.
+> **Viable first implementation achieved and MVP-sufficient.**
 
 Remaining maturity areas:
 
@@ -1708,24 +1965,57 @@ Tech Europe Foundation
 
 Assessment:
 
-> First production implementation complete; broader requirement remains incomplete.
+> **MVP-sufficient but deliberately incomplete.**
 
-Missing:
+TEF provides:
+
+- entrepreneurship;
+- startup ecosystem;
+- deep tech;
+- founder/programme activity;
+- university-linked innovation.
+
+Still incomplete:
 
 - established firms;
 - industry;
 - finance/business ecosystem;
-- professional events;
 - recruiting;
-- selected deadlines.
+- employer events;
+- high-value opportunities/deadlines.
 
-Assolombarda validated the information need but failed current production compatibility.
+However, the latest controlled audits demonstrate a current public-source/architecture ceiling:
+
+```text
+Assolombarda
+→ strong value
+→ timestamps/persistence fail
+
+Bocconi Career Services
+→ strong value
+→ partly authenticated
+→ no narrow structured public feed
+
+Italian Tech Alliance
+→ technically clean
+→ thin/repetitive press-clipping
+
+Fintech District
+→ strong value
+→ no usable RSS/API
+
+Camera di Commercio Milano
+→ strong value
+→ automated access blocked by Incapsula
+```
+
+The domain should therefore no longer be treated as an unfinished source-research task.
 
 ---
 
 # Current Source Audit Decision Summary
 
-Detailed rationale is owned by:
+Detailed rationale belongs in:
 
 ```text
 03 Information Taxonomy and Source Policy.md
@@ -1756,12 +2046,17 @@ Detailed rationale is owned by:
 | Assolombarda Centro Studi | Manual/research layer |
 | Ars Technica | Standby — access/persistence conflict |
 | Google DeepMind News | Active |
-| B4i | Legacy / superseded by TEF |
+| B4i | Legacy / superseded by TEF for current general ecosystem role |
 | Tech Europe Foundation | Active |
-| Bocconi Career Services | Manual/private layer |
+| Bocconi Career Services | High-value manual/private layer; standby for automation |
 | Bocconi general Events/News | Not suitable for current architecture |
-| Italian Tech Alliance | Production-readiness candidate |
-| Fintech District | Standby candidate |
+| Italian Tech Alliance | Deferred production-readiness candidate |
+| Fintech District | Standby — structured-access limitation |
+| Camera di Commercio Milano Monza Brianza Lodi | Standby — access/architecture |
+| ISPI Geoeconomics | Active |
+| ISPI Business Events | Standby — event/actionability semantics |
+| DG Competition | Standby — product quality / feed breadth |
+| ESMA | Standby — architecture |
 
 ---
 
@@ -1900,62 +2195,149 @@ Status:
 
 ---
 
+## ISPI Geoeconomics
+
+Validated:
+
+- differentiated information function;
+- official public RSS;
+- real project collector;
+- 10-item live sample;
+- 10/10 normalization;
+- timestamps;
+- description/persistence boundary;
+- current classifier;
+- no-source-default decision;
+- candidate-keyword historical checks;
+- deterministic ranking;
+- Tier 3 choice;
+- cadence review;
+- same-domain historical overlap review;
+- source configuration;
+- configuration assertions;
+- targeted source-configuration test;
+- full feed-fixture test;
+- full test suite;
+- real 13-source production-equivalent pipeline;
+- run summary;
+- report inspection;
+- stale-record exclusion.
+
+Full automated suite:
+
+```text
+118 passed
+```
+
+Real 18 August 2026 production-equivalent run:
+
+```text
+13 active sources
+13 successful
+0 empty
+0 failed
+0 invalid
+0 warnings
+
+1442 valid
+45 inside collection window
+43 unique
+37 unclassified
+6 displayed
+
+status: success
+```
+
+ISPI collection:
+
+```text
+10
+```
+
+Current-window ISPI records:
+
+```text
+0
+```
+
+expected because the feed's newest items were outside the monitored 24-hour window.
+
+Status:
+
+> **Implementation validated; documentation/commit checkpoint in progress.**
+
+---
+
 # Active Product-Quality Findings
 
-## 1. Source Count Is No Longer the Main Problem
+## 1. Further Source Expansion Is No Longer the Main MVP Bottleneck
 
 The system now has:
 
 ```text
-12 active sources
+13 active sources
 10 implemented domains
 ```
 
-The main remaining issue is a smaller set of information-function gaps.
+The final source audits produced only one activation:
+
+```text
+ISPI Geoeconomics
+```
+
+while several strategically strong candidates failed because of product, endpoint or architecture constraints.
 
 ### Consequence
 
-Do not keep adding sources merely because more publishers are available.
+Do not continue a standing source-audit queue.
+
+Future source work must be evidence-triggered.
 
 ---
 
-## 2. Financial Markets Is Improved but Not Mature
+## 2. Financial Markets Is Sufficient for the MVP but Not Mature
 
-Federal Reserve Monetary Policy provides meaningful dedicated evidence.
-
-### Remaining Gap
+Current dedicated role:
 
 ```text
-capital markets
-credit
-corporate financing
+Federal Reserve Monetary Policy
+```
+
+ESMA demonstrated the value of:
+
+```text
 market structure
-broader market-moving company developments
+settlement
+trading
+financial supervision
 ```
+
+but failed the architecture gate.
 
 ### Consequence
 
-Future Markets research should seek complementary roles rather than another monetary-policy source.
+Keep the limitation explicit.
+
+Do not build ESMA-specific timestamp/description handling.
 
 ---
 
-## 3. Companies Is Improved but Still Globally Weak
+## 3. Companies Is Sufficient for the MVP but Still Globally Weak
 
-MIMIT and Lavoce materially improved Italy/company intelligence.
-
-### Remaining Gap
+Current useful layer:
 
 ```text
-international corporate strategy
-M&A
-capital allocation
-major company developments
-corporate financing
+BBC Business
+Tech.eu
+MIMIT
+Lavoce.info Imprese
 ```
+
+DG Competition demonstrated strong M&A/antitrust value but broad-feed ranking noise.
 
 ### Consequence
 
-A new candidate should solve the international role rather than duplicate Italian industrial coverage.
+Do not distort the classifier or add publisher-specific ranking rules merely to activate DG Competition.
 
 ---
 
@@ -1967,11 +2349,10 @@ Current architecture:
 Istat
 + MIMIT
 + Lavoce.info Imprese
++ selective ISPI spillover
 ```
 
 ### Consequence
-
-Do not continue treating Italy as an unimplemented macroarea.
 
 Further Italy sources must provide differentiated maturity value.
 
@@ -1988,85 +2369,130 @@ OpenAI
 
 ### Consequence
 
-The next AI source, if any, should add:
-
-```text
-independent scrutiny
-```
-
-rather than another first-party lab.
+Future AI sourcing, if reopened, should prioritise independent scrutiny.
 
 ---
 
-## 6. Europe Has a Real Independent-Analysis Gap
+## 6. Europe Independent Interpretation Is Partially Improved
 
-Bruegel validated the information need but failed production compatibility.
-
-### Consequence
-
-Search for a cleaner independent analytical source rather than creating a Bruegel-specific persistence path.
-
----
-
-## 7. Milan/Lombardy Established-Firm Intelligence Remains Open
-
-Assolombarda validated strong information value.
-
-Its feed architecture failed because of:
+Current structure:
 
 ```text
-0 usable timestamps
-+
-persistence concerns
+ECB
+European Commission
+ISPI Geoeconomics
 ```
 
 ### Consequence
 
-The gap remains valid.
-
-The specific source is not currently viable.
+Independent interpretation remains incomplete but is no longer a Phase 4 blocker.
 
 ---
 
-## 8. Startups/VC Still Has Concentration Risk
+## 7. Milan/Bocconi Public-Source Limits Are Now Demonstrated
 
-Tech.eu remains the main specialist.
+The domain is no longer merely waiting for more research.
 
-Italian Tech Alliance has passed basic audit but has thin descriptions and press-clipping repetition.
+High-value complementary roles were tested across:
+
+```text
+Assolombarda
+Bocconi Career Services
+Italian Tech Alliance
+Fintech District
+Camera di Commercio Milano
+```
 
 ### Consequence
 
-ITA remains a production-readiness question, not an automatic next implementation.
+Milan/Bocconi is:
+
+> **MVP-sufficient but deliberately incomplete.**
+
+Do not introduce authenticated scraping, access-control workarounds or a new event model merely to increase nominal coverage.
 
 ---
 
-## 9. Public RSS Does Not Mean Safe Persistence
+## 8. High-Value Sources Can Still Be Wrong for the Current Architecture
+
+Examples:
+
+```text
+DG Competition
+→ excellent content
+→ broad/noisy feed
+
+ESMA
+→ excellent Financial Markets role
+→ incompatible timestamp/description shape
+
+ISPI Business Events
+→ excellent event content
+→ publication-time semantics wrong for actionability
+```
+
+### Consequence
+
+Strategic value is necessary but not sufficient for source activation.
+
+---
+
+## 9. Public Structured Access and Public Human Access Are Different
+
+Examples:
+
+```text
+Fintech District
+→ public site
+→ no suitable RSS/API
+
+Camera di Commercio Milano
+→ public site
+→ machine requests intercepted by Incapsula
+```
+
+### Consequence
+
+A source cannot be considered automation-compatible merely because a browser can read it.
+
+---
+
+## 10. Public RSS Does Not Mean Safe or Useful Persistence
 
 Bruegel demonstrated:
 
 ```text
 public feed
 +
-successful direct retrieval
+successful retrieval
 ≠
 safe metadata persistence
 ```
 
+ESMA demonstrated:
+
+```text
+public feed
++
+large page-like descriptions
+→ classification/ranking distortion
+```
+
 ### Consequence
 
-Always inspect field depth.
+Always inspect field depth and downstream behaviour.
 
 ---
 
-## 10. Missing Timestamps Remain a Hard Architecture Boundary
+## 11. Missing Timestamps Remain a Hard Architecture Boundary
 
-Assolombarda demonstrated:
+Assolombarda and ESMA reinforce:
 
 ```text
-technically successful feed
+collectable source
 +
-0 timestamps
-→ unusable for current 24-hour pipeline
+no suitable structured publication timestamp
+→ not eligible for current 24-hour architecture
 ```
 
 ### Consequence
@@ -2075,14 +2501,14 @@ Do not substitute retrieval time or scrape dates source-by-source.
 
 ---
 
-## 11. Classification Rate Is Still Not a Product KPI
+## 12. Classification Rate Is Still Not a Product KPI
 
-The 18 August run produced:
+Latest validated run:
 
 ```text
-42 processed
+43 processed
 37 unclassified
-5 displayed
+6 displayed
 ```
 
 This does not by itself prove a classifier defect.
@@ -2093,21 +2519,29 @@ Inspect missed records before changing taxonomy.
 
 ---
 
-## 12. Existing Description Formatting Artifacts Remain Separate
+## 13. Thin Report Context Is Now the Highest-ROI Product Limitation
 
-Some reports have shown strings such as:
+Current report descriptions are capped at:
 
 ```text
-andwhat
-AIplatform
-acrossEurope
+300 characters
 ```
 
-These have not yet been tied reproducibly to the MIMIT HTML-normalization fix.
+The system can often identify useful stories but still provides insufficient context to understand them without immediate click-through.
+
+This limitation affects:
+
+```text
+every source
+every domain
+every useful report
+```
+
+whereas another source would affect only a subset of days and domains.
 
 ### Consequence
 
-Do not modify normalization again without a reproducible persisted example and isolated cause.
+Phase 5 richer-context design becomes the active product-development priority.
 
 ---
 
@@ -2144,7 +2578,7 @@ This roadmap records only enough detail to control implementation sequencing.
 
 # Immediate Next Actions
 
-## 1. Complete This Documentation Checkpoint
+## 1. Complete the Phase 4 Documentation Closeout
 
 Update and replace:
 
@@ -2155,192 +2589,212 @@ Update and replace:
 04 Development Roadmap and Status.md
 ```
 
-`00 Project Brief.md` does not require a checkpoint update because:
+`00 Project Brief.md` does not require an update because:
 
 - project purpose is unchanged;
 - hard constraints are unchanged;
-- strategic direction is unchanged;
-- the detailed 12-source status belongs in 03/04.
+- strategic direction is unchanged.
 
 ---
 
-## 2. Inspect Documentation Diff
+## 2. Inspect the Full Git Diff
 
-After replacing the four documents:
+Expected implementation changes:
 
 ```text
-inspect only intended documentation changes
-→ verify no implementation files changed
-→ verify no stale 8-source / 9-domain references remain
-→ verify Italy is no longer described as pending
-→ verify DeepMind is no longer described as a future audit
-→ verify Nasdaq-to-DeepMind is no longer described as an active queue
+config/sources.yaml
+tests/test_feed_fixture.py
 ```
 
----
-
-## 3. Commit and Push Documentation Checkpoint
-
-The documentation update should become one stable checkpoint before new research begins.
-
----
-
-## 4. Refresh Project Source Files
-
-Upload or refresh the canonical versions used by the Development project.
-
-Confirm that the project sources match the pushed repository versions.
-
----
-
-## 5. Generate the Career Agent Research Prompt
-
-The prompt should ask the Career Agent to research **new source candidates** against the current remaining information-function gaps.
-
-The Career Agent should receive:
+Expected documentation changes:
 
 ```text
-current 12-source active universe
-current 10-domain universe
-completed audit decisions
-hard zero-cost / persistence / credential constraints
-remaining information-function gaps
-instruction not to re-propose closed candidates without new evidence
+docs/project/01 Product Requirements.md
+docs/project/02 System Architecture.md
+docs/project/03 Information Taxonomy and Source Policy.md
+docs/project/04 Development Roadmap and Status.md
 ```
 
-The requested research output should be:
+Unrelated file that must remain excluded:
 
 ```text
-one Markdown text box
-suitable to paste back into this Development project
+.obsidian/workspace.json
 ```
+
+Verify:
+
+- no generated same-day validation outputs remain modified;
+- source count is consistently 13 where current production state is described;
+- ISPI Geoeconomics is active;
+- DG Competition is standby;
+- ESMA is standby;
+- Milan/Bocconi is described as MVP-sufficient but incomplete;
+- Phase 4 is closed;
+- Phase 5 is the active design phase;
+- no stale Career Agent source-research queue remains active;
+- no document claims that all domains are complete.
 
 ---
 
-## 6. Run the Career Agent Research
+## 3. Run Final Validation
 
-The research should prioritise:
-
-```text
-Global Companies / Corporate Strategy
-Broader Financial Markets
-Independent AI / Technology reporting
-Independent Europe/EU interpretation
-Startups / VC diversification
-Milan / Lombardy established-company and professional ecosystem
-```
-
-It should not optimise for source count.
-
-It should rank candidates by expected differentiated value and practical compatibility.
-
----
-
-## 7. Create a New Development-Chat Handoff
-
-After the Career Agent research returns:
+Because the implementation has already passed:
 
 ```text
-updated canonical documents
+118 tests
 +
-completed audit-batch summary
-+
-new source-research output
-+
-current implementation baseline
+13-source production-equivalent run
 ```
 
-should be condensed into a new Development handoff.
+the closeout should rerun at least:
 
-The new chat should then audit candidates one at a time.
+```text
+pytest -q
+git diff --check
+```
+
+A second live pipeline run is unnecessary unless implementation files change again.
+
+---
+
+## 4. Stage Only Intended Files
+
+Stage:
+
+```text
+config/sources.yaml
+tests/test_feed_fixture.py
+docs/project/01 Product Requirements.md
+docs/project/02 System Architecture.md
+docs/project/03 Information Taxonomy and Source Policy.md
+docs/project/04 Development Roadmap and Status.md
+```
+
+Do not stage:
+
+```text
+.obsidian/workspace.json
+```
+
+---
+
+## 5. Commit and Push the Phase 4 Closeout
+
+The commit should capture:
+
+```text
+ISPI production integration
++
+Phase 4 source-audit closeout
++
+Phase 5 transition
+```
+
+Exact commands should be provided only after final diff inspection confirms the intended file set.
+
+---
+
+## 6. Refresh Canonical Project Sources
+
+After push:
+
+- upload/refresh the four canonical project documents;
+- ensure the Development project source files match the repository;
+- begin Phase 5 from those updated sources rather than from chat history.
+
+---
+
+## 7. Start Phase 5 Richer-Report Design
+
+Do not immediately edit:
+
+```text
+max_description_length
+```
+
+The design must first settle:
+
+- what “enough context” means;
+- target per-item context length;
+- acceptable total report length;
+- which current feed fields are available;
+- which descriptions are safe to persist;
+- how thin sources should behave;
+- whether richer structured fields exist;
+- fallback behaviour;
+- provenance;
+- copyright boundaries;
+- acceptance tests.
+
+Only then should implementation begin.
 
 ---
 
 # Next Highest-ROI Development Step
 
-After this documentation checkpoint:
+After the Phase 4 closeout commit:
 
-> **Commission the fresh Career Agent source-research pass.**
+> **Design the smallest lawful, deterministic and zero-cost richer-report context mechanism that materially improves understanding without requiring immediate click-through.**
 
-This is higher ROI than immediately auditing another source from the old candidate list because:
+This is now higher ROI than another speculative source audit because:
 
-- the previous queue is complete;
-- several original gaps have changed materially;
-- Italy is now implemented;
-- Financial Markets now has a dedicated monetary-policy source;
-- AI primary diversity is now achieved;
-- several attractive candidates proved incompatible;
-- the next source universe should therefore be re-derived from the current state.
+- the source universe is operational across all ten domains;
+- several important information gaps have been investigated;
+- multiple attractive sources failed for structural reasons rather than lack of research;
+- Milan/Bocconi now has both meaningful automated coverage and a documented public-source ceiling;
+- another source would improve a subset of the system;
+- richer context improves the daily value of every useful selected story.
 
-The Career Agent should answer:
+The active question is:
 
-> **Which new sources now offer the highest expected marginal value against the remaining information-function gaps?**
-
-Development should then independently validate every recommended candidate.
+> **How much additional lawful context is necessary for a report entry to communicate what happened, who is involved and why the development matters?**
 
 ---
 
-# Current Research Gaps for the Career Agent
+# Residual Source Gaps — Not Active Work
 
-## 1. Global Companies / Corporate Strategy
+These remain visible but are not current audit tasks.
+
+## Global Companies / Corporate Strategy
 
 Current weakness:
 
 ```text
-MIMIT/Lavoce strong for Italy
-BBC Business broad
-Tech.eu selective
-global dedicated role missing
+strong global dedicated role still missing
 ```
 
-Desired information:
+DG Competition remains standby.
 
-- M&A;
-- restructuring;
-- capital allocation;
-- corporate financing;
-- strategic partnerships;
-- material earnings/guidance;
-- major international company developments.
+Reopen if:
 
-Avoid:
-
-- generic business-news duplication;
-- press-release firehoses;
-- inaccessible premium dependence.
+- a clean narrow official feed appears;
+- real report use demonstrates material missed company intelligence.
 
 ---
 
-## 2. Broader Financial Markets
-
-Current strength:
-
-```text
-Fed Monetary Policy
-ECB spillover
-```
+## Broader Financial Markets
 
 Current weakness:
 
 ```text
-capital markets
+market structure
 credit
 corporate financing
-market structure
-IPOs
-broader market/company interactions
+settlement
+broader capital-markets intelligence
 ```
 
-Avoid:
+ESMA remains standby.
 
-- trading tips;
-- daily index recaps;
-- stock picking;
-- price predictions.
+Reopen if:
+
+- a cleaner official endpoint appears;
+- a generic timestamp/metadata improvement becomes independently justified;
+- report use demonstrates material cost.
 
 ---
 
-## 3. Independent AI / Technology Reporting
+## Independent AI / Technology Reporting
 
 Current primary layer:
 
@@ -2349,73 +2803,52 @@ OpenAI
 Google DeepMind
 ```
 
-Desired information function:
+Remaining role:
 
 ```text
 external scrutiny
-industry reporting
-software/systems
+systems/software
 cybersecurity
 infrastructure
 frontier-lab evaluation
 ```
 
-Avoid:
-
-- another first-party AI lab unless it fills a clearly different role;
-- consumer gadget noise;
-- sources with unclear persistence rights.
+Not currently blocking MVP use.
 
 ---
 
-## 4. Independent Europe / EU Interpretation
+## Independent Europe / EU Interpretation
 
-Current primary layer:
+Current layer:
 
 ```text
 ECB
 European Commission
+ISPI Geoeconomics
 ```
 
-Desired role:
+Further independent analysis remains desirable.
 
-- competitiveness;
-- industrial policy;
-- macro;
-- capital markets;
-- trade;
-- strategic autonomy;
-- regulation.
-
-Bruegel proved the need but failed current feed/persistence compatibility.
+Not currently blocking MVP use.
 
 ---
 
-## 5. Startups / VC Diversification
+## Startups / VC Diversification
 
 Current:
 
 ```text
 Tech.eu
-TEF selective ecosystem coverage
+TEF
 ```
 
-Potential differentiated roles:
+Italian Tech Alliance remains the strongest known deferred complement.
 
-- private-capital statistics;
-- European VC market structure;
-- Italian VC ecosystem;
-- professional programmes;
-- fund formation;
-- exits.
-
-Italian Tech Alliance remains a known production-readiness candidate.
-
-Do not simply add more funding-round publishers.
+Do not activate without new evidence.
 
 ---
 
-## 6. Milan / Lombardy Business and Professional Ecosystem
+## Milan / Bocconi Professional and Business Ecosystem
 
 Current:
 
@@ -2424,84 +2857,19 @@ TEF
 → startups / innovation / entrepreneurship
 ```
 
-Desired complementary roles:
-
-- established firms;
-- industry;
-- finance/business events;
-- professional ecosystem;
-- local economic research;
-- high-value opportunities.
-
-Assolombarda proved the strategic value but failed production compatibility.
-
-The research should search for alternative structured public sources.
-
----
-
-# Parallel Existing Candidate — Italian Tech Alliance
-
-Italian Tech Alliance should remain outside the new basic research pass unless the Career Agent has materially new evidence.
-
-Current state:
+Still incomplete:
 
 ```text
-basic technical audit complete
-classification candidates tested
-historical regression passed
-thin descriptions
-press-clipping repetition unresolved
+recruiting
+finance/business ecosystem
+established firms
+industry
+selected opportunities/deadlines
 ```
 
-Next Development question:
+Current source research has reached a justified public-source/current-architecture limit.
 
-> **Does ITA provide enough unique Italian VC/opportunity signal to justify activation in the actual final source universe?**
-
-Do not build near-duplicate clustering merely to support it.
-
----
-
-# Phase 4 Completion Criteria
-
-Phase 4 is complete when:
-
-- every active source has a deliberate strategic and technical role;
-- weak/incompatible sources have explicit retain/replace/remove/standby decisions;
-- Financial Markets has sufficiently useful coverage beyond merely having a configured domain;
-- Companies/Corporate Strategy is materially stronger than incidental coverage;
-- Italy has a validated low-maintenance implementation;
-- Milan/Bocconi has useful public-source implementation or has reached a justified public-source limit;
-- AI is no longer structurally defined by OpenAI alone;
-- Startups/VC is sufficiently differentiated for actual use or an explicit residual limitation is accepted;
-- high-value independent Europe/technology gaps have explicit source decisions;
-- source/default/keyword changes have regression evidence;
-- full automated tests pass;
-- real collection remains reliable;
-- generated reports are manually inspected;
-- source concentration and accessibility are acceptable;
-- no credentials or restricted article bodies are introduced;
-- zero recurring monetary cost remains intact;
-- additional source expansion has lower expected value than richer-report design.
-
-Phase 4 does **not** require:
-
-- every researched source to be implemented;
-- every domain to have equal source counts;
-- a fixed minimum number of publishers;
-- perfect global corporate reporting;
-- a replacement for FT or Reuters;
-- activation of every strategic candidate;
-- all ten macroareas to have identical technical architecture.
-
-The correct stopping question remains:
-
-> **Would another source/domain change create more user value than improving the context of stories already being selected?**
-
-After the upcoming source-research/audit batch, this question should be answered explicitly.
-
-## Status
-
-> **Active — major structural gaps have been reduced; one fresh gap-driven source-research cycle remains justified before deciding whether to move to Phase 5.**
+Reopen only if actual use demonstrates meaningful missed-opportunity cost or a new structured endpoint appears.
 
 ---
 
@@ -2551,38 +2919,231 @@ report
 
 Phase 4 source/domain correction must be sufficiently mature.
 
-The current plan is to reconsider entry immediately after the next fresh source-research/audit batch.
+### Status
 
-## Design Questions
+> **Entry condition passed.**
+
+The current source/domain universe is sufficiently mature for the MVP boundary.
+
+This does not mean coverage is complete.
+
+It means further speculative source expansion now has lower expected value than solving the validated context problem.
+
+---
+
+# Phase 5 Design Questions
+
+The design should answer the following before production code changes.
+
+## 1. Minimum Useful Context
+
+What should the user understand without opening the article?
+
+At minimum, likely:
+
+```text
+what happened
+who is involved
+why it matters
+```
+
+This must be specified precisely enough to evaluate outputs.
+
+---
+
+## 2. Target Context Length
+
+Current cap:
+
+```text
+300 characters
+```
+
+Determine whether the right target is:
+
+- a larger character cap;
+- one or two sentences;
+- different treatment by metadata availability;
+- another bounded deterministic rule.
+
+Do not select a number arbitrarily.
+
+---
+
+## 3. Source Metadata Audit
+
+For all 13 active sources, determine:
+
+- description availability;
+- description length distribution;
+- whether descriptions are actual summaries or title-like text;
+- whether richer feed fields exist;
+- whether content fields are present;
+- whether those fields are safe to persist.
+
+This should be empirical.
+
+---
+
+## 4. Persistence and Copyright Boundary
 
 Determine:
 
-- what “enough context” means;
-- target context length;
-- acceptable total report length;
-- which public feed fields exist;
-- which sources provide richer summaries;
-- which official/free APIs provide lawful structured context;
-- source-specific fallback behaviour;
-- treatment of Premium Bocconi Exception sources;
-- copyright boundaries;
-- source attribution;
-- inaccessible-link behaviour;
-- objective acceptance tests.
+- how much feed-provided text can safely remain in public Git;
+- whether all active sources can use the same rule;
+- whether longer descriptions expose substantial source content;
+- whether the report should display more text than the stored normalized record currently preserves.
 
-## Preferred Solution Order
+Do not assume that technically available content is automatically suitable for persistence.
 
-1. richer RSS/Atom fields;
-2. public structured metadata;
-3. official free APIs;
-4. limited permitted deterministic public extraction if justified;
-5. more complex methods only if simpler mechanisms fail.
+---
 
-Do not assume AI summarisation is required.
+## 5. Thin-Metadata Fallback
+
+Some sources provide weak descriptions.
+
+The design must determine what happens when:
+
+```text
+description missing
+or
+description too short
+```
+
+Possible outcomes may include:
+
+- headline-only fallback;
+- source-specific structured metadata if available;
+- no additional context;
+- later rejection of a source if context quality proves too poor.
+
+Do not invent article summaries without a lawful input.
+
+---
+
+## 6. Report-Length Constraint
+
+Richer entries increase total report length.
+
+The design should determine whether existing limits remain suitable:
+
+```text
+max 5 per domain
+max 30 total
+```
+
+Potential trade-off:
+
+```text
+fewer items
++
+better context
+```
+
+may create more user value than:
+
+```text
+more items
++
+thin context
+```
+
+Do not optimise only for description length.
+
+---
+
+## 7. Provenance
+
+The user should be able to distinguish:
+
+- source-provided description;
+- deterministic transformation;
+- any future generated summary.
+
+Current preferred Phase 5 approach should avoid generated summaries if structured metadata is sufficient.
+
+---
+
+## 8. Premium / Inaccessible Source Behaviour
+
+The design should remain compatible with:
+
+- public links;
+- Premium Bocconi Exception;
+- sources where click-through may require legitimate institutional access.
+
+Richer context must not become an excuse to ingest premium article bodies.
+
+---
+
+## 9. Acceptance Tests
+
+Before implementation, define how richer report quality will be judged.
+
+Possible evaluation dimensions:
+
+- can the user understand the core development without clicking?
+- are important details preserved?
+- is text misleading or truncated awkwardly?
+- is the report too long?
+- is content repetitive?
+- is provenance clear?
+- are copyright boundaries preserved?
+- are thin sources handled predictably?
+- does ranking/classification remain unchanged unless explicitly intended?
+
+The design should include a representative multi-source sample rather than evaluate one convenient feed.
+
+---
+
+# Preferred Phase 5 Solution Order
+
+Evaluate in this order:
+
+1. richer use of existing RSS/Atom metadata;
+2. other public structured metadata already exposed by active sources;
+3. official free APIs where directly relevant;
+4. narrowly permitted deterministic public extraction if independently justified;
+5. more complex mechanisms only if simpler methods fail.
+
+Do not assume:
+
+```text
+LLM summary
+```
+
+is required.
+
+Do not introduce:
+
+- recurring API cost;
+- production ChatGPT dependency;
+- RAG;
+- embeddings;
+- agentic summarisation.
+
+---
+
+# Phase 5 Definition of Done
+
+Phase 5 design is complete when:
+
+- the context requirement is explicit;
+- the source metadata baseline is measured;
+- copyright/persistence boundaries are defined;
+- at least one simple deterministic candidate solution is specified;
+- fallback behaviour is specified;
+- report-length implications are understood;
+- provenance is specified;
+- acceptance tests are defined;
+- implementation files affected are known;
+- unnecessary architecture has been rejected.
+
+Only then should Phase 6 begin.
 
 ## Status
 
-**Not started — validated requirement, intentionally deferred behind the current Phase 4 closeout decision**
+> **Active — design not yet complete**
 
 ---
 
@@ -2664,7 +3225,13 @@ Do not currently prioritise:
 - Bruegel useful feeds under the current full-content/malformed architecture;
 - Assolombarda under current timestamp/persistence constraints;
 - Ars Technica under current persistence terms;
-- generic Bocconi event feeds;
+- DG Competition under the current broad-feed/noise structure;
+- ESMA under the current timestamp/description structure;
+- ISPI Business Events without event/actionability semantics;
+- Fintech District without a clean structured public endpoint;
+- Camera di Commercio Milano under current machine-access conditions;
+- broad Bocconi crawlers;
+- authenticated Bocconi Career Services automation;
 - generic Politecnico event feeds;
 - multiple additional central banks;
 - multiple additional first-party AI labs;
@@ -2675,37 +3242,44 @@ Reconsider only if:
 
 - source terms change;
 - an official structured endpoint changes materially;
-- a new general architecture is independently justified;
-- the upcoming research identifies genuinely new evidence.
+- actual report use demonstrates a costly gap;
+- a general architecture is independently justified by multiple sources.
 
 ---
 
-# Stop Condition Before Phase 5
+# Phase 4 Stop Condition — Final Result
 
-Do not begin richer-report implementation until the next source research/audit cycle answers:
+The Phase 4 exit questions were:
 
 1. Are there still one or more clearly high-value, low-complexity source additions?
 2. Do those additions solve important information-function gaps rather than publisher-count gaps?
-3. Are remaining gaps increasingly caused by source availability/licensing rather than lack of research?
+3. Are remaining gaps increasingly caused by source availability/licensing/architecture rather than lack of research?
 4. Is the current report now more limited by thin context than by missing sources?
 
-If the answer becomes:
+Final assessment:
 
 ```text
-few/no high-ROI source additions remain
-+
-report context is the higher-value limitation
+1. Few clearly high-ROI low-complexity additions remain.
+
+2. ISPI Geoeconomics was the final clean differentiated addition
+   from the latest audit cycle.
+
+3. Remaining high-value gaps increasingly reflect:
+   - feed breadth
+   - missing timestamps
+   - persistence constraints
+   - event semantics
+   - missing structured endpoints
+   - access controls
+   - source-specific complexity
+
+4. Thin report context now affects more daily product value
+   than another speculative source addition.
 ```
 
-then move to Phase 5.
+Therefore:
 
-The switch should not depend on:
-
-- hitting a specific source count;
-- hitting a specific domain count;
-- auditing every possible candidate;
-- eliminating every gap;
-- frustration with source research.
+> **Phase 4 exit condition passed.**
 
 ---
 
@@ -2716,8 +3290,8 @@ Phase 0  Complete
 Phase 1  Complete
 Phase 2  Complete
 Phase 3  Complete
-Phase 4  Active — approaching explicit exit decision
-Phase 5  Deferred
+Phase 4  Complete for current MVP boundary
+Phase 5  Active — richer-report design
 Phase 6  Deferred
 Phase 7  Optional
 ```
@@ -2733,82 +3307,155 @@ collect
 → store
 → report
 → inspect real usefulness
-→ identify information-function gap
-→ audit smallest useful source
-→ validate
-→ checkpoint
 ```
 
 Current production checkpoint:
 
 ```text
-12 active sources
+13 active sources
 10 active domains
 
 Sifted
 → replaced by Tech.eu
 
 Financial Markets
-→ dedicated monetary/rates evidence now active
+→ dedicated monetary/rates evidence active
 
 Milan/Bocconi
-→ first production implementation through TEF
+→ active through TEF
+→ MVP-sufficient but intentionally incomplete
 
 Italy
-→ implemented through Istat + MIMIT + Lavoce.info
+→ Istat + MIMIT + Lavoce.info
+→ viable first production implementation
 
 AI
 → OpenAI + Google DeepMind primary diversity achieved
 
-Federal Reserve Monetary Policy
+Europe interpretation
+→ partially strengthened by ISPI Geoeconomics
+
+ISPI Geoeconomics
 → active
 
-MIMIT News
-→ active
-
-Lavoce.info Imprese
-→ active
-
-Google DeepMind News
-→ active
-
-Nasdaq
+ISPI Business Events
 → standby
 
-Bruegel
-→ standby/rejected depending feed
-
-Assolombarda
+DG Competition
 → standby
 
-Ars Technica
+ESMA
 → standby
 
 Italian Tech Alliance
-→ production-readiness candidate
+→ deferred production-readiness candidate
+
+Fintech District
+→ standby
+
+Camera di Commercio Milano
+→ standby
 ```
 
 Current immediate priority:
 
-> **Finish the documentation checkpoint, then commission the fresh Career Agent source-research pass.**
+> **Finish the Phase 4 closeout commit and begin Phase 5 richer-report design.**
 
-Expected following sequence:
+Expected sequence:
 
 ```text
-documentation checkpoint
-→ commit/push
+finish documentation
+→ inspect full diff
+→ pytest -q
+→ git diff --check
+→ stage only intended files
+→ commit
+→ push
 → refresh canonical project sources
-→ Career Agent research prompt
-→ Career Agent source research
-→ Development handoff
-→ new chat
-→ controlled audit batch
-→ explicit Phase 4 vs Phase 5 decision
+→ begin richer-context design
 ```
 
 ---
 
 # Changelog
+
+## 2026-08-18 — Thirteen-Source / Phase-4 Closure and Phase-5 Entry
+
+- Updated active production sources from twelve to thirteen.
+- Added ISPI Geoeconomics as the thirteenth active source.
+- Kept ISPI Geoeconomics at Tier 3.
+- Added no source-default domain for ISPI.
+- Added no ISPI-specific keywords.
+- Added no ISPI-specific collector or parser.
+- Validated ISPI through:
+  - real collector;
+  - 10-item live sample;
+  - 10/10 normalization;
+  - classification review;
+  - candidate-keyword historical searches;
+  - ranking review;
+  - cadence review;
+  - historical overlap review;
+  - configuration tests;
+  - full automated suite;
+  - real 13-source production-equivalent run.
+- Recorded the current full-suite validation:
+  - `118 passed`.
+- Recorded the 18 August 2026 production-equivalent run:
+  - 13 active;
+  - 13 successful;
+  - 0 failed;
+  - 0 invalid;
+  - 0 warnings;
+  - 1442 valid;
+  - 45 inside window;
+  - 43 unique;
+  - 37 unclassified;
+  - 6 displayed;
+  - status success.
+- Confirmed that ISPI collected 10 records and that none entered the current report because all were outside the monitored publication window.
+- Audited ISPI Business Events.
+- Kept ISPI Business Events on standby because publication time is not a reliable event/actionability date.
+- Audited DG Competition.
+- Confirmed excellent M&A/antitrust/company-strategy value.
+- Confirmed 30/30 normalisation for the broad RSS.
+- Confirmed excessive routine State-aid classification/ranking under the current Europe evidence.
+- Tested narrow Mergers/Antitrust/FSR feed routes and found no usable RSS endpoints.
+- Kept DG Competition on standby rather than introducing source-specific filtering or ranking.
+- Audited ESMA.
+- Confirmed strong Financial Markets information value.
+- Confirmed RSS collection but missing standard publication timestamps.
+- Confirmed long description payloads and incidental keyword inflation.
+- Kept ESMA on standby rather than introducing source-specific timestamp/description logic.
+- Reassessed Milan/Bocconi MVP maturity.
+- Revisited Italian Tech Alliance with a live 20-item feed probe.
+- Confirmed technically clean timestamps but heavy thin press-clipping repetition.
+- Kept Italian Tech Alliance as a deferred production-readiness candidate.
+- Researched the public Bocconi Career Services layer.
+- Confirmed strong public recruiting/employer-event value but no clean narrow structured feed and a partly authenticated action layer.
+- Preserved authenticated Career Services as manual/private.
+- Audited Fintech District.
+- Confirmed strong Milan fintech ecosystem relevance.
+- Found no usable RSS/API.
+- Kept sitemap-only structure insufficient for current 24-hour ingestion.
+- Rejected Next.js internal API reverse engineering.
+- Audited Camera di Commercio Milano Monza Brianza Lodi.
+- Confirmed strong local-company/business ecosystem value.
+- Found Incapsula/Imperva interstitial responses across tested machine endpoints.
+- Rejected access-control bypass.
+- Reclassified Milan/Bocconi as MVP-sufficient but deliberately incomplete.
+- Recorded the current public-source/current-architecture ceiling for several missing professional/business roles.
+- Reclassified Companies/Corporate Strategy as MVP-sufficient baseline but globally incomplete.
+- Reclassified Financial Markets as MVP-sufficient baseline but broader-markets incomplete.
+- Preserved AI as primary-source diverse with independent scrutiny incomplete.
+- Preserved Startups/VC as MVP-sufficient but concentrated.
+- Recorded ISPI as a partial improvement to independent Europe/geoeconomic interpretation.
+- Closed the active Phase 4 source-expansion cycle.
+- Removed the standing future source-audit queue.
+- Made future source work evidence-triggered.
+- Activated Phase 5 richer-report product design.
+- Made richer report context the next highest-ROI product-development problem.
+- Preserved richer-context implementation as deferred until the design gate is passed.
 
 ## 2026-08-18 — Twelve-Source / Ten-Domain Phase 4 Checkpoint
 
@@ -2816,105 +3463,48 @@ documentation checkpoint
 - Updated implemented domains from nine to ten.
 - Recorded Italy as implemented rather than pending.
 - Added Federal Reserve Board Monetary Policy as an active Tier 1 source.
-- Recorded Economics/Macro source default for Fed Monetary Policy.
-- Added `FOMC`, `Federal Open Market Committee` and `discount rate` after controlled testing and historical regression.
 - Added MIMIT News as an active Tier 1 Italy source.
-- Added Italy as the tenth domain with source-defined classification and an empty keyword list.
-- Added MIMIT secondary classification terms:
-  - `tavoli di crisi`;
-  - `accordo di sviluppo`;
-  - `quadro industriale`;
-  - `rilevanza strategica`;
-  - `inflazione`.
-- Recorded the generic HTML-to-text normalisation improvement triggered by MIMIT.
+- Added Italy as the tenth domain.
 - Added Lavoce.info Imprese as an active Tier 2 Italy source.
-- Added:
-  - `fusione e acquisizione`;
-  - `piano industriale`;
-  - `IA`;
-  - `mercati dei capitali`.
-- Recorded zero unintended historical regressions for the retained Lavoce keywords.
 - Added Google DeepMind News as an active Tier 1 AI source.
-- Recorded 100/100 DeepMind AI classification through source default.
-- Recorded that no new DeepMind keywords were required.
-- Recorded the real 18 August 2026 twelve-source run:
-  - 12 active;
-  - 12 successful;
-  - 0 failed;
-  - 0 invalid;
-  - 0 warnings;
-  - status success.
-- Reframed Financial Markets from "no dedicated source" to "dedicated monetary/rates evidence exists; broader markets remain incomplete."
-- Reframed Companies/Corporate Strategy from severe incidental coverage to materially improved but globally incomplete.
-- Reframed Italy from structural gap to viable first implementation.
-- Reframed AI from OpenAI concentration to OpenAI + DeepMind primary diversity, with independent reporting still missing.
-- Closed Nasdaq as standby under current persistence terms.
-- Closed Federal Reserve Banking/Regulatory as standby.
-- Closed MIMIT Incentives as standby.
-- Closed Lavoce General as rejected for production.
-- Closed Lavoce Banche e finanza as standby.
-- Closed Bruegel General RSS as rejected because of event/session noise.
-- Closed Bruegel Analysis and Publications as standby because malformed feeds also expose excessive/full-content payloads.
-- Closed Assolombarda News and Comunicati stampa as standby because of missing timestamps and persistence concerns.
-- Kept Assolombarda Centro Studi in the manual/research layer.
-- Closed Ars Technica as standby under current persistence terms.
-- Retired the completed Nasdaq→DeepMind technical audit queue.
-- Replaced the old queue with a fresh Career Agent source-research requirement.
-- Set the remaining research gaps as:
-  - global Companies/Corporate Strategy;
-  - broader Financial Markets;
-  - independent AI/Technology reporting;
-  - independent Europe/EU interpretation;
-  - Startups/VC diversification;
-  - Milan/Lombardy business and professional ecosystem.
-- Preserved Italian Tech Alliance as a production-readiness candidate whose basic audit should not be repeated.
-- Added an explicit Phase 4 exit decision after the next source-research/audit cycle.
-- Recorded selective GitHub Copilot use as an optional development speed-up for narrow mechanical multi-file edits.
-- Preserved richer-report design as the next major product phase if marginal source expansion falls below the value of richer context.
+- Recorded the generic HTML-to-text normalisation improvement triggered by MIMIT.
+- Recorded zero unintended historical regressions for retained Lavoce keywords.
+- Recorded the real twelve-source production run.
+- Reframed Financial Markets from no dedicated source to dedicated monetary/rates evidence.
+- Reframed Companies/Corporate Strategy as materially improved but globally incomplete.
+- Reframed Italy as a viable first implementation.
+- Reframed AI as OpenAI + DeepMind primary diversity achieved.
+- Closed Nasdaq, Bruegel, Assolombarda and Ars Technica according to their audited constraints.
+- Retired the completed Nasdaq→DeepMind audit queue.
+- Set the remaining information-function gaps for the final gap-driven research cycle.
 
 ## 2026-08-17 — Phase 4 Source-Audit Consolidation and New Expansion Strategy
 
-- Reconciled the roadmap with the pushed eight-source / nine-domain production checkpoint.
+- Reconciled the roadmap with the eight-source / nine-domain production checkpoint.
 - Recorded Tech Europe Foundation as the first active Milan/Bocconi source.
-- Recorded Milan and Bocconi Ecosystem as an implemented source-defined domain with no keywords.
+- Recorded Milan and Bocconi Ecosystem as a source-defined domain with no keywords.
 - Recorded the successful real eight-source pipeline integration.
-- Recorded the Artificial Intelligence `AI` case-sensitivity correction following Italian false positives.
-- Recorded completed Financial Times audit and standby decision.
-- Recorded completed Il Sole 24 Ore audit and standby decision.
-- Recorded Bank of Italy RSS as standby.
-- Recorded Bank of Italy BDS as an approved future structured-data architecture.
-- Recorded completed Reuters audit and zero-cost production limitation.
+- Recorded the Artificial Intelligence `AI` case-sensitivity correction.
+- Recorded Financial Times, Il Sole 24 Ore, Bank of Italy and Reuters audit conclusions.
 - Recorded B4i as legacy/superseded by TEF.
 - Recorded Bocconi Career Services as a high-value manual/private layer.
-- Recorded broad Bocconi Events/News as unsuitable for current automation.
 - Recorded Italian Tech Alliance as a production-readiness candidate.
-- Incorporated the second Career Agent strategic source-expansion research.
 - Reframed source expansion around information-function gaps rather than publisher count.
-- Identified Financial Markets, Companies, Italy and independent AI as the highest-cost gaps.
-- Established the controlled Nasdaq→DeepMind audit queue.
-- Preserved richer-report design as deferred until Phase 4 source/domain breadth became sufficiently mature.
 
 ## 2026-08-17 — Phase 4A Tech.eu Replacement and Financial Markets Activation
 
-- Incorporated the first Career Agent strategic source/domain audit into the development sequence.
-- Formalised the narrow Premium Bocconi Exception while preserving the prohibition on authenticated automated ingestion.
-- Directly compared Tech.eu and Sifted through the real collector.
+- Incorporated the first Career Agent strategic source/domain audit.
+- Formalised the narrow Premium Bocconi Exception.
+- Compared Tech.eu and Sifted through the real collector.
 - Observed 20/20 Tech.eu descriptions versus 0/24 Sifted descriptions.
-- Approved Tech.eu as the replacement for Sifted.
-- Removed Sifted from the active source registry.
-- Added Tech.eu as Tier 2, Europe, with no source-default domain.
-- Tested Tech.eu with and without a Startups/VC source default.
-- Rejected the blanket Startups/VC default because Tech.eu is heterogeneous.
-- Added `acquired` to Companies and Corporate Strategy after a real M&A recall gap.
-- Added `early-stage fund` and `funding market` to Startups/VC after real Tech.eu evidence.
-- Removed generic `startup` because it promoted weak startup profiles too easily.
-- Added `tariffs` to Global Politics and Geopolitics after a relevant trade/geopolitics miss.
-- Activated Financial Markets as the eighth domain with a conservative keyword set.
+- Replaced Sifted with Tech.eu.
+- Added Tech.eu as Tier 2 with no source default.
+- Added evidence-backed keywords.
+- Removed generic `startup`.
+- Activated Financial Markets with a conservative keyword set.
 - Validated taxonomy changes against stored historical records.
 - Completed a real 17 August pipeline run.
-- Manually inspected the generated report.
 - Recorded that classification rate alone is not a product-quality KPI.
-- Preserved zero recurring cost, deterministic processing, credential safety and public-repository constraints.
 
 ## 2026-08-14 — Phase 3 Production Closeout and Phase 4 Entry
 
@@ -2923,10 +3513,8 @@ documentation checkpoint
 - Recorded automated repository persistence.
 - Recorded degraded and critical failure validation.
 - Recorded GitHub scheduler latency.
-- Recorded source accessibility and metadata richness as active product-quality concerns.
-- Recorded Bocconi reading access as separate from automated-ingestion permission.
 - Made source/domain correction the active milestone.
-- Deferred richer-report design until after source correction.
+- Deferred richer-report design until source correction.
 
 ## 2026-08-11 — Phase 2 Real-Source Validation
 
