@@ -204,8 +204,8 @@ More sophisticated techniques require a validated product limitation that simple
 
 The current production system provides:
 
-- eight active public RSS sources;
-- nine active topic domains;
+- twelve active public RSS sources;
+- ten active topic domains;
 - automated daily execution;
 - source-level failure isolation;
 - publication-window filtering;
@@ -227,31 +227,43 @@ Current active sources:
 5. Istat Press Releases;
 6. OpenAI News;
 7. Tech.eu;
-8. Tech Europe Foundation.
+8. Tech Europe Foundation;
+9. Federal Reserve Board Monetary Policy;
+10. MIMIT News;
+11. Lavoce.info Imprese;
+12. Google DeepMind News.
 
 Current active domains:
 
 1. Global Politics and Geopolitics;
 2. Economics and Macroeconomics;
-3. Companies and Corporate Strategy;
-4. Artificial Intelligence;
-5. Technology and Software;
-6. Startups and Venture Capital;
-7. Europe and the European Union;
-8. Financial Markets;
-9. Milan and Bocconi Ecosystem.
+3. Financial Markets;
+4. Companies and Corporate Strategy;
+5. Artificial Intelligence;
+6. Technology and Software;
+7. Startups and Venture Capital;
+8. Europe and the European Union;
+9. Italy;
+10. Milan and Bocconi Ecosystem.
 
-Strategically required but not yet implemented as a dedicated domain:
-
-10. Italy.
+All ten strategic macroareas now have an implemented production domain.
 
 The system is operational.
 
-The main remaining limitation is no longer basic automation.
+The main remaining limitation is no longer basic automation or missing domain implementation.
 
 It is:
 
-> **insufficient information breadth and uneven domain coverage.**
+> **uneven information depth and incomplete source-role coverage across several domains.**
+
+Current strongest residual gaps include:
+
+- global Companies and Corporate Strategy;
+- broader Financial Markets beyond monetary-policy evidence;
+- independent AI and technology reporting;
+- independent European economic-policy interpretation;
+- Startups/VC diversification;
+- Milan/Lombardy established-company and professional ecosystem coverage.
 
 ---
 
@@ -379,9 +391,13 @@ over:
 
 The target information universe contains ten strategic macroareas.
 
+All ten now have implemented domains.
+
 The product does not require equal source counts across all domains.
 
 It does require enough useful coverage that major macroareas are not effectively defined by one weak or incidental source.
+
+A domain being implemented does not mean that its source universe is mature.
 
 ---
 
@@ -439,23 +455,33 @@ Current meaningful sources include:
 
 ```text
 ECB
+Federal Reserve Board Monetary Policy
 Istat
 European Commission
 BBC Business
+Lavoce.info Imprese
 ```
+
+The system now has substantial primary monetary and macroeconomic evidence across:
+
+- euro area;
+- United States;
+- Italy;
+- European Union.
 
 ## Requirement Status
 
-> **Reasonably served, but geographically/institutionally concentrated.**
+> **Well served for primary evidence; independent interpretation remains less complete.**
 
-Important missing roles include:
+The previous US monetary-policy gap has been materially closed through the Federal Reserve Board Monetary Policy source.
 
-- US/global monetary-policy evidence;
-- independent European economic interpretation.
+The main remaining role is:
 
-The Federal Reserve is the highest-priority current candidate for the first role.
+- independent European/global economic interpretation that adds analytical value beyond primary institutions.
 
-Bruegel is a leading candidate for the second.
+Bruegel was investigated for this role but did not fit the current production architecture safely.
+
+The system should continue searching only if a cleaner differentiated source exists.
 
 ---
 
@@ -493,29 +519,48 @@ It should exclude or heavily deprioritise:
 
 The domain is implemented.
 
-However:
+Dedicated upstream evidence now exists through:
+
+```text
+Federal Reserve Board Monetary Policy
+```
+
+Additional selective financial-market interpretation is available through:
+
+```text
+Lavoce.info Imprese
+```
+
+Validated current coverage is strongest for:
+
+- monetary policy;
+- rates;
+- financial conditions;
+- central-bank decisions;
+- selected capital-market developments.
+
+## Requirement Status
+
+> **Partially satisfied — monetary/rates coverage is materially stronger, broader markets coverage remains incomplete.**
+
+The previous condition:
 
 ```text
 no dedicated production Financial Markets source exists
 ```
 
-## Requirement Status
+is no longer accurate.
 
-> **Major unsatisfied coverage requirement.**
+Remaining high-value gaps include:
 
-This is currently one of the highest-opportunity-cost product gaps.
+- capital markets;
+- corporate financing;
+- market structure;
+- broader credit-market developments;
+- material equity-market/company-market developments;
+- stronger causal market reporting.
 
-Current highest-priority audit candidates:
-
-1. Nasdaq;
-2. Federal Reserve Board.
-
-Later specialist candidates may include:
-
-- MEF Treasury;
-- ESMA;
-- BIS;
-- Euronext.
+The product should continue to prefer explanatory market intelligence over price-centric coverage.
 
 ---
 
@@ -539,29 +584,43 @@ The report should surface strategically meaningful developments involving:
 
 ## Current State
 
-Coverage is mainly incidental through:
+Current meaningful coverage now comes from:
 
 ```text
 BBC Business
 Tech.eu
+MIMIT News
+Lavoce.info Imprese
+```
+
+Current information roles:
+
+```text
+BBC Business
+→ broad international business reporting
+
+Tech.eu
+→ European technology/startup and selected company developments
+
+MIMIT News
+→ primary Italian industrial policy,
+  restructuring and strategic-investment evidence
+
+Lavoce.info Imprese
+→ independent Italian business/company interpretation
 ```
 
 ## Requirement Status
 
-> **Major unsatisfied coverage requirement.**
+> **Materially improved but still incomplete.**
 
-No current source provides a strong dedicated corporate-strategy layer.
+The domain is no longer served only incidentally by BBC Business and Tech.eu.
 
-Current strategic candidates include:
-
-- Nasdaq;
-- MIMIT;
-- Lavoce.info;
-- potentially targeted SEC filings later.
+However, a strong global dedicated corporate-strategy/reporting role remains missing.
 
 The product may retain an explicit residual gap in high-quality global corporate journalism if no legal, zero-cost substitute for FT/Reuters emerges.
 
-It should not fill that gap with inferior sources solely for completeness.
+It should not fill that gap with inferior or legally ambiguous sources solely for completeness.
 
 ---
 
@@ -584,36 +643,52 @@ The report should provide awareness of major:
 
 ## Current State
 
-Current coverage:
+Current first-party primary coverage:
 
 ```text
 OpenAI News
-+ incidental Tech.eu/BBC
+Google DeepMind News
 ```
+
+Additional incidental coverage comes from:
+
+```text
+Tech.eu
+BBC
+```
+
+OpenAI and DeepMind now provide meaningfully different frontier-lab primary evidence.
 
 ## Requirement Status
 
-> **Operational but excessively concentrated on one primary vendor.**
+> **Primary-source diversity achieved; independent scrutiny remains incomplete.**
 
-Desired information structure:
+The minimum diversity structure:
+
+```text
+one strong primary source
++
+one meaningfully different primary or independent source
+```
+
+is now satisfied through:
 
 ```text
 OpenAI
-→ primary source
-
-second frontier lab
-→ primary-source diversity
-
-independent reporting
-→ external analysis and scrutiny
++ Google DeepMind
 ```
 
-Current strongest candidates:
+The stronger target remains:
 
 ```text
-Google DeepMind
-Ars Technica
+OpenAI
++ Google DeepMind
++ independent reporting
 ```
+
+but this is a maturity objective, not a mandatory quota.
+
+Ars Technica was investigated for the independent-reporting role but did not pass the current persistence-policy gate.
 
 The system does not need every major AI lab.
 
@@ -642,6 +717,7 @@ Main coverage:
 
 ```text
 Tech.eu
+Google DeepMind spillover
 OpenAI spillover
 BBC spillover
 ```
@@ -650,9 +726,11 @@ BBC spillover
 
 > **Moderately served.**
 
-Independent technology reporting would improve the domain, but current opportunity cost is below Markets, Companies and Italy.
+Independent technology/systems reporting would improve the domain.
 
-Ars Technica is the leading current candidate.
+Ars Technica was strategically attractive but did not pass the current persistence-policy gate.
+
+The product should not add another generic technology publication unless it provides clearly differentiated information value and clean automation/persistence compatibility.
 
 ---
 
@@ -676,25 +754,34 @@ It should not become a funding-round ticker.
 
 ## Current State
 
-Current specialist source:
+Current specialist production source:
 
 ```text
 Tech.eu
+```
+
+Additional ecosystem contribution comes from:
+
+```text
+Tech Europe Foundation
 ```
 
 Italian Tech Alliance has already passed its basic technical/source audit.
 
 ## Requirement Status
 
-> **Operational but too dependent on one specialist.**
+> **Operational but still dependent on a small number of specialist roles.**
 
-Italian Tech Alliance is the strongest current production-readiness candidate.
+Italian Tech Alliance remains a production-readiness candidate.
 
 Its expected differentiated role is:
 
 ```text
 Tech.eu
 → European company/deal coverage
+
+Tech Europe Foundation
+→ selected startup / entrepreneurship / ecosystem activity
 
 Italian Tech Alliance
 → Italian VC ecosystem, policy, statistics and programmes
@@ -731,13 +818,21 @@ ECB
 European Commission
 ```
 
+Additional selective specialist coverage comes from:
+
+```text
+Tech.eu
+```
+
 ## Requirement Status
 
 > **Strong primary evidence, incomplete independent interpretation.**
 
-A high-quality independent analytical source is desirable.
+A high-quality independent analytical source remains desirable.
 
-Bruegel is the current leading candidate.
+Bruegel was audited for this role and proved strategically strong but technically/persistence-incompatible under the current architecture.
+
+The product should continue searching only if a cleaner source can provide the same information function without source-specific complexity.
 
 ---
 
@@ -747,7 +842,7 @@ Bruegel is the current leading candidate.
 
 Italy is a fixed strategic macroarea.
 
-The system should eventually surface high-value developments involving:
+The system should surface high-value developments involving:
 
 - Italian macroeconomics;
 - major companies;
@@ -765,43 +860,55 @@ The system should eventually surface high-value developments involving:
 
 ## Current State
 
-Current production contribution comes mainly from:
+Italy now has a dedicated production domain.
+
+Current differentiated production architecture:
 
 ```text
 Istat
+→ primary statistics and macroeconomic evidence
+
+MIMIT News
+→ industrial policy, company restructuring,
+  strategic investment and company-policy evidence
+
+Lavoce.info Imprese
+→ independent economic/business interpretation
 ```
 
-There is no dedicated Italy domain.
+Italian-language deterministic classification has been validated through:
+
+- live source records;
+- narrow keyword additions;
+- historical-regression checks;
+- uppercase acronym handling;
+- real production runs.
 
 ## Requirement Status
 
-> **Major unsatisfied strategic requirement.**
+> **Viable first production implementation achieved; broader maturity remains incomplete.**
 
-Italy should not be solved through a single generic Italian newspaper.
+The previous requirement that Italy provide:
 
-The current preferred information architecture is differentiated:
+- meaningful coverage beyond Istat;
+- at least one strong company/industrial or business role;
+- useful economic interpretation or policy evidence;
+- acceptable Italian-language classification;
+- public/automation-compatible endpoints;
+- manageable noise;
+- no premium authenticated ingestion;
 
-```text
-Istat
-→ primary statistics
+has now been satisfied at a first production level.
 
-MIMIT
-→ industrial policy / company situations
+Remaining maturity gaps include:
 
-Lavoce.info
-→ independent economic/business interpretation
+- Italian banking;
+- broader capital markets;
+- major-company reporting beyond industrial-policy events;
+- Milan/Lombardy established-company intelligence;
+- selected startup/VC ecosystem depth.
 
-Assolombarda
-→ Milan/Lombardy firms and economy
-
-Italian Tech Alliance
-→ VC/startup ecosystem
-
-Bank of Italy BDS later
-→ structured financial/statistical signals
-```
-
-This remains a strategic target until each candidate is technically validated.
+Italy should therefore no longer be treated as an unimplemented strategic requirement.
 
 ---
 
@@ -841,7 +948,7 @@ The product should avoid:
 
 # 21. Current Milan/Bocconi Implementation
 
-The first automated implementation is now active through:
+The first automated implementation is active through:
 
 ```text
 Tech Europe Foundation
@@ -874,6 +981,8 @@ Important remaining gaps:
 - established-company ecosystem;
 - industrial ecosystem;
 - selected high-value public lectures.
+
+Assolombarda was audited as a strong complement for established firms and the Milan/Lombardy economy, but its current feeds do not satisfy production timestamp and persistence requirements.
 
 ---
 
@@ -1013,9 +1122,9 @@ Both remain inactive.
 
 # 27. Source Expansion Requirement
 
-The source universe is not yet complete.
+The source universe is not assumed complete.
 
-Source expansion should now be driven by:
+Source expansion should continue to be driven by:
 
 > **missing information functions**
 
@@ -1023,56 +1132,102 @@ rather than:
 
 > **interesting publications.**
 
-Current highest-cost gaps:
+Current highest-cost residual gaps:
 
 ```text
-Financial Markets
-Companies / Corporate Strategy
-Italy
-Independent AI / Technology
+Global Companies / Corporate Strategy
+Broader Financial Markets
+Independent AI / Technology reporting
+Independent Europe/EU interpretation
 ```
 
-Secondary concentration gaps:
+Secondary concentration/maturity gaps:
 
 ```text
 Startups / VC
 Milan / Bocconi
+Milan / Lombardy established-company coverage
 ```
+
+Italy and AI primary-source diversity are no longer first-order implementation gaps.
 
 The product does not require a fixed source count.
 
 It requires enough differentiated coverage to support useful daily awareness.
 
+After the next research batch, source expansion should be explicitly compared against the marginal value of richer report context.
+
 ---
 
-# 28. Current Strategic Source-Audit Queue
+# 28. Current Strategic Source-Research Requirement
 
-Current Development audit order:
+The previous source-audit queue has been completed.
 
-1. Nasdaq;
-2. Federal Reserve Board;
-3. MIMIT;
-4. Lavoce.info;
-5. Bruegel;
-6. Assolombarda;
-7. Ars Technica;
-8. Google DeepMind News.
+Completed audit batch:
 
-These are research priorities, not production approvals.
+```text
+Nasdaq
+Federal Reserve Board
+MIMIT
+Lavoce.info
+Bruegel
+Assolombarda
+Ars Technica
+Google DeepMind
+```
 
-Each source must still pass:
+Stable outcomes include:
+
+```text
+Federal Reserve Monetary Policy
+→ Active
+
+MIMIT News
+→ Active
+
+Lavoce.info Imprese
+→ Active
+
+Google DeepMind News
+→ Active
+
+Nasdaq
+→ Standby
+
+Bruegel
+→ Standby / rejected depending feed
+
+Assolombarda
+→ Standby
+
+Ars Technica
+→ Standby
+```
+
+Detailed source-policy rationale belongs in:
+
+```text
+03 Information Taxonomy and Source Policy.md
+```
+
+The next source step should **not** be another preselected Development queue.
+
+Instead:
+
+> **Run a fresh strategic source-research pass against the current information-function gaps.**
+
+The Career Agent may be used for this discovery step because it can evaluate source value against broader professional and analytical priorities.
+
+The Development project remains responsible for:
 
 - policy review;
 - endpoint validation;
-- metadata review;
-- collector test;
-- normalisation test;
-- classification review;
-- report contribution review;
-- licensing/persistence review;
-- automated tests.
+- technical testing;
+- classification decisions;
+- persistence review;
+- production approval.
 
-Parallel:
+Parallel existing candidate:
 
 ```text
 Italian Tech Alliance
@@ -1083,151 +1238,123 @@ Its basic audit should not be repeated.
 
 ---
 
-# 29. Source Roles Expected From the New Audit Queue
+# 29. Expected Roles for the Next Source Research Pass
 
-## Nasdaq
+The new research should search for sources that could solve specific remaining roles.
 
-Expected role:
+## Global Companies / Corporate Strategy
+
+Desired role:
 
 ```text
-Financial Markets
-+ Companies
-+ earnings
-+ IPOs
-+ corporate finance
+M&A
+restructuring
+capital allocation
+corporate financing
+strategy
+major company developments
 ```
 
-Product risk:
+The objective is not to find a generic business-news publisher.
 
-- retail-investor noise;
-- routine stock stories;
-- excessive volume.
-
-The product requirement is not “add Nasdaq”.
-
-It is:
-
-> Find a narrow Nasdaq feed configuration that materially improves Markets/Companies without becoming a firehose.
+It is to find a source that materially improves the missing global corporate-strategy layer.
 
 ---
 
-## Federal Reserve
+## Broader Financial Markets
 
-Expected role:
+Desired role:
 
 ```text
-US monetary policy
-rates
+capital markets
 credit
-financial conditions
-banking
+corporate financing
+market structure
+financial stability
+material market-moving developments
 ```
 
-Expected product value:
+Federal Reserve Monetary Policy already supplies strong rates/monetary evidence.
 
-- reduce Europe-only macro bias;
-- strengthen Financial Markets;
-- complement ECB.
+A new source should add a different markets information function.
 
 ---
 
-## MIMIT
+## Independent AI / Technology Reporting
 
-Expected role:
+Desired role:
 
 ```text
-Italy
+external scrutiny
+software / systems context
+AI industry reporting
+cybersecurity
+infrastructure
+frontier-lab evaluation
+```
+
+The system already has:
+
+```text
+OpenAI
+Google DeepMind
+```
+
+A new source should therefore add independent interpretation rather than another lab blog.
+
+---
+
+## Independent Europe/EU Interpretation
+
+Desired role:
+
+```text
+economic-policy analysis
 industrial policy
-company restructuring
-strategic investment
-innovation
+competitiveness
+trade
+capital markets
+European strategic issues
 ```
 
-Expected product value:
+ECB and European Commission already supply primary evidence.
 
-- strengthen Italy;
-- strengthen Companies/Corporate Strategy;
-- provide primary evidence.
+A new source should add analysis rather than duplicate institutional announcements.
 
 ---
 
-## Lavoce.info
+## Startups / VC Diversification
 
-Expected role:
+Desired role:
 
 ```text
-independent Italian economic/business interpretation
+private-capital trends
+European venture strategy
+Italian VC ecosystem
+fundraising / investment statistics
+professional programmes
 ```
 
-Expected product value:
-
-- explain developments that primary institutional sources only report.
+Do not add multiple sources that simply repeat funding rounds.
 
 ---
 
-## Bruegel
+## Milan / Lombardy Professional and Business Ecosystem
 
-Expected role:
-
-```text
-independent European economic-policy analysis
-```
-
-Expected product value:
-
-- complement ECB and European Commission primary evidence.
-
----
-
-## Assolombarda
-
-Expected role:
+Desired role:
 
 ```text
-Milan/Lombardy firms
+established firms
 industry
+professional events
 economic research
-professional ecosystem
+finance/business ecosystem
+high-value opportunities
 ```
 
-Expected product value:
+TEF already covers startup/innovation activity.
 
-```text
-TEF
-→ startups / innovation
-
-Assolombarda
-→ established firms / industry / Milan economy
-```
-
----
-
-## Ars Technica
-
-Expected role:
-
-```text
-independent AI / technology reporting
-```
-
-Expected product value:
-
-- reduce vendor-driven AI coverage;
-- improve software/systems context.
-
----
-
-## Google DeepMind
-
-Expected role:
-
-```text
-second frontier-lab primary AI source
-```
-
-Expected product value:
-
-- diversify primary AI evidence.
+A new source should complement, not duplicate, that role.
 
 ---
 
@@ -1263,7 +1390,7 @@ read headline
 
 This is a validated product requirement.
 
-Implementation remains intentionally deferred until source/domain coverage is sufficiently mature.
+Implementation remains intentionally deferred until the source/domain universe is sufficiently mature.
 
 ---
 
@@ -1398,26 +1525,28 @@ Keyword changes must be grounded in real missed or misclassified records.
 
 The system should support both English and Italian source material where strategically useful.
 
-Current multilingual evidence includes:
+Current multilingual production evidence includes:
 
-- Il Sole 24 Ore testing;
-- Italian Tech Alliance testing.
+- MIMIT News;
+- Lavoce.info Imprese;
+- prior Il Sole 24 Ore testing;
+- Italian Tech Alliance testing;
+- historical-regression testing for Italian keywords.
 
-The Artificial Intelligence acronym must be represented intentionally as:
+The Artificial Intelligence acronyms must be represented intentionally as:
 
 ```text
 AI
+IA
 ```
 
-rather than generic lowercase:
+rather than generic lowercase forms when those would create false matches.
 
-```text
-ai
-```
-
-to avoid false Italian matches.
+Current deterministic behaviour deliberately distinguishes intentionally uppercase acronyms from lowercase keywords.
 
 Do not introduce language detection unless current deterministic mechanisms become inadequate.
+
+The product should remain comfortably majority English unless additional Italian sources provide differentiated information value.
 
 ---
 
@@ -1496,6 +1625,10 @@ It should not contain:
 - private emails;
 - restricted database exports.
 
+Public structured feeds should still be evaluated for persistence compatibility.
+
+A public RSS endpoint does not automatically mean that every field it exposes is suitable for permanent public storage.
+
 ---
 
 # 42. Product Non-Goals
@@ -1546,13 +1679,41 @@ Phase 4 information expansion is sufficiently complete when:
 
 - Financial Markets has meaningful dedicated coverage;
 - Companies/Corporate Strategy is materially stronger than incidental coverage;
-- Italy has a validated practical implementation decision;
+- Italy has a validated practical implementation;
 - Milan/Bocconi has more than nominal ecosystem coverage or has reached a justified public-source limit;
 - AI is no longer structurally defined by OpenAI alone;
-- Startups/VC has sufficiently differentiated coverage;
+- Startups/VC has sufficiently differentiated coverage or a justified reason not to expand further;
 - major active sources have clear information roles;
 - source-access/persistence decisions are explicit;
+- unresolved gaps are clearly identified rather than filled with inferior sources;
 - further source work provides lower marginal value than improving report context.
+
+Current progress against these criteria:
+
+```text
+Financial Markets
+→ partially achieved;
+  dedicated monetary/rates coverage exists
+
+Companies / Corporate Strategy
+→ materially improved;
+  global role remains incomplete
+
+Italy
+→ achieved at viable first-production level
+
+Milan / Bocconi
+→ partially achieved
+
+AI primary-source diversity
+→ achieved
+
+Startups / VC diversification
+→ incomplete
+
+source roles / persistence decisions
+→ materially documented
+```
 
 This does not require:
 
@@ -1560,13 +1721,14 @@ This does not require:
 - complete coverage;
 - every researched source activated;
 - a Reuters/FT replacement;
-- perfect bilingual coverage.
+- perfect bilingual coverage;
+- elimination of all residual information gaps.
 
 ---
 
 # 45. Acceptance Criteria — Milan/Bocconi
 
-The Milan/Bocconi requirement is considered **partially satisfied** today.
+The Milan/Bocconi requirement is considered **partially satisfied**.
 
 Current minimum achieved:
 
@@ -1588,21 +1750,34 @@ For stronger maturity, the system should additionally provide some combination o
 
 It does not need to automate every private Bocconi opportunity.
 
+If public structured sources cannot safely provide some of these roles, the product may explicitly accept that limit rather than build fragile private-source automation.
+
 ---
 
 # 46. Acceptance Criteria — Italy
 
-Italy remains unsatisfied as a dedicated product macroarea.
+Italy has reached a **viable first production implementation**.
 
-A viable implementation should provide:
+Current minimum achieved:
 
+- dedicated active Italy domain;
 - meaningful coverage beyond Istat;
-- at least one strong company/industrial or business role;
-- useful economic interpretation or policy evidence;
+- Tier 1 Italian industrial/company-policy evidence through MIMIT;
+- independent business/company interpretation through Lavoce.info Imprese;
 - acceptable Italian-language classification;
-- public/automation-compatible endpoints;
-- manageable noise;
+- tested bilingual keyword behaviour;
+- public/automation-compatible production endpoints;
 - no premium authenticated ingestion.
+
+Italy should therefore no longer be treated as an unsatisfied implementation requirement.
+
+For stronger maturity, the system may still add differentiated coverage of:
+
+- banking;
+- broader capital markets;
+- major companies;
+- Milan/Lombardy established-company activity;
+- Italian private capital.
 
 The exact number of sources is not fixed.
 
@@ -1612,7 +1787,9 @@ The exact number of sources is not fixed.
 
 Financial Markets should not be considered mature merely because the domain exists.
 
-Maturity requires useful recurring coverage of some combination of:
+The current system has achieved a meaningful first dedicated layer through Federal Reserve Monetary Policy.
+
+Maturity still requires useful recurring coverage of a broader combination of:
 
 - rates;
 - yields;
@@ -1624,13 +1801,19 @@ Maturity requires useful recurring coverage of some combination of:
 - market structure;
 - material equity-market developments.
 
+Current status:
+
+> **Partially satisfied.**
+
 The report should remain explanatory rather than price-centric.
+
+A future Markets source should complement the existing monetary-policy role rather than duplicate it.
 
 ---
 
 # 48. Acceptance Criteria — AI Diversity
 
-AI coverage should eventually include:
+Minimum AI source diversity requires:
 
 ```text
 at least one strong primary source
@@ -1638,15 +1821,32 @@ at least one strong primary source
 at least one meaningfully different primary or independent source
 ```
 
-The current working target is:
+This minimum is now achieved through:
 
 ```text
 OpenAI
 + Google DeepMind
-+ independent reporting such as Ars Technica
 ```
 
-This is a directional target, not a mandatory three-source quota.
+Both are active Tier 1 first-party sources but represent meaningfully different frontier labs.
+
+For stronger maturity, the system should ideally add:
+
+```text
+independent reporting / scrutiny
+```
+
+if a legally and technically clean source can be found.
+
+The current stronger target is therefore:
+
+```text
+OpenAI
++ Google DeepMind
++ independent reporting
+```
+
+This remains directional rather than a mandatory three-source quota.
 
 ---
 
@@ -1669,11 +1869,17 @@ Phase 6
 richer-report implementation/evaluation
 ```
 
-Do not begin richer-report implementation while the information universe is still changing materially.
+Phase 4 is now materially more mature than at the previous checkpoint.
+
+Do not begin richer-report implementation while a small number of high-value source corrections still clearly dominate expected user value.
+
+However, source expansion must not become open-ended.
 
 The switch should occur when:
 
 > **another source/domain change has lower expected user value than adding context to the stories already being selected.**
+
+After the next fresh source-research batch, this crossover should be evaluated explicitly.
 
 ---
 
@@ -1683,94 +1889,90 @@ Current priority order:
 
 ## Priority 1
 
-Strengthen:
+Run a fresh gap-driven source research pass against:
 
 ```text
-Financial Markets
-Companies / Corporate Strategy
+Global Companies / Corporate Strategy
+Broader Financial Markets
+Independent AI / Technology reporting
+Independent Europe/EU interpretation
+Startups / VC diversification
+Milan / Lombardy business and professional ecosystem
 ```
 
-Current first Development audit:
-
-```text
-Nasdaq
-```
+Do not restart the completed Nasdaq-to-DeepMind audit queue.
 
 ---
 
 ## Priority 2
 
-Add:
+Audit only newly justified candidates that add differentiated information roles.
+
+The Development project should validate:
 
 ```text
-US/global monetary-policy and financial-condition evidence
+policy
+→ endpoint
+→ metadata
+→ collector
+→ normalisation
+→ classification
+→ persistence
+→ report contribution
+→ tests
+→ real pipeline
 ```
 
-Current candidate:
-
-```text
-Federal Reserve Board
-```
+Do not activate sources merely because the strategic research recommends them.
 
 ---
 
 ## Priority 3
 
-Build a stronger Italian economic/business information layer.
+Resolve existing production-readiness candidates only where still high ROI.
 
-Current candidates:
+Main existing example:
 
 ```text
-MIMIT
-Lavoce.info
-Assolombarda
 Italian Tech Alliance
 ```
+
+Its basic source audit should not be repeated.
 
 ---
 
 ## Priority 4
 
-Reduce AI vendor concentration.
-
-Current candidates:
+After the new candidate research/audit batch, compare:
 
 ```text
-Ars Technica
-Google DeepMind
+marginal value of another source
 ```
+
+against:
+
+```text
+marginal value of richer report context
+```
+
+This comparison should determine whether Phase 4 continues or the product moves into richer-report design.
 
 ---
 
 ## Priority 5
 
-Improve independent Europe/EU interpretation.
+Preserve current stable operation while source research continues.
 
-Current candidate:
+Do not introduce unrelated:
 
-```text
-Bruegel
-```
+- architecture;
+- dashboard work;
+- AI summarisation;
+- clustering;
+- event databases;
+- statistical pipelines;
 
----
-
-## Priority 6
-
-Continue Milan/Bocconi complementarity.
-
-Current candidate:
-
-```text
-Assolombarda
-```
-
-Later possibilities:
-
-```text
-ISPI
-Camera di Commercio
-Fintech District
-```
+without validated need.
 
 ---
 
@@ -1802,17 +2004,18 @@ Each requires a separate validated need.
 
 Known limitations include:
 
-- only eight active sources;
-- only nine active domains;
-- Italy lacks a dedicated implemented domain;
-- Financial Markets lacks a dedicated source;
-- Companies/Corporate Strategy is weak;
-- AI remains vendor-concentrated;
+- twelve active sources still do not provide complete information-function coverage;
+- Financial Markets is stronger on monetary/rates evidence than broader markets;
+- Companies/Corporate Strategy still lacks a strong global dedicated reporting layer;
+- independent AI/technology scrutiny remains incomplete;
 - Startups/VC remains strongly Tech.eu-dependent;
-- Milan/Bocconi is only partially covered;
-- English-language sources dominate production;
-- Italian-language coverage is limited;
+- Milan/Bocconi remains only partially covered;
+- Milan/Lombardy established-company intelligence remains incomplete;
+- Europe/EU lacks a clean independent analytical production source;
+- English-language sources dominate production by design;
+- Italian-language production coverage remains selective;
 - report descriptions are capped at 300 characters;
+- some descriptions contain source-formatting artefacts that require later quality review if reproducible;
 - near-duplicate same-story coverage is not clustered;
 - article-level geography is not implemented;
 - content type is not implemented;
@@ -1820,7 +2023,10 @@ Known limitations include:
 - private Career Services opportunities are not automated;
 - statistical structured data is not yet converted into intelligence events;
 - GitHub scheduler latency can shift the daily window;
-- high-quality global corporate reporting remains an explicit residual gap.
+- high-quality global corporate reporting remains an explicit residual gap;
+- some strategically valuable sources cannot be used because their licensing/persistence terms conflict with the public repository;
+- some strategically valuable feeds cannot be used because publication timestamps are absent;
+- some public RSS feeds expose excessive/full-content payloads unsuitable for current metadata persistence.
 
 These are not automatic feature requests.
 
@@ -1883,31 +2089,74 @@ A product change is complete only when:
 
 **Failure visibility:** implemented.
 
-**Financial Markets domain:** implemented but source coverage weak.
+**Active sources:** twelve.
 
-**Milan/Bocconi domain:** implemented through TEF but only partially satisfies the broader requirement.
+**Active strategic domains:** ten of ten.
 
-**Italy domain:** pending.
+**Financial Markets:** partially satisfied; dedicated monetary/rates evidence exists, broader markets coverage remains incomplete.
 
-**AI diversity:** insufficient.
+**Companies/Corporate Strategy:** materially improved through MIMIT and Lavoce.info, but global corporate-strategy coverage remains incomplete.
 
-**Companies/Corporate Strategy coverage:** insufficient.
+**Milan/Bocconi:** implemented through TEF but only partially satisfies the broader requirement.
+
+**Italy:** viable first production implementation achieved.
+
+**AI primary-source diversity:** achieved through OpenAI + Google DeepMind.
+
+**Independent AI/technology reporting:** still incomplete.
 
 **Startups/VC diversification:** incomplete.
+
+**Europe independent interpretation:** incomplete.
 
 **Richer report context:** validated requirement, intentionally deferred.
 
 Current active product objective:
 
-> **Strengthen the source and domain universe through differentiated information roles until the marginal value of additional source work falls below the value of richer report context.**
+> **Use one more gap-driven source-research cycle to determine whether remaining information-function gaps still justify expansion, then explicitly compare the value of additional sources with the value of richer report context.**
 
-Current next Development action:
+Current next strategic action:
 
-> **Begin the Nasdaq source audit, then proceed through the ranked domain-gap-driven audit queue while moving Italian Tech Alliance toward a production-readiness decision.**
+> **Update the canonical project documents, commission a fresh Career Agent source-research pass against the remaining information-function gaps, and return the results to Development for a new controlled audit batch.**
 
 ---
 
 # Changelog
+
+## 2026-08-18 — Twelve-Source / Ten-Domain Product Checkpoint
+
+- Updated the current production state from eight to twelve active sources.
+- Updated the implemented taxonomy from nine to ten active domains.
+- Recorded Italy as a viable first production implementation rather than a pending macroarea.
+- Recorded the current Italy architecture:
+  - Istat;
+  - MIMIT News;
+  - Lavoce.info Imprese.
+- Recorded Italian-language classification as production-validated through live-source testing and historical regression.
+- Recorded Federal Reserve Board Monetary Policy as active Tier 1 US monetary-policy evidence.
+- Changed Financial Markets from "no dedicated source" to "partially satisfied with dedicated monetary/rates coverage."
+- Reframed Financial Markets maturity around broader capital markets, credit, corporate financing and market structure.
+- Recorded MIMIT News and Lavoce.info Imprese as material improvements to Companies/Corporate Strategy.
+- Reframed Companies/Corporate Strategy from a severe incidental-coverage gap to a materially improved but globally incomplete domain.
+- Added Google DeepMind News as the second active frontier-lab primary AI source.
+- Recorded the minimum AI-diversity criterion as achieved through OpenAI + Google DeepMind.
+- Preserved independent AI/technology reporting as a stronger maturity objective.
+- Recorded Bruegel as strategically valuable but unsuitable under the current feed/persistence architecture.
+- Recorded Assolombarda as strategically valuable but incompatible with current publication-time and persistence requirements.
+- Recorded Ars Technica as unsuitable under current persistence terms.
+- Recorded Nasdaq as standby under current access/persistence constraints.
+- Retired the completed Nasdaq-to-DeepMind audit queue.
+- Replaced the old queue with a fresh gap-driven source-research requirement.
+- Set the next research gaps as:
+  - global Companies/Corporate Strategy;
+  - broader Financial Markets;
+  - independent AI/Technology reporting;
+  - independent Europe/EU interpretation;
+  - Startups/VC diversification;
+  - Milan/Lombardy business and professional ecosystem.
+- Preserved Italian Tech Alliance as an existing production-readiness candidate whose basic audit should not be repeated.
+- Added an explicit requirement to evaluate the source-expansion/richer-context crossover after the next research batch.
+- Preserved richer-report context as a validated but deferred product requirement.
 
 ## 2026-08-17 — Milan/Bocconi First Implementation and Source-Expansion Reframing
 
@@ -1919,20 +2168,12 @@ Current next Development action:
 - Preserved recruiting, employer events, finance/consulting opportunities and complete deadline coverage as remaining Milan/Bocconi gaps.
 - Clarified that complete private Career Services replication is not a product requirement.
 - Preserved authenticated yoU@B and JobGate as manual/private layers.
-- Recorded Italy as the remaining strategically approved but unimplemented dedicated macroarea.
-- Recorded Financial Markets as implemented but still lacking dedicated source coverage.
+- Recorded Italy as the remaining strategically approved but unimplemented dedicated macroarea at that checkpoint.
+- Recorded Financial Markets as implemented but still lacking dedicated source coverage at that checkpoint.
 - Recorded Companies/Corporate Strategy as a major remaining information gap.
 - Recorded AI vendor concentration as an active product-quality issue.
 - Incorporated the information-function-before-publisher-count expansion principle.
-- Replaced the obsolete FT-first next-source sequence with the new audit queue:
-  1. Nasdaq;
-  2. Federal Reserve;
-  3. MIMIT;
-  4. Lavoce.info;
-  5. Bruegel;
-  6. Assolombarda;
-  7. Ars Technica;
-  8. Google DeepMind.
+- Replaced the obsolete FT-first next-source sequence with the Nasdaq-to-DeepMind audit queue.
 - Recorded Italian Tech Alliance as a production-readiness candidate rather than an unexplored source.
 - Preserved richer-report context as a validated but deferred product requirement.
 

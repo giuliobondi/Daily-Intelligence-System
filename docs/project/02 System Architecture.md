@@ -86,8 +86,8 @@ The core system is implemented as a repository-native deterministic production p
 The current architecture supports:
 
 - repository-native configuration loading;
-- eight active real public RSS sources;
-- nine active topic domains;
+- twelve active real public RSS sources;
+- ten active topic domains;
 - RSS/Atom collection;
 - bounded remote HTTP retrieval;
 - explicit User-Agent and Accept headers;
@@ -96,6 +96,7 @@ The current architecture supports:
 - structured source-level outcomes;
 - source-level failure isolation;
 - normalisation;
+- generic HTML-to-text description normalisation;
 - validation;
 - collection-window filtering;
 - exact deduplication;
@@ -120,11 +121,13 @@ The current architecture supports:
 - concurrency protection;
 - domains whose classification evidence comes entirely from validated source defaults;
 - empty domain keyword lists where explicitly permitted;
-- deterministic case-sensitive acronym handling.
+- deterministic case-sensitive acronym handling;
+- multilingual deterministic keyword classification;
+- historical regression using persisted processed records.
 
 Phase 3 automation architecture is complete.
 
-Phase 4 has demonstrated two important architectural properties.
+Phase 4 has now demonstrated three important architectural properties.
 
 First:
 
@@ -136,28 +139,55 @@ Examples:
 Sifted
 → Tech.eu
 
-7 domains
-→ 8 domains
-→ Financial Markets added
+Financial Markets
+→ added through configuration
+
+Federal Reserve
+→ added through configuration
+
+Lavoce.info
+→ added through configuration
+
+Google DeepMind
+→ added through configuration
 ```
 
 Second:
 
-> a new strategic macroarea can be implemented through the existing article pipeline even when lexical keywords are not the correct classification evidence.
+> strategic macroareas can be implemented through the existing article pipeline even when lexical keywords are not the correct primary classification evidence.
+
+Examples:
+
+```text
+Tech Europe Foundation
+→ source default
+→ Milan and Bocconi Ecosystem
+
+MIMIT News
+→ source default
+→ Italy
+
+Lavoce.info Imprese
+→ source default
+→ Italy
+```
+
+Third:
+
+> source-specific input defects should trigger general fixes only when the fix improves the architecture beyond one source.
 
 Example:
 
 ```text
-Tech Europe Foundation
-→ standard RSS collection
-→ standard ArticleRecord
-→ source default
-→ Milan and Bocconi Ecosystem
+MIMIT HTML descriptions
+→ exposed a general normalization issue
+→ generic HTML-to-text normalization implemented
+→ no MIMIT-specific branch added
 ```
 
 The current architectural priority remains:
 
-> **continue improving the information layer through controlled source/domain changes, while avoiding new processing architectures until repeated evidence proves they are necessary.**
+> **continue controlled source research using the existing pipeline, while refusing new processing architectures unless repeated evidence shows they are necessary.**
 
 ---
 
@@ -347,11 +377,14 @@ DomainConfig.keywords
 
 being empty.
 
-This was deliberately enabled for domains whose classification evidence may come entirely from validated source defaults.
+This is deliberately used where source identity provides better evidence than generic lexical rules.
 
-Current example:
+Current examples:
 
 ```text
+Italy
+keywords: []
+
 Milan and Bocconi Ecosystem
 keywords: []
 ```
@@ -360,7 +393,7 @@ This does not mean all domains should omit keywords.
 
 It means:
 
-> empty keyword sets are a supported configuration state when source identity provides better evidence than invented lexical rules.
+> empty keyword sets are a supported configuration state when validated source defaults provide stronger evidence.
 
 Source configuration and domain configuration remain separate from processing logic.
 
@@ -396,6 +429,10 @@ Do not add retries until repeated production evidence shows that transient failu
 
 A source failure should normally degrade the run rather than crash the entire pipeline.
 
+Malformed or technically incompatible feeds should not automatically trigger parser exceptions or source-specific repairs.
+
+A general collector change requires evidence that it improves more than one strategically justified source class.
+
 ---
 
 ## 5.4 `normalize.py`
@@ -409,6 +446,7 @@ Responsibilities include:
 - URL cleanup;
 - timestamp normalisation;
 - description handling;
+- generic HTML-to-text cleanup;
 - deterministic record identity;
 - source metadata preservation.
 
@@ -416,13 +454,35 @@ Publication timestamps are converted to timezone-aware UTC datetimes.
 
 Record identity remains deterministic.
 
-Normalisation should not perform:
+### HTML Description Normalisation
+
+Phase 4 added generic HTML-to-text handling after MIMIT exposed feed descriptions containing HTML markup.
+
+The current normalization path now:
+
+```text
+feed description
+→ HTML-to-text cleanup
+→ whitespace cleanup
+→ punctuation-safe normalized text
+→ None if no meaningful text remains
+```
+
+This behaviour is generic.
+
+It is not tied to MIMIT or any other individual source.
+
+The change followed the architectural rule:
+
+> when a source exposes a genuine general parsing defect, fix the common normalization layer rather than branching on source identity.
+
+Normalisation should still not perform:
 
 - semantic classification;
 - summarisation;
-- enrichment;
 - translation;
-- entity extraction.
+- entity extraction;
+- source-specific article-body extraction.
 
 ---
 
@@ -455,6 +515,28 @@ Records without usable publication timestamps are excluded.
 The pipeline does not silently substitute retrieval time.
 
 This preserves deterministic temporal semantics.
+
+Assolombarda testing reinforced this design.
+
+Its official feeds were technically collectable but produced:
+
+```text
+0/15 usable publication timestamps
+```
+
+for both tested streams.
+
+The correct architectural response was:
+
+```text
+do not activate source
+```
+
+not:
+
+```text
+replace publication time with retrieval time
+```
 
 Known limitation:
 
@@ -502,14 +584,26 @@ Unclassified records remain valid.
 
 A source default acts as explicit classification evidence.
 
-Examples:
+Current examples:
 
 ```text
 Istat
 → Economics and Macroeconomics
 
+Federal Reserve Board Monetary Policy
+→ Economics and Macroeconomics
+
 OpenAI News
 → Artificial Intelligence
+
+Google DeepMind News
+→ Artificial Intelligence
+
+MIMIT News
+→ Italy
+
+Lavoce.info Imprese
+→ Italy
 
 Tech Europe Foundation
 → Milan and Bocconi Ecosystem
@@ -539,7 +633,7 @@ configured keyword containing uppercase characters
 → case-sensitive match
 ```
 
-The motivating example is:
+The motivating example was:
 
 ```text
 AI
@@ -555,7 +649,15 @@ caused false Artificial Intelligence classifications in Italian-language content
 
 The case convention preserved historical English AI recall while removing false Italian matches.
 
-This simple rule is preferred to introducing:
+The same mechanism now supports:
+
+```text
+IA
+```
+
+for the Italian AI acronym.
+
+This simple rule remains preferable to introducing:
 
 - language detection;
 - NLP;
@@ -570,11 +672,12 @@ A domain may contain:
 keywords: []
 ```
 
-and still be classifiable through a source default.
+and still be classifiable through source defaults.
 
-Current example:
+Current examples:
 
 ```text
+Italy
 Milan and Bocconi Ecosystem
 ```
 
@@ -632,6 +735,10 @@ broad keyword
 ```
 
 This is why taxonomy changes require regression testing.
+
+The Lavoce.info keyword audit reinforced that near-synonymous keywords should not be added merely because they describe the same concept.
+
+Avoid duplicate lexical evidence that only inflates score.
 
 ---
 
@@ -815,6 +922,10 @@ Istat Press Releases
 OpenAI News
 Tech.eu
 Tech Europe Foundation
+Federal Reserve Board Monetary Policy
+MIMIT News
+Lavoce.info Imprese
+Google DeepMind News
 ```
 
 All current production collection routes use public structured RSS.
@@ -826,7 +937,7 @@ No current source requires:
 - Bocconi authentication;
 - premium article retrieval.
 
-Current source architecture remains deliberately uniform:
+Current active source architecture remains deliberately uniform:
 
 ```text
 public structured feed
@@ -835,7 +946,14 @@ public structured feed
 → ArticleRecord
 ```
 
-No active source currently requires a custom parser or source-specific processing branch.
+No active source currently requires:
+
+- a source-specific collector;
+- a separate parser;
+- a separate record model;
+- a custom persistence path.
+
+This remains a strong architectural success criterion for source expansion.
 
 ---
 
@@ -846,24 +964,30 @@ Current active domains:
 ```text
 Global Politics and Geopolitics
 Economics and Macroeconomics
+Financial Markets
 Companies and Corporate Strategy
 Artificial Intelligence
 Technology and Software
 Startups and Venture Capital
 Europe and the European Union
-Financial Markets
+Italy
 Milan and Bocconi Ecosystem
 ```
 
-Strategically approved but not yet implemented:
-
-```text
-Italy
-```
+All ten strategic macroareas are now implemented.
 
 Most domains use keyword evidence.
 
-Milan and Bocconi Ecosystem currently demonstrates a second valid architecture:
+Two domains currently demonstrate source-defined classification:
+
+```text
+Italy
+Milan and Bocconi Ecosystem
+```
+
+with empty keyword lists.
+
+Their architecture is:
 
 ```text
 validated narrow source
@@ -871,7 +995,7 @@ validated narrow source
 → domain
 ```
 
-with no generic topic keywords required.
+This is intentionally more conservative than inventing broad lexical keywords.
 
 ---
 
@@ -936,13 +1060,15 @@ report:
 
 Configuration remains preferred over code changes when source/domain additions fit the current processing model.
 
+The Federal Reserve, Lavoce.info and Google DeepMind integrations required no production Python changes.
+
+The MIMIT integration required one general normalization improvement, not source-specific branching.
+
 ---
 
 # 9. Current Milan/Bocconi Architecture
 
-Milan/Bocconi is no longer only a planned architecture.
-
-The first production implementation is:
+Milan/Bocconi is implemented through:
 
 ```text
 Tech Europe Foundation News RSS
@@ -972,7 +1098,7 @@ The domain currently contains:
 keywords: []
 ```
 
-This architecture was chosen because TEF's information value comes from institutional identity, not because generic words such as:
+This architecture was chosen because TEF's information value comes from institutional identity rather than generic words such as:
 
 ```text
 Milan
@@ -981,104 +1107,215 @@ startup
 event
 ```
 
-would provide sufficiently precise evidence.
+The implementation required:
 
-The implementation required only:
-
-- one new source configuration;
-- one new domain configuration;
-- general support for empty domain keyword lists;
+- source configuration;
+- domain configuration;
+- support for empty domain keyword lists;
 - configuration tests.
 
 It did **not** require:
 
 - event scraping;
 - Bocconi authentication;
-- a new opportunity data model;
+- an opportunity data model;
 - a deadline engine;
 - a new ranking model;
 - source-specific collector logic.
 
-This is an important architectural precedent:
+This remains an important architectural precedent:
 
 > use the existing article pipeline for professional-ecosystem sources until article semantics become demonstrably insufficient.
 
 ---
 
-# 10. Current Real Integration Evidence
+# 10. Current Italy Architecture
 
-The TEF/Milan-Bocconi integration was tested with a full production-equivalent run.
+Italy is now implemented through the same standard article pipeline.
 
-Observed result:
+Current architecture:
 
 ```text
-8 active sources
-8 successful
+Istat
+→ Economics/Macro default
+
+MIMIT News
+→ Italy default
+
+Lavoce.info Imprese
+→ Italy default
+```
+
+The Italy domain contains:
+
+```yaml
+keywords: []
+```
+
+This is intentional.
+
+Generic terms such as:
+
+```text
+Italia
+azienda
+impresa
+investimenti
+```
+
+were not used as Italy-domain classifiers because they would create excessive noise.
+
+Instead:
+
+```text
+source identity
+→ Italy domain evidence
+```
+
+while narrow bilingual keywords provide additional topical domains.
+
+Examples:
+
+```text
+tavoli di crisi
+accordo di sviluppo
+quadro industriale
+rilevanza strategica
+fusione e acquisizione
+piano industriale
+inflazione
+IA
+mercati dei capitali
+```
+
+The implementation required:
+
+- one new domain;
+- source configuration;
+- narrow keyword configuration;
+- deterministic multilingual regression;
+- generic description normalization for MIMIT.
+
+It did **not** require:
+
+- Italian-language NLP;
+- a second classifier;
+- source-specific ranking;
+- a separate Italy pipeline;
+- a new record type.
+
+This validates the source-defined-domain architecture beyond TEF.
+
+---
+
+# 11. Current AI Architecture
+
+Current primary AI architecture:
+
+```text
+OpenAI News
+→ Artificial Intelligence source default
+
+Google DeepMind News
+→ Artificial Intelligence source default
+```
+
+Both use the standard article pipeline.
+
+DeepMind integration required only:
+
+- source configuration;
+- configuration tests.
+
+Controlled classification review showed:
+
+```text
+100/100 DeepMind records
+→ Artificial Intelligence
+
+97/100
+→ AI only
+
+3/100
+→ sensible secondary domains through existing taxonomy
+```
+
+No DeepMind-specific keywords or ranking rules were needed.
+
+The architectural AI problem is therefore no longer:
+
+```text
+how to add a second primary lab
+```
+
+It is:
+
+```text
+whether a clean independent reporting source can be added
+without special architecture
+```
+
+No special AI processing layer is justified.
+
+---
+
+# 12. Current Real Integration Evidence
+
+The latest controlled production-equivalent checkpoint validated twelve active sources.
+
+Observed 18 August 2026 run:
+
+```text
+12 active sources
+12 successful
 0 failed
 0 invalid
+0 warnings
 
-1295 valid records
-40 inside the collection window
-37 unique
-29 unclassified
-8 displayed
+1432 valid records
+44 inside collection window
+42 unique
+37 unclassified
+5 displayed
 
 status: success
 ```
 
-TEF itself collected:
+Google DeepMind collected:
 
 ```text
-10 feed entries
+100 feed entries
 ```
 
-No TEF records entered the processed 24-hour output because the feed entries were older than the monitored window.
+No DeepMind items entered the processed 24-hour output because the newest feed item was outside the monitored window.
 
 This was expected.
 
-The integration therefore validated:
-
-- eighth-source collection;
-- source-default configuration;
-- ninth-domain configuration;
-- normal pipeline execution;
-- output generation;
-- absence of stale TEF leakage.
-
----
-
-# 11. Ranking and TEF Architecture
-
-Typical TEF baseline score:
+Earlier Phase 4 runs also validated:
 
 ```text
-Tier 1
-= 4
-
-Milan/Bocconi domain
-= +2
-
-total
-= 6
+Federal Reserve integration
+MIMIT + Italy integration
+Lavoce.info integration
 ```
 
-A TEF story can receive additional domains and keyword matches if normal classifier evidence exists.
+without requiring new pipeline architecture.
 
-One tested story reached a higher score because it also matched Companies and Technology.
+The current integration evidence therefore demonstrates:
 
-No special TEF ranking rule exists.
-
-No ranking change was required because:
-
-- TEF remains in its own primary report section;
-- report selection caps that section at five items;
-- current total report volumes remain well below the 30-item cap.
-
-Do not lower TEF's source tier merely to manipulate relevance scores.
+- twelve-source collection;
+- ten-domain configuration;
+- multiple source defaults;
+- two empty-keyword domains;
+- bilingual keyword classification;
+- general HTML description normalization;
+- deterministic ranking;
+- normal output generation;
+- absence of stale-record leakage.
 
 ---
 
-# 12. Collection Architecture
+# 13. Collection Architecture
 
 The collector should remain generic.
 
@@ -1105,9 +1342,25 @@ endpoint research
 
 Do not add source-specific collector modules unless unavoidable and justified by source value.
 
+Recent source audits provide useful negative evidence:
+
+```text
+Bruegel
+→ malformed useful feeds
+→ also full-content persistence problem
+→ no collector hardening justified
+
+Assolombarda
+→ technically collectable
+→ no publication timestamps
+→ no date-recovery branch justified
+```
+
+The architecture should reject incompatible sources rather than accumulate exceptions.
+
 ---
 
-# 13. Network and Failure Architecture
+# 14. Network and Failure Architecture
 
 Remote source retrieval can fail because of:
 
@@ -1140,7 +1393,7 @@ Do not mask critical failures simply to publish a report.
 
 ---
 
-# 14. Degraded-Run Architecture
+# 15. Degraded-Run Architecture
 
 A degraded run is legitimate when:
 
@@ -1154,7 +1407,7 @@ The report must not imply that all sources succeeded when they did not.
 
 ---
 
-# 15. Automation Architecture
+# 16. Automation Architecture
 
 Production automation uses GitHub Actions.
 
@@ -1196,7 +1449,7 @@ Automation consumes no AI credits.
 
 ---
 
-# 16. Scheduled-Execution Limitation
+# 17. Scheduled-Execution Limitation
 
 GitHub Actions scheduling is not guaranteed to start precisely at the configured minute.
 
@@ -1221,7 +1474,7 @@ Not implemented.
 
 ---
 
-# 17. Persistence Architecture
+# 18. Persistence Architecture
 
 Current production outputs are committed back to the repository.
 
@@ -1248,11 +1501,27 @@ Costs:
 - public-storage copyright constraints;
 - same-day reruns overwrite date-keyed outputs before commit if run locally.
 
+Persistence architecture also creates an important source-selection constraint.
+
+A public feed can still be unsuitable when it exposes:
+
+```text
+substantial article text
+or
+effectively complete publication bodies
+```
+
+Bruegel demonstrated this failure mode.
+
+Therefore:
+
+> feed accessibility and feed persistence compatibility are independent gates.
+
 Do not introduce external storage until repository-native persistence becomes a measured limitation.
 
 ---
 
-# 18. Historical Regression Architecture
+# 19. Historical Regression Architecture
 
 Stored JSONL outputs are not only historical data.
 
@@ -1275,13 +1544,16 @@ This approach has already been used for:
 - `startup` removal;
 - Italian-source classification;
 - `AI` case matching;
-- Italian Tech Alliance candidate keywords.
+- Italian Tech Alliance candidate keywords;
+- Federal Reserve Financial Markets keywords;
+- MIMIT Italian keywords;
+- Lavoce.info bilingual keywords.
 
-This is the preferred validation mechanism before introducing more sophisticated evaluation infrastructure.
+This remains the preferred validation mechanism before introducing more sophisticated evaluation infrastructure.
 
 ---
 
-# 19. Report Architecture
+# 20. Report Architecture
 
 The report is intentionally simple Markdown.
 
@@ -1308,7 +1580,7 @@ Do not build a frontend until repository browsing becomes a demonstrated usabili
 
 ---
 
-# 20. Richer-Report Architecture
+# 21. Richer-Report Architecture
 
 The user need is validated:
 
@@ -1340,9 +1612,13 @@ The future architecture must preserve:
 - source transparency;
 - low maintenance.
 
+Phase 4 is now approaching the point where richer-report architecture should be compared directly with the expected value of another source.
+
+That crossover has not yet been declared.
+
 ---
 
-# 21. Premium-Source Architecture
+# 22. Premium-Source Architecture
 
 Premium reading access and production ingestion are separate.
 
@@ -1377,8 +1653,18 @@ Financial Times
 → standby
 
 Il Sole 24 Ore
-→ technically excellent
+→ technically strong
 → persistence/licensing boundary insufficiently clean
+→ standby
+
+Nasdaq
+→ structured/public access exists
+→ persistence terms conflict
+→ standby
+
+Ars Technica
+→ official RSS exists
+→ persistence rights insufficiently clean
 → standby
 ```
 
@@ -1386,11 +1672,11 @@ No premium publication is currently active through this exception.
 
 ---
 
-# 22. Bank of Italy Structured-Data Architecture
+# 23. Bank of Italy Structured-Data Architecture
 
 Bank of Italy BDS exposed a potential future source class that does not fit the current article pipeline directly.
 
-A statistical event architecture would conceptually require:
+A statistical-event architecture would conceptually require:
 
 ```text
 series configuration
@@ -1419,7 +1705,7 @@ Do not build generic statistical infrastructure before selected series demonstra
 
 ---
 
-# 23. Opportunity and Deadline Architecture
+# 24. Opportunity and Deadline Architecture
 
 Professional opportunities can have time semantics different from article publication.
 
@@ -1460,7 +1746,7 @@ Do not create an opportunity database merely because the Milan/Bocconi domain ex
 
 ---
 
-# 24. Security and Privacy Architecture
+# 25. Security and Privacy Architecture
 
 The repository is public.
 
@@ -1484,7 +1770,7 @@ Even if GitHub Secrets could technically store institutional credentials, archit
 
 ---
 
-# 25. Copyright and Content Boundaries
+# 26. Copyright and Content Boundaries
 
 The repository may store, where permitted:
 
@@ -1507,6 +1793,14 @@ The system must not store:
 - substantial unauthorised excerpts;
 - licensed database full text.
 
+## Full-Content Feed Boundary
+
+A public RSS feed is not automatically suitable for persistence.
+
+If a feed's description/content field exposes substantial or complete article bodies, the source must not be integrated merely because the feed parser can read it.
+
+Bruegel validated this boundary.
+
 ## Richer-Report Boundary
 
 The richer-context requirement does not override copyright rules.
@@ -1521,7 +1815,7 @@ Not:
 
 ---
 
-# 26. Architecture for ChatGPT Use
+# 27. Architecture for ChatGPT and Copilot Use
 
 ChatGPT remains outside the production dependency chain.
 
@@ -1538,28 +1832,47 @@ ChatGPT may be used manually for:
 - classification/ranking analysis;
 - deciding whether observed limitations justify implementation changes.
 
-The separation remains:
+GitHub Copilot may be used selectively during development for:
+
+- narrow mechanical edits;
+- repetitive multi-file configuration/test updates;
+- repository-local locating or completion work.
+
+Copilot must not become:
+
+- a production dependency;
+- an architectural decision-maker;
+- a substitute for validation;
+- a recurring-credit requirement.
+
+The working development principle remains:
+
+```text
+ChatGPT decides and writes
+→ Copilot may locate/apply narrow mechanical edits
+→ Git/tests verify
+```
+
+The production separation remains:
 
 ```text
 Daily Intelligence System
 = deterministic production infrastructure
 
-ChatGPT
-= external development and reasoning layer
+ChatGPT / Copilot
+= external development assistance
 ```
-
-The richer-report requirement does not automatically change this boundary.
 
 ---
 
-# 27. Implemented vs Active vs Deferred Architecture
+# 28. Implemented vs Active vs Deferred Architecture
 
 ## Implemented and Validated
 
 - Python package;
 - repository-native configuration;
-- eight-source public RSS registry;
-- nine-domain active taxonomy;
+- twelve-source public RSS registry;
+- ten-domain active taxonomy;
 - RSS/Atom collection;
 - local fixture collection;
 - remote HTTP/HTTPS retrieval;
@@ -1570,6 +1883,7 @@ The richer-report requirement does not automatically change this boundary.
 - structured source outcomes;
 - source-level failure isolation;
 - normalisation;
+- generic HTML-to-text description cleanup;
 - deterministic URL cleaning;
 - UTC-aware timestamps;
 - deterministic record IDs;
@@ -1581,6 +1895,7 @@ The richer-report requirement does not automatically change this boundary.
 - empty domain keyword support;
 - validated source-defined domains;
 - uppercase-sensitive keyword handling;
+- English/Italian deterministic keyword support;
 - deterministic ranking;
 - JSONL persistence;
 - Markdown reporting;
@@ -1600,32 +1915,31 @@ The richer-report requirement does not automatically change this boundary.
 - critical-failure protection;
 - concurrency protection;
 - repository-native production history;
+- historical regression workflow;
 - Tech.eu replacing Sifted;
 - Financial Markets domain;
 - Milan and Bocconi Ecosystem domain;
+- Italy domain;
 - Tech Europe Foundation source;
-- conservative keyword regression workflow.
+- Federal Reserve Board Monetary Policy source;
+- MIMIT News source;
+- Lavoce.info Imprese source;
+- Google DeepMind News source;
+- conservative bilingual keyword regression workflow.
 
 ## Active Architectural Evaluation
 
-- further source correction/expansion;
-- dedicated Financial Markets source coverage;
-- Companies/Corporate Strategy source coverage;
-- Italy domain implementation;
-- broader Milan/Bocconi source coverage;
-- AI source diversity;
+- further source correction/expansion against remaining information-function gaps;
+- global Companies/Corporate Strategy coverage;
+- broader Financial Markets source coverage;
+- independent AI/Technology reporting;
+- independent Europe/EU interpretation;
+- Startups/VC diversification;
+- broader Milan/Bocconi and Milan/Lombardy coverage;
 - Italian Tech Alliance production readiness;
-- Nasdaq feed suitability;
-- Federal Reserve feed suitability;
-- MIMIT suitability;
-- Lavoce.info suitability;
-- Bruegel suitability;
-- Assolombarda suitability;
-- Ars Technica suitability;
-- Google DeepMind suitability;
 - source metadata richness;
 - reporting-window cutoff independence;
-- richer-report architecture after Phase 4.
+- richer-report architecture after the next source-research cycle.
 
 ## Deferred Until Evidence
 
@@ -1656,20 +1970,21 @@ The richer-report requirement does not automatically change this boundary.
 
 ---
 
-# 28. Current Architectural Limitations
+# 29. Current Architectural Limitations
 
 Known limitations include:
 
-- current production universe contains only eight feeds;
-- Financial Markets has no dedicated production source;
-- Companies/Corporate Strategy remains weakly sourced;
-- Italy is not yet an explicit implemented domain;
+- current production universe contains twelve feeds but still lacks complete information-function coverage;
+- Financial Markets is stronger on monetary/rates evidence than broader capital markets;
+- Companies/Corporate Strategy still lacks a strong international dedicated reporting source;
 - Milan/Bocconi has only a first narrow production source;
-- independent AI reporting remains limited;
-- AI primary evidence is concentrated on OpenAI;
+- Milan/Lombardy established-company coverage remains incomplete;
+- independent AI/technology reporting remains unresolved;
+- primary AI evidence is now diversified across OpenAI and DeepMind;
 - Startups/VC depends heavily on Tech.eu;
-- current active automated sources are mostly English-language;
-- full bilingual classification remains only partially validated;
+- Europe/EU still lacks a clean independent analytical source;
+- current active automated sources are majority English-language;
+- bilingual deterministic classification is validated but remains deliberately conservative;
 - exact deduplication does not detect differently worded coverage of the same story;
 - records without publication timestamps are excluded;
 - ranking remains provisional;
@@ -1684,13 +1999,16 @@ Known limitations include:
 - no long-term source-health database exists;
 - report descriptions remain capped at 300 characters;
 - scheduled execution time influences the collection window;
-- repository-native storage creates strict copyright/persistence requirements for candidate sources.
+- repository-native storage creates strict copyright/persistence requirements for candidate sources;
+- malformed feeds are not generically repaired if the resulting content is unsuitable for persistence;
+- no metadata-only alternate persistence path exists;
+- no source-specific date-recovery path exists.
 
 These are maturity limits, not automatic implementation requirements.
 
 ---
 
-# 29. Open Architecture Decisions
+# 30. Open Architecture Decisions
 
 ## Reporting Window
 
@@ -1752,9 +2070,9 @@ Status:
 
 ---
 
-## Independent AI Architecture
+## Independent AI / Technology Reporting
 
-Current working hypothesis:
+Current architecture:
 
 ```text
 OpenAI
@@ -1762,36 +2080,73 @@ OpenAI
 
 Google DeepMind
 → second primary source
+```
 
-independent technology source
-→ reporting / interpretation
+Remaining information role:
+
+```text
+independent reporting / interpretation
 ```
 
 Status:
 
-> source audit pending; no special architecture expected.
+> source role still open; no special architecture justified.
+
+Ars Technica was audited and rejected under current persistence constraints.
+
+The next source-research cycle may identify a cleaner candidate.
 
 ---
 
 ## Italy Architecture
 
-Current working hypothesis:
+Current implemented architecture:
 
 ```text
 Istat
-+ MIMIT
-+ Lavoce.info
-+ Assolombarda
-+ Italian Tech Alliance
++ MIMIT News
++ Lavoce.info Imprese
 ```
 
 with Bank of Italy structured data later if justified.
 
 Status:
 
-> source validation pending.
+> implemented and architecturally validated.
 
-This is an information architecture hypothesis, not an implemented technical architecture.
+Assolombarda and Italian Tech Alliance remain potential complementary roles, but neither is required to consider the basic Italy architecture complete.
+
+---
+
+## Metadata-Only Source Path
+
+Question:
+
+> Should the system eventually support deliberately title/link/date-only persistence for strategically important sources whose description fields cannot safely be stored?
+
+Status:
+
+> not approved.
+
+Current evidence from Bruegel, Ars Technica and Assolombarda is insufficient to justify a second persistence path.
+
+Prefer source replacement or standby unless several high-value sources demonstrate the same need.
+
+---
+
+## Source-Specific Date Recovery
+
+Question:
+
+> Should publication dates ever be recovered by scraping article pages when RSS timestamps are missing?
+
+Status:
+
+> not approved.
+
+Assolombarda did not justify such a branch.
+
+Publication-time semantics remain strict.
 
 ---
 
@@ -1799,11 +2154,11 @@ This is an information architecture hypothesis, not an implemented technical arc
 
 Validated product need.
 
-Architecture remains intentionally undefined until source/domain work reaches diminishing returns.
+Architecture remains intentionally undefined until the next source-research cycle clarifies whether source expansion has reached diminishing returns.
 
 ---
 
-# 30. Architecture Validation Gates
+# 31. Architecture Validation Gates
 
 ## Gate A — Local Architecture
 
@@ -1873,7 +2228,7 @@ Known limitation:
 
 ## Gate E — Source/Domain Expansion Architecture
 
-**Status: passed for current architecture; source universe still under active expansion**
+**Status: passed**
 
 Evidence:
 
@@ -1883,31 +2238,48 @@ Evidence:
 - Italian keyword collision reproduced;
 - classifier case behaviour corrected;
 - Tech Europe Foundation added;
-- ninth domain added;
+- Milan/Bocconi domain added;
 - empty-keyword domain support added;
 - source-defined classification validated;
-- full real eight-source pipeline executed successfully.
+- Federal Reserve Monetary Policy added;
+- MIMIT News added;
+- Italy added as tenth domain;
+- Lavoce.info Imprese added;
+- Google DeepMind News added;
+- bilingual classification validated;
+- generic HTML description normalization added;
+- full real twelve-source pipeline executed successfully.
 
 This proves:
 
-> the current architecture can support both ordinary keyword-defined domains and narrow source-defined domains without adding new processing layers.
+> the current architecture can support ordinary keyword-defined domains, narrow source-defined domains, multilingual deterministic classification and continued source expansion without new processing layers.
 
-What remains open is the **information universe**, not the basic expansion architecture.
+What remains open is the **information universe**, not the expansion architecture.
 
 ---
 
 ## Gate F — Italy Architecture
 
-**Status: not passed**
+**Status: passed**
 
-Required before considering Italy implementation complete:
+Evidence:
 
-- suitable source set;
-- production-safe endpoints;
-- classification/default decision;
-- bilingual regression;
-- report contribution review;
-- no unnecessary source-specific architecture.
+- dedicated Italy domain implemented;
+- suitable public source set validated;
+- Istat + MIMIT + Lavoce provide differentiated roles;
+- MIMIT and Lavoce use validated Italy source defaults;
+- Italy domain works with an empty keyword list;
+- bilingual keyword regression completed;
+- historical regression completed;
+- real production-equivalent runs succeeded;
+- no Italy-specific processing pipeline was required;
+- no authenticated premium source is required.
+
+This proves:
+
+> the current `ArticleRecord` architecture is sufficient for a viable first Italy implementation.
+
+Information breadth may still improve without reopening the architecture gate.
 
 ---
 
@@ -1929,6 +2301,8 @@ Required before implementation:
 The user need is validated.
 
 Implementation architecture is not.
+
+The gate should be reconsidered after the next gap-driven source-research batch.
 
 ---
 
@@ -1954,7 +2328,7 @@ Entry requires:
 
 ---
 
-# 31. Current Architecture Summary
+# 32. Current Architecture Summary
 
 The Daily Intelligence System is a production-operational, repository-native deterministic Python pipeline.
 
@@ -1987,15 +2361,19 @@ GitHub trigger
 Current information architecture:
 
 ```text
-8 active public RSS sources
-9 active domains
+12 active public RSS sources
+10 active domains
 
 deterministic source defaults
 deterministic keyword classification
 source-defined domain support
+empty-keyword domain support
 deterministic keyword case semantics
+English/Italian deterministic classification
+generic HTML-to-text description normalization
 deterministic ranking
 repository-native historical data
+historical regression workflow
 ```
 
 Current active source set:
@@ -2009,6 +2387,10 @@ Istat Press Releases
 OpenAI News
 Tech.eu
 Tech Europe Foundation
+Federal Reserve Board Monetary Policy
+MIMIT News
+Lavoce.info Imprese
+Google DeepMind News
 ```
 
 Current active domains:
@@ -2016,25 +2398,25 @@ Current active domains:
 ```text
 Global Politics and Geopolitics
 Economics and Macroeconomics
+Financial Markets
 Companies and Corporate Strategy
 Artificial Intelligence
 Technology and Software
 Startups and Venture Capital
 Europe and the European Union
-Financial Markets
+Italy
 Milan and Bocconi Ecosystem
 ```
 
 Current architectural direction:
 
 ```text
-continue domain-gap-driven source correction
-→ strengthen Financial Markets / Companies
-→ validate Italy
-→ broaden Milan/Bocconi where justified
-→ diversify AI sources
-→ stop expansion when marginal source value falls
-→ design richer report context
+run fresh gap-driven source research
+→ audit only differentiated candidates
+→ continue reusing existing ArticleRecord architecture
+→ reject source-specific complexity without cross-source evidence
+→ reassess source-expansion marginal value
+→ design richer report context when it becomes higher ROI
 ```
 
 Potential future architecture remains gated:
@@ -2048,6 +2430,9 @@ professional opportunities
 
 near-duplicate clusters
 → only after repeated report evidence
+
+metadata-only persistence
+→ only if multiple high-value sources justify it
 ```
 
 The architecture should remain simple unless actual report usage proves otherwise.
@@ -2055,6 +2440,40 @@ The architecture should remain simple unless actual report usage proves otherwis
 ---
 
 # Changelog
+
+## 2026-08-18 — Twelve-Source / Ten-Domain Architecture Checkpoint
+
+- Reconciled architecture with the validated twelve-source / ten-domain production state.
+- Added Federal Reserve Board Monetary Policy to the active source architecture.
+- Added MIMIT News to the active source architecture.
+- Added Lavoce.info Imprese to the active source architecture.
+- Added Google DeepMind News to the active source architecture.
+- Added Italy as the tenth implemented domain.
+- Recorded Italy as a source-defined empty-keyword domain.
+- Recorded MIMIT and Lavoce.info Italy source defaults.
+- Recorded bilingual deterministic keyword classification as production-validated.
+- Added the intentional uppercase Italian AI acronym `IA`.
+- Recorded Federal Reserve Financial Markets keyword integration.
+- Recorded MIMIT and Lavoce.info keyword regression as examples of the historical-regression architecture.
+- Added generic HTML-to-text feed-description normalization after the MIMIT integration.
+- Recorded that the fix was general rather than source-specific.
+- Recorded Google DeepMind as the second Tier 1 frontier-lab source.
+- Recorded that DeepMind required configuration/test changes only.
+- Removed the stale DeepMind "source audit pending" architecture assumption.
+- Marked Italy Architecture Gate F as passed.
+- Recorded the latest twelve-source production-equivalent validation:
+  - 12 active;
+  - 12 successful;
+  - 0 failed;
+  - 0 invalid;
+  - 0 warnings.
+- Recorded Bruegel as evidence against blindly hardening the parser when useful feeds also expose full-content payloads.
+- Recorded Assolombarda as evidence against source-specific publication-date recovery or retrieval-time substitution.
+- Added metadata-only persistence as an explicit but unapproved future architecture question.
+- Added source-specific date recovery as an explicit but unapproved future architecture question.
+- Reframed the active architecture problem from "validate Italy / diversify AI" to "audit the remaining information-function gaps using the existing architecture."
+- Preserved richer-report architecture as deferred, but moved it closer to explicit comparison against further source expansion.
+- Recorded selective Copilot use as development assistance only, never as a production dependency.
 
 ## 2026-08-17 — TEF / Milan-Bocconi and Multilingual Classification Architecture
 
@@ -2071,11 +2490,10 @@ The architecture should remain simple unless actual report usage proves otherwis
 - Added deterministic case semantics for configured keywords.
 - Recorded intentional case-sensitive `AI` matching to avoid Italian `ai` false positives.
 - Recorded that historical English AI recall was preserved.
-- Reframed Source/Domain Expansion Gate E as architecturally passed while information-universe expansion remains active.
+- Reframed Source/Domain Expansion Gate E as architecturally passed while information-universe expansion remained active.
 - Added Bank of Italy BDS as the strongest validated future statistical-event architecture use case.
 - Added opportunity/deadline state tracking as a future architecture gated by real Milan/Bocconi evidence.
 - Added Italian Tech Alliance as a possible future near-duplicate evidence source without approving clustering.
-- Updated active architectural evaluation to the new domain-gap-driven source queue.
 - Preserved richer-report architecture as deferred.
 
 ## 2026-08-17 — Phase 4A Source and Domain Architecture Validation
