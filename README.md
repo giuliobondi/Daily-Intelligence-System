@@ -6,6 +6,18 @@ Instead of manually checking many separate publications and institutions every d
 
 ---
 
+## Try the System
+
+The system runs automatically every day and stores each generated intelligence report in the public repository.
+
+**[View the latest daily intelligence reports](reports/daily/)**
+
+Open the most recent dated report to see the current output.
+
+Each report includes the selected developments, original sources, relevance scores, source-provided context, and source-health information for that run.
+
+The project is still evolving. If you use the reports, critical feedback is especially useful — including missing sources, weak classifications, ranking issues, information gaps, or changes that would make the system more useful.
+
 ## README Guide
 
 This README is intentionally divided into two parts.
