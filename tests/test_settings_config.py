@@ -148,7 +148,7 @@ def test_load_valid_report_configuration() -> None:
 
     assert report.max_items_per_domain == 5
     assert report.max_total_items == 30
-    assert report.max_description_length == 300
+    assert report.max_description_length == 500
 
 
 def test_report_mapping_is_required(tmp_path: Path) -> None:

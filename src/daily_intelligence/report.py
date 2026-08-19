@@ -255,27 +255,51 @@ def _render_story(
             f"**Also:** {', '.join(secondary_domains)}"
         )
 
-    if record.description:
-        lines.extend(
-            [
-                "",
-                _truncate_description(
-                    record.description,
-                    max_description_length,
-                ),
-            ]
-        )
+
+    lines.extend(
+        [
+            "",
+            (
+                "**Source context:** "
+                + _format_source_context(
+                    record=record,
+                    max_length=max_description_length,
+                )
+            ),
+        ]
+    )
 
     lines.append("")
 
     return lines
 
 
-def _truncate_description(
+def _format_source_context(
+    record: ArticleRecord,
+    max_length: int,
+) -> str:
+    """Return bounded source-provided context for report display."""
+
+    description = record.description
+
+    if (
+        not description
+        or description.casefold().strip()
+        == record.title.casefold().strip()
+    ):
+        return "No additional source-provided context available."
+
+    return _truncate_source_context(
+        description=description,
+        max_length=max_length,
+    )
+
+
+def _truncate_source_context(
     description: str,
     max_length: int,
 ) -> str:
-    """Truncate feed-provided text without generating new content."""
+    """Truncate source context at a useful deterministic boundary."""
 
     if len(description) <= max_length:
         return description
@@ -283,7 +307,27 @@ def _truncate_description(
     if max_length <= 3:
         return description[:max_length]
 
-    return description[: max_length - 3].rstrip() + "..."
+    available_length = max_length - 3
+    candidate = description[:available_length].rstrip()
+
+    sentence_end = max(
+        candidate.rfind("."),
+        candidate.rfind("!"),
+        candidate.rfind("?"),
+    )
+
+    if sentence_end >= 0:
+        sentence = candidate[: sentence_end + 1].rstrip()
+
+        if sentence:
+            return sentence
+
+    word_end = candidate.rfind(" ")
+
+    if word_end > 0:
+        candidate = candidate[:word_end].rstrip()
+
+    return candidate + "..."
 
 
 def _format_datetime(value: datetime) -> str:

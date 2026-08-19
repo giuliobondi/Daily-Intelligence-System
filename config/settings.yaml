@@ -11,4 +11,4 @@ ranking:
 report:
   max_items_per_domain: 5
   max_total_items: 30
-  max_description_length: 300
+  max_description_length: 500

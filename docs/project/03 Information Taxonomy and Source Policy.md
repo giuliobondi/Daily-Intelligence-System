@@ -77,7 +77,11 @@ Current production configuration:
 - automated output persistence;
 - source-level failure isolation;
 - degraded-run reporting;
-- generic HTML-to-text normalisation for feed descriptions.
+- generic HTML-to-text normalisation for feed descriptions;
+- explicit `Source context` report provenance;
+- deterministic bounded report-context rendering at 500 characters;
+- sentence-aware truncation with word-boundary fallback;
+- explicit fallback when source context is missing or duplicates the title.
 
 Current active sources:
 
@@ -110,7 +114,7 @@ Current implemented domains:
 
 All ten strategic topic macroareas now have an implemented domain.
 
-Phase 4 has produced several validated information-quality corrections and source-governance decisions:
+Phase 4 produced several validated information-quality corrections and source-governance decisions:
 
 - Sifted was replaced by Tech.eu;
 - Tech.eu uses no blanket source-default domain;
@@ -130,15 +134,55 @@ Phase 4 has produced several validated information-quality corrections and sourc
 - ESMA was kept on standby because its feed lacks standard publication timestamps, carries long descriptions that distort classification, and would require multiple compensating processing changes;
 - Italian Tech Alliance remains a deferred production-readiness candidate after a live feed probe confirmed strong Italian VC/programme value but substantial thin press-clipping repetition;
 - Bocconi Career Services, Fintech District and Camera di Commercio Milano Monza Brianza Lodi were audited as Milan/Bocconi complements but are not suitable for automated MVP ingestion under the current public-structured-source and article-model constraints;
-- Nasdaq, Bruegel, Assolombarda and Ars Technica remain deferred or standby because access, persistence, metadata or architecture constraints outweigh their incremental value;
-- a real thirteen-source production-equivalent run completed successfully on 18 August 2026 with thirteen successful sources, zero invalid records and no warnings;
-- the full automated test suite passed with 118 tests.
+- Nasdaq, Bruegel, Assolombarda and Ars Technica remain deferred or standby because access, persistence, metadata or architecture constraints outweigh their incremental value.
 
-The Phase 4 source-research cycle is now sufficiently mature for the current MVP boundary.
+Phase 5 completed a source-metadata audit to determine whether richer report context could be delivered without expanding the ingestion architecture.
+
+The audit established that:
+
+- the former 300-character display cap was not the dominant context limitation across most sources;
+- Tech Europe Foundation, Lavoce.info Imprese and some ISPI descriptions lost useful context under the 300-character cap;
+- several other sources already expose concise usable descriptions below 300 characters;
+- ECB provides no useful description in the tested sample;
+- Federal Reserve descriptions are often title-like;
+- Google DeepMind description availability is partial;
+- richer RSS `content` fields exist for some sources but can be body-like and thousands of characters long;
+- generic use of those `content` fields would increase persistence and classification/ranking risk.
+
+Phase 6 implemented the smallest accepted response:
+
+```text
+existing normalized description
+→ explicit Source context label
+→ 500-character display bound
+→ complete-sentence preference
+→ word-boundary fallback
+→ explicit no-context fallback
+```
+
+The implementation deliberately does not:
+
+- add a new context field;
+- ingest article bodies;
+- use generic RSS `content` fields;
+- scrape article pages;
+- use LLM summarisation;
+- change classification evidence;
+- change ranking evidence;
+- change report item caps.
+
+The current implementation checkpoint passed:
+
+- 20 feed-fixture tests;
+- 14 report tests;
+- 122 tests in the full suite;
+- a clean `git diff --check`;
+- a production-equivalent run with all thirteen active sources successful and zero invalid records;
+- manual inspection of generated report output.
 
 The governing policy is now:
 
-> **Preserve the current source universe, reopen source expansion only against demonstrated report gaps or materially cleaner endpoints, and move product effort to the richer-context design problem.**
+> **Preserve the current source universe and metadata/persistence boundaries, use bounded source-provided context in reports, and reopen source expansion or richer enrichment only when real product use demonstrates a material remaining gap.**
 
 ---
 
@@ -618,7 +662,9 @@ Independent technology scrutiny remains thinner than desired.
 
 Ars Technica remains on standby because persistence terms are not sufficiently clean for the current public-repository model.
 
-No additional technology source is required before richer-report work begins.
+No additional technology source is currently required.
+
+Future expansion should be evidence-triggered by real report use or a materially cleaner independent source.
 
 ---
 
@@ -1424,8 +1470,10 @@ Weak metadata patterns include:
 
 - missing publication timestamps;
 - empty descriptions;
+- title-duplicate descriptions;
 - descriptions consisting only of external publisher labels;
 - descriptions containing large portions of page bodies;
+- malformed publisher-provided spacing or truncation;
 - unstable or malformed links.
 
 Metadata richness should be evaluated before source activation because it affects:
@@ -1433,8 +1481,44 @@ Metadata richness should be evaluated before source activation because it affect
 - classification;
 - ranking;
 - report context;
-- public persistence;
-- future richer-report design.
+- public persistence.
+
+The Phase 5 metadata audit established an important distinction:
+
+> **thin metadata and display truncation are different problems.**
+
+Increasing the report display limit can recover context that already exists in a feed description.
+
+It cannot create context where the feed exposes:
+
+- no description;
+- only a title-like description;
+- a malformed or already-truncated publisher snippet.
+
+The current report-context policy therefore uses the existing normalized description as the source of truth and exposes thin metadata transparently.
+
+Do not substitute body-like RSS `content` fields merely because they are longer.
+
+Some active sources expose materially richer `content` fields, but controlled auditing showed that these can contain thousands of characters and behave more like article bodies than bounded feed metadata.
+
+Generic ingestion would create unnecessary risk for:
+
+- public-repository persistence;
+- classification quality;
+- ranking quality;
+- maintenance;
+- copyright boundaries.
+
+Source-provided metadata defects should remain visible unless a safe deterministic correction is validated at the actual defect layer.
+
+The Tech.eu audit is the current example:
+
+```text
+malformed spacing
+→ already present in raw RSS description
+→ source-quality limitation
+→ no speculative generic word repair
+```
 
 ---
 
@@ -2215,40 +2299,196 @@ Future work should be triggered by demonstrated missed-opportunity cost.
 
 # Report Context and Source Metadata
 
-Current report descriptions remain intentionally short.
+Richer report context is now an implemented information-policy requirement.
 
-The current report generation layer caps displayed descriptions at approximately 300 characters.
+The report should let the reader understand the core development without immediate click-through when source metadata permits it.
 
-This was appropriate for the initial deterministic MVP but is now a validated usability limitation.
+Current production policy:
 
-The user should increasingly be able to understand:
+```text
+source-provided normalized description
+→ explicit Source context provenance
+→ maximum 500-character display
+→ complete-sentence preference when truncation is needed
+→ word-boundary fallback
+→ explicit fallback when context is unavailable
+```
 
-- what happened;
-- who is involved;
-- why it matters;
+The 500-character bound is a presentation limit.
 
-without immediately opening every article.
+It does not change:
 
-The next information-policy priority is therefore richer context.
+- the stored normalized description;
+- classification evidence;
+- ranking evidence;
+- source selection;
+- the 5-items-per-domain cap;
+- the 30-items-total cap.
 
-This does not automatically imply:
+## Phase 5 Metadata Audit Findings
 
-- scraping full articles;
-- using LLM summaries;
-- storing copyrighted bodies;
-- adding paid APIs;
-- expanding descriptions indiscriminately.
+The source-metadata audit showed that the former 300-character limit was not the main context constraint across most sources.
 
-The design problem should begin from:
+Observed source patterns included:
 
-- current feed metadata;
-- persistence rights;
-- source-by-source metadata richness;
-- deterministic extraction opportunities;
-- report-length constraints;
-- fallback behavior.
+```text
+BBC World / BBC Business
+→ concise descriptions, generally below 300 characters
 
-Source metadata quality should be treated as an input to the richer-context design.
+European Commission Highlighted News
+→ bounded descriptions, generally below 300 characters
+
+OpenAI News
+→ concise descriptions, generally below 300 characters
+
+MIMIT News
+→ short normalized descriptions
+
+Tech Europe Foundation
+→ descriptions commonly around 450–550 characters
+
+Lavoce.info Imprese
+→ descriptions around 330–360 characters
+
+ISPI Geoeconomics
+→ some descriptions above 300 characters
+
+ECB
+→ no usable description in the tested sample
+
+Federal Reserve
+→ descriptions often title-like
+
+Google DeepMind
+→ description availability partial
+```
+
+The audit also found richer RSS `content` fields for some sources, including:
+
+- Istat;
+- Tech.eu;
+- Tech Europe Foundation;
+- ISPI Geoeconomics.
+
+Those fields were often thousands of characters long and body-like.
+
+Current policy therefore rejects generic use of RSS `content` for report enrichment.
+
+## Minimum Useful Context
+
+Where the source provides sufficient metadata, source context should allow the reader to identify:
+
+- the core development;
+- the relevant actor or object;
+- at least one material qualifier where available, such as:
+  - scale;
+  - consequence;
+  - rationale;
+  - next step;
+  - constraint;
+  - strategic or economic significance.
+
+This is a manual product-quality rubric.
+
+It is not an automated score.
+
+## Provenance
+
+The report label is:
+
+```text
+Source context
+```
+
+rather than:
+
+```text
+Summary
+```
+
+because the text is publisher/source-provided metadata and may be:
+
+- a summary;
+- an abstract;
+- a teaser;
+- a short description.
+
+The system must not imply that the text is independently authored or AI-generated.
+
+## Missing or Title-Duplicate Context
+
+When the description is missing or duplicates the title, render:
+
+```text
+No additional source-provided context available.
+```
+
+This is intentionally transparent.
+
+Do not fabricate context to make every report entry appear equally rich.
+
+## Truncation Policy
+
+Current maximum rendered source context:
+
+```text
+500 characters
+```
+
+If the description fits within the limit:
+
+```text
+render unchanged
+```
+
+If it exceeds the limit:
+
+```text
+prefer the last complete sentence within the bound
+→ otherwise cut at the last word boundary
+→ append ... for word-boundary truncation
+```
+
+The objective is to avoid awkward mid-word cuts while keeping report length bounded.
+
+## Persistence Boundary
+
+The richer-context requirement does not relax the public-repository persistence policy.
+
+Do not generically persist or render:
+
+- full article bodies;
+- large RSS `content` payloads;
+- authenticated premium content;
+- first paragraphs scraped from article pages.
+
+The current solution uses only the existing normalized feed description.
+
+## Source-Quality Boundary
+
+The system should not guess repairs to malformed publisher metadata.
+
+During Phase 6 validation:
+
+- BBC and OpenAI raw descriptions, normalized descriptions, persisted JSONL and Markdown files were confirmed correctly spaced;
+- apparent joined words in copied terminal output were a presentation artefact rather than a pipeline defect;
+- Tech.eu malformed spacing was confirmed to exist in the raw RSS description itself.
+
+Current policy:
+
+> **Do not add generic text-repair heuristics for defects that originate in publisher metadata or have not been reproduced in the system's own transformation layer.**
+
+## Deferred Enrichment Methods
+
+The following remain deferred:
+
+- article-page metadata extraction;
+- first-paragraph extraction;
+- generic RSS body-content ingestion;
+- LLM summarisation;
+- a new persisted context field.
+
+Reconsider them only if repeated real report use shows that the current bounded source-description approach creates material information loss.
 
 ---
 
@@ -2280,7 +2520,9 @@ Reconsider only if deterministic classification demonstrably fails important use
 
 ## LLM Summarisation
 
-Reconsider only if richer context cannot be delivered safely and sufficiently through deterministic/public metadata.
+The current richer-context requirement has been satisfied without LLM summarisation.
+
+Reconsider only if repeated real report use demonstrates a material context gap that cannot be solved through safer deterministic/public metadata.
 
 Any future AI enhancement must remain:
 
@@ -2314,11 +2556,30 @@ This does **not** mean:
 - all premium sources are automated;
 - no future source work is needed.
 
-It means the information universe is strong enough to support the next product-design phase.
+It means the information universe is strong enough to support the current richer-report MVP and evidence-driven future iteration.
 
 ---
 
 # Changelog
+
+## 2026-08-19 — Richer-Context Metadata and Persistence Policy Implemented
+
+- Closed the richer-report metadata-design question for the current MVP.
+- Replaced the former approximately 300-character report-description policy with a 500-character bounded `Source context` policy.
+- Recorded that 300 characters was not the dominant context limitation across most sources, but unnecessarily truncated useful TEF, Lavoce.info and some ISPI descriptions.
+- Added the Minimum Useful Context rubric for manual product-quality review.
+- Added explicit `Source context` provenance rather than implying AI-generated or independently authored summaries.
+- Added the transparent fallback `No additional source-provided context available.` for missing or title-duplicate descriptions.
+- Recorded deterministic complete-sentence truncation with word-boundary fallback.
+- Preserved existing 5-items-per-domain and 30-items-total report caps.
+- Preserved existing classification, ranking and JSONL persistence semantics.
+- Recorded that richer RSS `content` fields are not generically used because several tested sources expose body-like payloads thousands of characters long.
+- Kept article-page extraction, first-paragraph extraction, generic RSS body-content ingestion, a new context field and LLM summarisation deferred.
+- Added the source-quality boundary that malformed publisher metadata should not trigger speculative generic text repair.
+- Recorded Phase 6 validation showing BBC/OpenAI spacing was correct through raw feed, normalized data, JSONL and Markdown, while malformed Tech.eu spacing originated in the raw RSS description.
+- Confirmed 20 feed-fixture tests, 14 report tests and 122 full-suite tests passed.
+- Confirmed a successful 13-source production-equivalent run with zero invalid records.
+- Reframed future source or context work as evidence-triggered rather than automatically queued.
 
 ## 2026-08-18 — Thirteen-Source / Phase-4 Source-Research Closure
 

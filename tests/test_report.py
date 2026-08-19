@@ -186,7 +186,7 @@ def test_report_contains_header_and_story() -> None:
     ) in report
     assert "**Source:** Example Technology Source" in report
     assert "**Relevance score:** 5" in report
-    assert "Feed-provided description." in report
+    assert "**Source context:** Feed-provided description." in report
 
 
 def test_higher_ranked_story_is_displayed_first() -> None:
@@ -320,24 +320,127 @@ def test_missing_publication_time_is_visible() -> None:
     assert "Publication time unavailable" in report
 
 
-def test_description_is_truncated_to_configured_limit() -> None:
-    """Feed-provided descriptions respect report-length configuration."""
+def test_source_context_shorter_than_limit_is_unchanged() -> None:
+    """Short source context is rendered without truncation."""
+
+    description = "A complete source-provided description."
 
     report = render_report(
         records=[
             _record(
-                description="ABCDEFGHIJKLMNO",
+                description=description,
             )
         ],
         sources=[_source()],
         domains=_domains(),
-        config=_config(max_description_length=10),
+        config=_config(max_description_length=100),
         report_date="2026-08-10",
         generated_at=GENERATED_AT,
     )
 
-    assert "ABCDEFG..." in report
-    assert "ABCDEFGHIJKLMNO" not in report
+    assert f"**Source context:** {description}" in report
+
+
+def test_source_context_prefers_complete_sentence_before_limit() -> None:
+    """Long source context stops at a complete sentence when possible."""
+
+    description = (
+        "The first sentence explains the development. "
+        "The second sentence contains substantially more detail."
+    )
+
+    report = render_report(
+        records=[
+            _record(
+                description=description,
+            )
+        ],
+        sources=[_source()],
+        domains=_domains(),
+        config=_config(max_description_length=60),
+        report_date="2026-08-10",
+        generated_at=GENERATED_AT,
+    )
+
+    assert (
+        "**Source context:** "
+        "The first sentence explains the development."
+        in report
+    )
+    assert "second sentence" not in report
+
+
+def test_source_context_falls_back_to_word_boundary() -> None:
+    """Long context without sentence endings is cut at a word boundary."""
+
+    description = (
+        "Alpha beta gamma delta epsilon zeta eta theta"
+    )
+
+    report = render_report(
+        records=[
+            _record(
+                description=description,
+            )
+        ],
+        sources=[_source()],
+        domains=_domains(),
+        config=_config(max_description_length=30),
+        report_date="2026-08-10",
+        generated_at=GENERATED_AT,
+    )
+
+    assert "**Source context:** Alpha beta gamma delta..." in report
+    assert "epsil..." not in report
+
+
+def test_missing_source_context_is_explicit() -> None:
+    """Missing descriptions expose a transparent fallback."""
+
+    report = render_report(
+        records=[
+            _record(
+                description=None,
+            )
+        ],
+        sources=[_source()],
+        domains=_domains(),
+        config=_config(),
+        report_date="2026-08-10",
+        generated_at=GENERATED_AT,
+    )
+
+    assert (
+        "**Source context:** "
+        "No additional source-provided context available."
+        in report
+    )
+
+
+def test_title_duplicate_source_context_is_not_repeated() -> None:
+    """A description identical to the title is treated as no added context."""
+
+    title = "Federal Reserve issues FOMC statement"
+
+    report = render_report(
+        records=[
+            _record(
+                title=title,
+                description=title,
+            )
+        ],
+        sources=[_source()],
+        domains=_domains(),
+        config=_config(),
+        report_date="2026-08-10",
+        generated_at=GENERATED_AT,
+    )
+
+    assert (
+        "**Source context:** "
+        "No additional source-provided context available."
+        in report
+    )
 
 
 def test_secondary_domains_are_shown_without_repeating_story() -> None:

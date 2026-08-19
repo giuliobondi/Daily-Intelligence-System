@@ -55,7 +55,8 @@ The architecture should therefore prefer:
 - configuration-first source and domain changes where the existing pipeline already supports them;
 - conservative classification over forced coverage;
 - reuse of the existing `ArticleRecord` pipeline before introducing new record models;
-- source-specific complexity only when information value independently justifies it.
+- source-specific complexity only when information value independently justifies it;
+- presentation-layer improvements before expanding persistence or content-ingestion architecture when the user need can be solved there.
 
 The architecture should avoid:
 
@@ -75,7 +76,8 @@ The architecture should avoid:
 - complex frontend applications;
 - machine-learning components without a validated need;
 - source-specific parsing logic when a standard structured endpoint already works;
-- new processing paradigms introduced only to increase source count.
+- new processing paradigms introduced only to increase source count;
+- generic ingestion of article-body-like feed fields without a validated persistence and product requirement.
 
 ---
 
@@ -104,6 +106,11 @@ The current architecture supports:
 - deterministic ranking;
 - JSONL persistence;
 - deterministic Markdown report generation;
+- explicitly labelled source-provided report context;
+- bounded 500-character report context;
+- deterministic sentence-aware report truncation;
+- deterministic word-boundary fallback;
+- explicit missing-context fallback;
 - structured JSON run summaries;
 - pipeline orchestration;
 - one-command local execution;
@@ -127,7 +134,11 @@ The current architecture supports:
 
 Phase 3 automation architecture is complete.
 
-Phase 4 source/domain architecture has now been validated and the active source-expansion cycle has reached its current MVP stopping point.
+Phase 4 source/domain architecture has been validated and the active source-expansion cycle reached its current MVP stopping point.
+
+Phase 5 richer-report architecture design is complete.
+
+Phase 6 richer-report implementation has been locally validated.
 
 Phase 4 demonstrated five important architectural properties.
 
@@ -238,9 +249,32 @@ Assolombarda
 → no source-specific date recovery
 ```
 
+Phase 5 and Phase 6 added a sixth architectural property:
+
+> a validated information-quality problem should be solved at the narrowest layer that can satisfy the user need.
+
+For richer report context:
+
+```text
+existing ArticleRecord.description
+→ report-only formatting improvement
+```
+
+was sufficient.
+
+The implementation therefore did not introduce:
+
+- a new record model;
+- a new persisted context field;
+- generic RSS `content` ingestion;
+- article-page scraping;
+- LLM summarisation;
+- new classification evidence;
+- new ranking evidence.
+
 The active architectural priority is now:
 
-> **preserve the validated thirteen-source / ten-domain deterministic pipeline, reopen source architecture only against demonstrated product gaps, and design the smallest safe richer-report context mechanism.**
+> **preserve the validated thirteen-source / ten-domain deterministic pipeline, keep the richer-report implementation as a presentation-layer extension of the existing `ArticleRecord` architecture, and reopen source or advanced architecture only against demonstrated product gaps.**
 
 ---
 
@@ -286,6 +320,10 @@ Local execution and GitHub Actions invoke the same application pipeline.
 This remains an important architectural constraint:
 
 > local validation should exercise the same code path used by scheduled production.
+
+The richer-report implementation remains inside the same report-rendering path.
+
+There is no parallel enrichment pipeline.
 
 ---
 
@@ -390,7 +428,25 @@ Important conceptual models include:
 
 The article remains the core production record type.
 
-Do not introduce a separate event, opportunity or statistical record model without a validated requirement.
+The richer-report implementation deliberately preserves:
+
+```text
+ArticleRecord.description
+```
+
+as the only production field used for source-provided descriptive context.
+
+No separate:
+
+```text
+context
+summary
+report_context
+```
+
+field has been added.
+
+Do not introduce a separate event, opportunity, statistical or enriched-context record model without a validated requirement.
 
 Recent source audits strengthen this constraint rather than weaken it.
 
@@ -555,7 +611,7 @@ The current normalization path is:
 feed description
 → HTML-to-text cleanup
 → whitespace cleanup
-→ punctuation-safe normalized text
+→ normalized text
 → None if no meaningful text remains
 ```
 
@@ -567,17 +623,65 @@ The change followed the architectural rule:
 
 > when a source exposes a genuine general parsing defect, fix the common normalization layer rather than branching on source identity.
 
+### Richer-Report Boundary
+
+Phase 6 did **not** modify description normalization.
+
+The richer-report implementation consumes the description produced by the existing normalizer.
+
+Architecture:
+
+```text
+normalize once
+→ use normalized description for deterministic article evidence
+→ persist it
+→ format it separately for report presentation
+```
+
+This prevents report-display requirements from silently changing classification and ranking semantics.
+
+### Source-Provided Malformation Boundary
+
+The Phase 6 production validation exposed apparent spacing defects in some displayed text.
+
+Controlled diagnostics established two different cases.
+
+BBC/OpenAI examples:
+
+```text
+raw feed
+→ correct spacing
+
+normalizer
+→ correct spacing
+
+persisted JSONL
+→ correct spacing
+
+Markdown file
+→ correct spacing
+```
+
+The apparent joined words were caused by terminal/paste presentation rather than the production pipeline.
+
+Tech.eu examples showed:
+
+```text
+malformed spacing
+→ already present in raw RSS description
+```
+
+The architecture therefore did **not** add speculative generic word-repair heuristics.
+
+This reinforces:
+
+> do not modify shared normalization logic until the defect is demonstrated to originate in that logic.
+
 ### Timestamp Boundary
 
 The ESMA audit demonstrated an important limit.
 
-ESMA entries contain publication dates inside embedded HTML:
-
-```html
-<time datetime="...">
-```
-
-while standard RSS `published` / `updated` fields are absent.
+ESMA entries contain publication dates inside embedded HTML while standard RSS `published` / `updated` fields are absent.
 
 The existing normalizer correctly does **not** scrape arbitrary HTML fragments to synthesize a publication timestamp.
 
@@ -602,7 +706,8 @@ Normalisation should still not perform:
 - summarisation;
 - translation;
 - entity extraction;
-- source-specific article-body extraction.
+- source-specific article-body extraction;
+- speculative reconstruction of malformed publisher text.
 
 ---
 
@@ -625,9 +730,10 @@ That is acceptable.
 ESMA demonstrated this distinction:
 
 ```text
-10 records normalized
-0 normalization errors
-published_at = None
+records normalized
++
+no usable structured publication time
+→ structurally valid but not current-window eligible
 ```
 
 Structural normalization success is therefore not equivalent to production eligibility.
@@ -652,15 +758,7 @@ This preserves deterministic temporal semantics.
 
 Multiple audits reinforce this design.
 
-Assolombarda testing produced:
-
-```text
-0/15 usable publication timestamps
-```
-
-for both tested streams.
-
-ESMA similarly lacks standard feed publication timestamps.
+Assolombarda and ESMA both demonstrated that a technically collectable source without suitable structured publication timestamps is not automatically compatible with the current production architecture.
 
 The correct architectural response remains:
 
@@ -682,7 +780,7 @@ introduce a source-specific page/date parser
 
 Known limitation:
 
-GitHub Actions scheduling can start materially later than the nominal schedule, so the rolling 24-hour window moves with actual execution.
+GitHub Actions scheduling can start later than the nominal schedule, so the rolling 24-hour window moves with actual execution.
 
 A fixed reporting cutoff remains an open future design decision.
 
@@ -847,17 +945,6 @@ long description
 → extra relevance score
 ```
 
-Example behaviour included incidental matches for:
-
-```text
-parliament
-European Union
-European Commission
-European Parliament
-```
-
-inside an ESMA regulatory item.
-
 The architecture should not solve this with source-specific exclusions.
 
 Preferred responses are:
@@ -865,6 +952,8 @@ Preferred responses are:
 1. use a cleaner source/endpoint;
 2. improve a generic metadata boundary if independently justified;
 3. keep the source on standby.
+
+This risk is one reason the richer-report implementation does not copy long RSS `content` fields into `ArticleRecord.description`.
 
 ---
 
@@ -919,32 +1008,23 @@ broad keyword
 
 The DG Competition audit demonstrated this directly.
 
-Routine State-aid records often received:
-
-```text
-Tier 1 source score = 4
-Europe/EU domain    = 2
-European Commission keyword = 1
-total = 7
-```
-
-That made low-priority notices competitive with stronger existing Europe/EU stories.
-
 The architectural response was:
 
 ```text
 do not activate the broad feed
 ```
 
-not:
+rather than:
 
 ```text
-add a DG-specific ranking penalty
+add a source-specific ranking penalty
 ```
 
 This reinforces:
 
 > fix source evidence before ranking complexity.
+
+The richer-report implementation does not affect relevance scoring because report formatting occurs after classification and ranking.
 
 ---
 
@@ -979,6 +1059,32 @@ A technically accessible source can still be unsuitable if it exposes:
 - excessive article body text;
 - content with unclear persistence rights;
 - private/authenticated content.
+
+### Richer-Report Persistence Boundary
+
+Phase 6 does not change JSONL persistence semantics.
+
+The report uses the same persisted normalized:
+
+```text
+description
+```
+
+field.
+
+The system does not persist a separate enlarged report context.
+
+Therefore:
+
+```text
+500-character report display limit
+≠
+500-character persistence limit
+```
+
+The existing normalized description remains stored as before.
+
+The 500-character bound applies only when rendering the Markdown report.
 
 ---
 
@@ -1029,15 +1135,64 @@ Report sections follow configured domain order.
 
 The report does not attempt semantic story clustering.
 
-Descriptions are currently truncated according to configuration.
+### Source-Context Rendering
 
-Current maximum:
+Phase 6 extends only the report presentation layer.
+
+The existing normalized:
 
 ```text
-300 characters
+ArticleRecord.description
 ```
 
-This is now the principal validated report-product limitation and is the next active architecture-design problem.
+remains the source of report context.
+
+The report renders it explicitly as:
+
+```text
+**Source context:** ...
+```
+
+Current maximum display length:
+
+```text
+500 characters
+```
+
+Formatting behaviour is deterministic:
+
+```text
+description missing
+or description == title
+→ explicit no-context fallback
+
+length <= 500
+→ render unchanged
+
+length > 500
+→ prefer a complete sentence within the bound
+→ otherwise truncate at the last word boundary
+→ append ... only for word-boundary truncation
+```
+
+Current fallback text:
+
+```text
+No additional source-provided context available.
+```
+
+This mechanism does not:
+
+- mutate `ArticleRecord.description`;
+- add a new context field;
+- change classification evidence;
+- change ranking evidence;
+- change JSONL persistence semantics;
+- use feed `content` fields;
+- fetch article pages;
+- call an LLM.
+
+The richer-report implementation is therefore a bounded presentation-layer transformation rather than a new content-ingestion architecture.
 
 ---
 
@@ -1101,7 +1256,9 @@ The pipeline:
 
 There is no parallel AI processing path.
 
-The richer-report phase should initially preserve this single pipeline unless a validated design requires a small generic extension.
+Phase 6 preserves this single pipeline.
+
+No enrichment orchestration stage was added.
 
 ---
 
@@ -1226,7 +1383,7 @@ validated narrow source
 
 This is intentionally more conservative than inventing broad lexical keywords.
 
-All ten domains are now sufficient for the current MVP boundary.
+All ten domains are sufficient for the current MVP boundary.
 
 This does not mean all ten are equally mature.
 
@@ -1299,8 +1456,18 @@ and:
 report:
   max_items_per_domain: 5
   max_total_items: 30
-  max_description_length: 300
+  max_description_length: 500
 ```
+
+`max_description_length` remains the historical configuration name.
+
+Its current role is:
+
+```text
+maximum rendered Source context length
+```
+
+It does not alter the stored `ArticleRecord.description`.
 
 Configuration remains preferred over code changes when source/domain additions fit the current processing model.
 
@@ -1462,20 +1629,6 @@ source identity
 
 for validated Italy-focused sources, while narrow bilingual keywords provide additional topical domains.
 
-Examples:
-
-```text
-tavoli di crisi
-accordo di sviluppo
-quadro industriale
-rilevanza strategica
-fusione e acquisizione
-piano industriale
-inflazione
-IA
-mercati dei capitali
-```
-
 ISPI is different:
 
 ```text
@@ -1522,19 +1675,6 @@ DeepMind integration required only:
 - source configuration;
 - configuration tests.
 
-Controlled classification review showed:
-
-```text
-100/100 DeepMind records
-→ Artificial Intelligence
-
-97/100
-→ AI only
-
-3/100
-→ sensible secondary domains through existing taxonomy
-```
-
 No DeepMind-specific keywords or ranking rules were needed.
 
 ISPI Geoeconomics can also produce AI/Technology records through ordinary keyword evidence.
@@ -1560,69 +1700,92 @@ No special AI processing layer is justified.
 
 # 12. Current Real Integration Evidence
 
-The latest controlled production-equivalent checkpoint validated thirteen active sources.
+The Phase 4 production checkpoint validated thirteen active sources and ten active domains.
 
-Observed 18 August 2026 run:
+The Phase 6 richer-report implementation was then validated against the same production architecture.
+
+Latest local production-equivalent validation on 19 August 2026:
 
 ```text
 13 active sources
 13 successful
 0 failed
 0 invalid
-0 warnings
 
-1442 valid records
-45 inside collection window
-43 unique
-37 unclassified
-6 displayed
+1448 valid records
+50 inside collection window
+45 unique
+28 unclassified
 
 status: success
 ```
 
-ISPI Geoeconomics collected:
+The exact inside-window, unique, unclassified and displayed counts can vary between same-day runs because the monitored window ends at actual execution time.
+
+The important architectural result is:
 
 ```text
-10 feed entries
-```
-
-No ISPI records appeared in the final processed/report output during that validation run because the current ISPI feed entries were outside the monitored publication window.
-
-This was expected and confirms:
-
-```text
-source successfully integrated
+same 13-source collection architecture
 +
-stale records do not leak into current output
-```
-
-Earlier Phase 4 runs also validated:
-
-```text
-Federal Reserve integration
-MIMIT + Italy integration
-Lavoce.info integration
-Google DeepMind integration
+same ArticleRecord processing model
++
+same deterministic classification/ranking/storage semantics
++
+richer report presentation
+→ successful production-equivalent run
 ```
 
 The full automated test suite passed:
 
 ```text
-118 passed
+122 passed
 ```
 
-The current integration evidence therefore demonstrates:
+Targeted report validation passed:
 
-- thirteen-source collection;
-- ten-domain configuration;
-- multiple source defaults;
-- two empty-keyword domains;
-- bilingual keyword classification;
-- general HTML description normalization;
-- deterministic ranking;
-- normal output generation;
-- absence of stale-record leakage;
-- configuration-only ISPI integration.
+```text
+14 passed
+```
+
+Targeted feed-fixture validation passed:
+
+```text
+20 passed
+```
+
+The richer-report validation additionally confirmed:
+
+- source context can be rendered without a new record field;
+- short descriptions remain unchanged;
+- missing descriptions receive an explicit fallback;
+- title-duplicate descriptions are not repeated;
+- sentence-aware truncation remains deterministic;
+- word-boundary fallback avoids mid-word cuts;
+- report caps remain unchanged;
+- classification/ranking output semantics remain unchanged;
+- no RSS body-content field is required;
+- no article-page retrieval is required;
+- no production AI dependency is introduced.
+
+A diagnostic review also separated two different text-quality cases:
+
+```text
+BBC / OpenAI examples
+→ raw feed text correct
+→ normalized text correct
+→ persisted JSONL correct
+→ Markdown file correct
+→ apparent joined words were terminal/paste display artefacts
+
+Tech.eu examples
+→ malformed spacing already present in raw RSS description
+→ source-quality limitation
+→ no speculative generic text-repair heuristic added
+```
+
+This reinforces the architecture rule:
+
+> only change a shared processing layer when the observed defect actually originates there and the correction is justified by evidence.
 
 ---
 
@@ -1861,6 +2024,12 @@ Therefore:
 
 > feed accessibility, metadata quality and persistence compatibility are independent gates.
 
+The Phase 5 metadata audit strengthens this boundary.
+
+Some active sources expose body-like RSS `content` fields containing thousands of characters.
+
+Those fields are not part of the current production persistence architecture.
+
 Do not introduce external storage until repository-native persistence becomes a measured limitation.
 
 ---
@@ -1901,7 +2070,7 @@ This remains the preferred validation mechanism before introducing more sophisti
 
 # 20. Report Architecture
 
-The report is intentionally simple Markdown.
+The report remains intentionally simple Markdown.
 
 It provides:
 
@@ -1918,73 +2087,286 @@ It provides:
 - publication time;
 - relevance score;
 - secondary domains;
-- truncated description.
+- explicitly labelled source-provided context.
 
 GitHub-hosted Markdown remains sufficient as the current delivery interface.
 
 Do not build a frontend until repository browsing becomes a demonstrated usability problem.
 
+Current report bounds are:
+
+```text
+maximum items per domain = 5
+maximum total items      = 30
+maximum source context   = 500 characters
+```
+
+The richer-context change does not alter report-selection caps.
+
+The architecture intentionally separates:
+
+```text
+selection / ranking
+```
+
+from:
+
+```text
+presentation of already-selected source context
+```
+
+This prevents richer display text from silently changing which stories are selected.
+
 ---
 
 # 21. Richer-Report Architecture
 
-The user need is validated:
+The richer-report architecture is implemented and locally validated.
 
-> reports should provide enough context to understand major developments without immediate click-through.
+Validated user need:
 
-Current description limit:
+> reports should provide enough context to understand major developments without immediate click-through when source metadata permits it.
 
-```text
-300 characters
-```
-
-Phase 4 source research has now reached the point where richer-report design has higher expected marginal product value than continuing a standing source-audit queue.
-
-Potential future solution order remains:
-
-1. richer RSS/Atom metadata;
-2. public structured summaries;
-3. official free APIs;
-4. narrowly permitted deterministic public extraction;
-5. more complex methods only if required.
-
-Do not assume LLM summarisation is necessary.
-
-The richer-report architecture must preserve:
-
-- zero recurring cost;
-- provenance;
-- copyright safety;
-- source transparency;
-- low maintenance;
-- bounded report length;
-- deterministic fallback behaviour.
-
-The next design task is not:
+The accepted architecture is:
 
 ```text
-increase description length
+existing normalized ArticleRecord.description
+→ report-only source-context formatter
+→ explicit provenance label
+→ bounded deterministic rendering
 ```
 
-in isolation.
+Current provenance label:
 
-It is:
+```text
+Source context
+```
 
-> **define the smallest lawful deterministic context mechanism that produces materially better understanding across heterogeneous source metadata.**
+Current display limit:
 
-Required design questions include:
+```text
+500 characters
+```
 
-- what minimum context should a report entry provide?
-- how long should report entries become?
-- which source metadata can be safely persisted?
-- which sources already provide sufficient metadata?
-- what happens when metadata is thin?
-- should context extraction differ by structured metadata shape?
-- how is provenance preserved?
-- what acceptance tests determine whether the richer report is genuinely better?
-- how is total report length kept manageable?
+## 21.1 Why 500 Characters
 
-Implementation should not begin until the design gate is passed.
+The Phase 5 metadata audit found that 300 characters was not the dominant context limitation across most sources.
+
+However, the 300-character cap unnecessarily truncated useful source descriptions from sources including:
+
+```text
+Tech Europe Foundation
+Lavoce.info Imprese
+some ISPI Geoeconomics items
+```
+
+The audit showed approximately:
+
+```text
+TEF
+→ descriptions commonly around 450–550 characters
+
+Lavoce.info Imprese
+→ descriptions around 330–360 characters
+
+ISPI Geoeconomics
+→ some descriptions above 300 characters
+```
+
+A 500-character bound was selected because it materially improves those cases while keeping entries bounded and avoiding a generic expansion into article-body text.
+
+A 600-character bound was not necessary to satisfy the validated need.
+
+The report item-count caps remain unchanged because historical reports were well below the existing 30-item maximum and richer context should be evaluated before increasing breadth.
+
+---
+
+## 21.2 Deterministic Formatting
+
+Current behaviour:
+
+```text
+if description is missing
+or normalized description equals title
+→ No additional source-provided context available.
+
+if description length <= max length
+→ render unchanged
+
+if description length > max length
+→ prefer a complete sentence that fits within the bound
+→ otherwise use the final word boundary
+→ append ... for word-boundary truncation
+```
+
+The formatter does not generate new factual content.
+
+The implementation is deterministic and testable.
+
+---
+
+## 21.3 Provenance
+
+The report uses:
+
+```text
+**Source context:**
+```
+
+rather than:
+
+```text
+Summary
+```
+
+because the text is publisher/source-provided metadata.
+
+Depending on the source, it may represent:
+
+- a summary;
+- an abstract;
+- a teaser;
+- a short description.
+
+The system does not claim that it is:
+
+- independently written analysis;
+- an AI-generated summary;
+- a verified article-body synopsis.
+
+This preserves transparent provenance.
+
+---
+
+## 21.4 Persistence and Evidence Boundary
+
+The richer-report implementation deliberately does **not** enrich `ArticleRecord.description` from feed `content` fields.
+
+Phase 5 source auditing found materially richer `content` fields for some sources, including:
+
+```text
+Istat
+Tech.eu
+Tech Europe Foundation
+ISPI Geoeconomics
+```
+
+These fields can contain thousands of characters and behave more like article bodies than bounded metadata.
+
+Using them generically would introduce two architectural risks:
+
+```text
+larger persisted copyrighted payloads
++
+more text entering deterministic classification/ranking
+```
+
+The existing description therefore remains the shared classification, ranking and persistence evidence field.
+
+The richer report transforms only how that existing field is displayed.
+
+This distinction is important:
+
+```text
+classification / ranking / storage
+→ existing normalized description
+
+report presentation
+→ bounded formatting of that same description
+```
+
+---
+
+## 21.5 Thin-Metadata Behaviour
+
+Some feeds expose little or no usable description metadata.
+
+Examples identified during the audit include:
+
+```text
+ECB
+→ no usable description in tested items
+
+Federal Reserve
+→ descriptions often title-like
+
+Google DeepMind
+→ description availability partial
+```
+
+The current architecture handles this transparently rather than inventing context.
+
+Fallback:
+
+```text
+No additional source-provided context available.
+```
+
+This fallback also creates a visible signal for whether future enrichment is genuinely needed.
+
+---
+
+## 21.6 Source-Quality Boundary
+
+The richer-report implementation does not include generic speculative repair of publisher text.
+
+Tech.eu testing demonstrated descriptions where malformed spacing already existed in the raw feed.
+
+The architecture preserves source-provided metadata rather than guessing word boundaries.
+
+A future source-specific or generic repair should require evidence that:
+
+- the defect originates in a deterministic transformation controlled by the system; or
+- a safe generic correction is supported across multiple valuable sources.
+
+---
+
+## 21.7 Rejected Richer-Context Alternatives
+
+The following were considered and rejected or deferred for the current MVP:
+
+```text
+300 → 600 character increase only
+→ broader than necessary
+→ does not solve thin metadata
+
+generic RSS content ingestion
+→ body-like payload and persistence/classification risk
+
+article-page metadata extraction
+→ deferred
+→ no validated need after simpler solution
+
+first-paragraph / article-body extraction
+→ unnecessary complexity and copyright risk
+
+LLM summaries
+→ recurring dependency, cost and provenance complexity
+
+new ArticleRecord context field
+→ unnecessary
+→ existing description is sufficient for current requirement
+```
+
+The accepted architecture is therefore intentionally smaller than the alternatives considered.
+
+---
+
+## 21.8 Acceptance Boundary
+
+The architecture is considered validated because:
+
+- report-specific tests pass;
+- the complete deterministic test suite passes;
+- a production-equivalent run succeeds across all thirteen active sources;
+- real report output was inspected;
+- report context is materially richer where source metadata permits it;
+- report length remains bounded;
+- provenance is explicit;
+- classification/ranking/storage semantics remain stable;
+- no new paid or AI-dependent production mechanism was introduced.
+
+Future context enrichment should reopen only when repeated report use demonstrates that bounded feed descriptions still create material information loss.
 
 ---
 
@@ -2040,6 +2422,10 @@ Ars Technica
 
 No premium publication is currently active through this exception.
 
+Richer-report work does not alter this boundary.
+
+The pipeline must not fetch premium article bodies merely to improve report context.
+
 ---
 
 # 23. Bank of Italy Structured-Data Architecture
@@ -2068,7 +2454,7 @@ Reason for deferral:
 - event-generation semantics have not been designed;
 - significance thresholds have not been validated;
 - additional state would be required;
-- richer-report context now has higher expected user value.
+- no current evidence shows this has higher value than using and evaluating the completed richer-report architecture.
 
 Bank of Italy BDS remains the strongest validated future use case.
 
@@ -2101,7 +2487,7 @@ Current TEF implementation deliberately remains within:
 ArticleRecord
 ```
 
-The Phase 4 audits now provide repeated evidence that:
+The Phase 4 audits provide repeated evidence that:
 
 ```text
 publication date
@@ -2207,10 +2593,10 @@ long page-like description
 
 ESMA validated this risk.
 
-The richer-report phase should therefore distinguish:
+The richer-report implementation therefore distinguishes:
 
 ```text
-more context
+more useful presentation context
 ```
 
 from:
@@ -2223,9 +2609,21 @@ persisting larger feed bodies
 
 The richer-context requirement does not override copyright rules.
 
+Current production remains limited to source-provided descriptions already carried through the standard `ArticleRecord` pipeline.
+
+The report may display up to:
+
+```text
+500 characters
+```
+
+from that existing description field.
+
+The implementation does not generically persist or render body-like RSS `content` payloads.
+
 Objective:
 
-> enough lawful context for initial understanding.
+> enough lawful source-provided context for initial understanding.
 
 Not:
 
@@ -2317,6 +2715,11 @@ ChatGPT / Copilot
 - deterministic ranking;
 - JSONL persistence;
 - Markdown reporting;
+- explicit `Source context` provenance;
+- 500-character bounded report context;
+- deterministic sentence-aware source-context truncation;
+- deterministic word-boundary fallback;
+- explicit missing/title-duplicate context fallback;
 - JSON run summaries;
 - pipeline orchestration;
 - CLI;
@@ -2349,14 +2752,17 @@ ChatGPT / Copilot
 
 ## Active Architectural Evaluation
 
-- richer-report context design;
-- source metadata richness;
-- safe persistence boundary for richer context;
-- richer-context fallback behaviour;
-- report-length target;
-- richer-context provenance;
-- richer-context acceptance tests;
-- reporting-window cutoff independence.
+No new architecture project is automatically active after the richer-report checkpoint.
+
+The next architecture change should be triggered by observed use.
+
+Potential evidence areas include:
+
+- whether bounded source context remains too thin in repeated real reports;
+- whether reporting-window cutoff dependence causes meaningful missed coverage;
+- whether same-story duplication materially harms reading quality;
+- whether opportunity/deadline semantics create real missed-opportunity cost;
+- whether source-health history becomes necessary for maintenance.
 
 Residual information-function gaps remain documented but are not active architecture projects unless new evidence emerges:
 
@@ -2381,11 +2787,14 @@ Residual information-function gaps remain documented but are not active architec
 - long-term source-health database;
 - advanced ranking;
 - automatic publisher-diversity penalties;
+- article-page context extraction;
+- generic RSS body-content ingestion;
 - LLM summarisation;
 - authenticated premium ingestion;
 - authenticated Bocconi ingestion;
 - source-specific ranking rules;
 - source-specific publication-date recovery;
+- speculative source-text repair;
 - hidden/internal API reverse engineering;
 - access-control bypass;
 - dashboards;
@@ -2429,7 +2838,8 @@ Known limitations include:
 - no opportunity-state model exists;
 - no deadline persistence exists;
 - no long-term source-health database exists;
-- report descriptions remain capped at 300 characters;
+- report source context remains bounded at 500 characters and therefore cannot create information that the source does not provide;
+- some sources provide no description, title-like descriptions or malformed publisher metadata;
 - scheduled execution time influences the collection window;
 - repository-native storage creates strict copyright/persistence requirements for candidate sources;
 - malformed feeds are not generically repaired if the resulting content is unsuitable for persistence;
@@ -2653,24 +3063,36 @@ The current decision remains:
 
 ## Richer Report
 
-Validated product need.
+Validated and implemented.
+
+Current architecture:
+
+```text
+ArticleRecord.description
+→ report-only formatter
+→ Source context provenance
+→ 500-character bound
+→ sentence-aware truncation
+→ word-boundary fallback
+→ explicit no-context fallback
+```
 
 Status:
 
-> **active architecture-design problem; implementation gate not yet passed.**
+> **architecture gate passed and implementation locally validated.**
 
-The source-expansion cycle no longer blocks the design phase.
+No additional context-ingestion architecture is approved.
 
-The next work should define:
+Reopen this decision only if repeated real report use demonstrates that source-provided descriptions remain materially insufficient.
 
-- context requirement;
-- source metadata availability;
-- persistence/copyright boundary;
-- fallback behaviour;
-- report-length target;
-- provenance;
-- deterministic candidate approaches;
-- acceptance tests.
+Potential future escalation order remains:
+
+1. better public structured metadata;
+2. source replacement;
+3. narrowly justified public article metadata extraction;
+4. more complex methods only if simpler options fail.
+
+Generic RSS body-content ingestion and LLM summarisation remain deferred.
 
 ---
 
@@ -2765,8 +3187,7 @@ Evidence:
 - ISPI Geoeconomics added;
 - bilingual classification validated;
 - generic HTML description normalization added;
-- full real thirteen-source pipeline executed successfully;
-- 118-test full suite passed.
+- full real thirteen-source pipeline executed successfully.
 
 This proves:
 
@@ -2805,33 +3226,44 @@ Information breadth may still improve without reopening the architecture gate.
 
 ## Gate G — Richer Report Architecture
 
-**Status: active design gate / not yet passed**
+**Status: passed**
 
-The user need is validated.
+The richer-report design and implementation gate is complete for the current MVP.
 
-The source/domain universe is now sufficiently mature to begin architecture design.
+Validated design decisions:
 
-Required before implementation:
+- source-provided description remains the context source;
+- no new `ArticleRecord` field;
+- no generic RSS `content` ingestion;
+- no article-page scraping;
+- no LLM summarisation;
+- explicit `Source context` provenance;
+- 500-character display bound;
+- sentence-aware deterministic truncation;
+- word-boundary fallback;
+- transparent missing/title-duplicate fallback;
+- report item caps remain unchanged;
+- classification/ranking/storage semantics remain unchanged.
 
-- exact context requirement;
-- source metadata audit;
-- copyright/access boundary;
-- premium-source fallback behaviour;
-- output-length target;
-- provenance design;
-- deterministic candidate approach comparison;
-- fallback behaviour for thin metadata;
-- acceptance tests.
-
-The gate should now be worked directly.
-
-Do not begin production implementation merely by increasing:
+Validation evidence:
 
 ```text
-max_description_length
+20 feed-fixture tests passed
+14 report tests passed
+122 full-suite tests passed
+13/13 active sources successful in production-equivalent run
+0 invalid records
+git diff --check clean
+report output generated and manually inspected
 ```
 
-without first settling the information and persistence design.
+The gate demonstrates:
+
+> the existing `ArticleRecord` and persistence architecture can support materially richer report context through a small presentation-layer change.
+
+Future enrichment is not automatically approved.
+
+Reopen only if repeated report use demonstrates a material remaining context problem that the current bounded metadata approach cannot solve.
 
 ---
 
@@ -2847,7 +3279,8 @@ Possible future examples:
 - article-level geography;
 - statistical intelligence events;
 - deadline tracking;
-- advanced ranking.
+- advanced ranking;
+- article-page context enrichment.
 
 Entry requires:
 
@@ -2905,6 +3338,28 @@ repository-native historical data
 historical regression workflow
 ```
 
+Current report architecture:
+
+```text
+existing ArticleRecord.description
+→ explicit Source context label
+→ 500-character display bound
+→ sentence-aware truncation
+→ word-boundary fallback
+→ explicit no-context fallback
+```
+
+The richer-report layer is presentation-only:
+
+```text
+no new record model
+no new persisted context field
+no generic RSS body-content ingestion
+no article-page scraping
+no LLM summarisation
+no classification/ranking expansion
+```
+
 Current active source set:
 
 ```text
@@ -2942,11 +3397,10 @@ Current architectural direction:
 
 ```text
 preserve the 13-source / 10-domain production architecture
-→ reopen source work only against demonstrated report gaps
-→ avoid source-specific complexity without cross-source evidence
-→ keep ArticleRecord as the single production record model
-→ design the smallest safe richer-report context mechanism
-→ validate richer-context architecture before implementation
+→ preserve ArticleRecord as the single production record model
+→ preserve bounded deterministic report context
+→ observe real report use
+→ reopen source or architecture work only against demonstrated product cost
 ```
 
 Potential future architecture remains gated:
@@ -2964,6 +3418,9 @@ near-duplicate clusters
 metadata-only persistence
 → only if multiple high-value sources justify it
 
+article-page context extraction
+→ only if bounded feed context proves materially insufficient
+
 source-specific date recovery
 → not approved
 
@@ -2977,153 +3434,112 @@ The architecture should remain simple unless actual report usage proves otherwis
 
 # Changelog
 
+## 2026-08-19 — Richer-Report Architecture Implemented and Validated
+
+- Closed richer-report Architecture Gate G for the current MVP.
+- Preserved `ArticleRecord.description` as the only production context field.
+- Increased configured report context display bound from 300 to 500 characters.
+- Added explicit `Source context` provenance in report rendering.
+- Added transparent fallback when source context is missing or duplicates the title.
+- Added deterministic sentence-aware truncation with word-boundary fallback.
+- Kept maximum report breadth unchanged at 5 items per domain and 30 items total.
+- Confirmed the richer-report change is presentation-only and does not alter classification, ranking or JSONL persistence semantics.
+- Rejected generic use of RSS `content` fields after metadata auditing showed body-like payloads for several sources.
+- Kept article-page extraction, first-paragraph extraction and LLM summarisation deferred.
+- Confirmed source metadata limitations remain visible rather than being hidden by fabricated or speculative repair.
+- Diagnosed apparent BBC/OpenAI spacing defects and confirmed raw feeds, normalized descriptions, persisted JSONL and Markdown files were correct; terminal/paste presentation caused the apparent joining.
+- Confirmed malformed Tech.eu spacing is already present in raw RSS descriptions and did not add speculative generic word-repair logic.
+- Validated the implementation with:
+  - 20 feed-fixture tests passed;
+  - 14 report tests passed;
+  - 122 full-suite tests passed;
+  - clean `git diff --check`;
+  - successful production-equivalent run across all 13 active sources;
+  - 0 invalid records;
+  - manual inspection of generated report output.
+- Reframed future architecture work as evidence-triggered rather than automatically proceeding to another feature or source-expansion phase.
+
 ## 2026-08-18 — Thirteen-Source / Phase-4 Closure Architecture Checkpoint
 
 - Reconciled architecture with the validated thirteen-source / ten-domain production state.
 - Added ISPI Geoeconomics to the active source architecture.
-- Recorded ISPI as a Tier 3 configuration-only integration with:
-  - no source-default domains;
-  - no new taxonomy terms;
-  - no source-specific parser;
-  - no ranking exception.
+- Recorded ISPI as a configuration-only integration requiring no source-specific parser, record model or ranking exception.
 - Recorded successful ISPI real-collector and normalization testing.
-- Recorded the final thirteen-source production-equivalent validation:
-  - 13 active;
-  - 13 successful;
-  - 0 failed;
-  - 0 invalid;
-  - 0 warnings;
-  - 1442 valid;
-  - 45 inside collection window;
-  - 43 unique;
-  - 37 unclassified;
-  - 6 displayed.
-- Recorded `118 passed` as the current full-suite validation checkpoint.
-- Recorded that current ISPI items were outside the monitored window and did not leak stale records into the processed/report output.
-- Recorded ISPI Business Events as evidence that publication time, event date and actionability date can diverge.
+- Recorded that stale ISPI records did not leak into current-window output.
 - Preserved `ArticleRecord` as the only production record model.
-- Kept opportunity/deadline architecture deferred despite stronger evidence of the semantic mismatch.
-- Recorded DG Competition as evidence against source-specific ranking/filtering:
-  - broad official RSS technically works;
-  - high-value M&A/antitrust signal exists;
-  - routine State-aid items receive excessive Europe/EU ranking evidence;
-  - no narrow official RSS route was found;
-  - no DG-specific filter or ranking penalty added.
-- Recorded ESMA as evidence against source-specific timestamp recovery:
-  - feed collection works;
-  - standard publication timestamps absent;
-  - dates embedded in HTML;
-  - normalized descriptions are unusually long;
-  - incidental keywords inflate classification/ranking;
-  - no ESMA-specific parser added.
-- Recorded Italian Tech Alliance as evidence that technically clean structured feeds may still fail product-quality thresholds because of thin/repetitive metadata.
-- Recorded Bocconi Career Services as evidence that high-value professional information may legitimately remain manual/private where the actionable layer is authenticated.
-- Recorded Fintech District as evidence against reverse-engineering hidden application APIs when no clean RSS/API exists.
-- Recorded Camera di Commercio Milano Monza Brianza Lodi as evidence against bypassing access-control/interstitial systems.
-- Reframed Milan/Bocconi architecture as MVP-sufficient but deliberately incomplete, with a documented public-source/current-architecture ceiling.
-- Closed the active Phase 4 source-expansion architecture cycle for the current MVP boundary.
-- Changed Gate G from a future post-source-research gate to the active architecture-design problem.
-- Preserved richer-report implementation as unapproved until context, metadata, persistence, provenance, fallback and acceptance-test requirements are defined.
-- Reframed the active architectural priority from source expansion to richer-report context design.
+- Kept opportunity/deadline architecture deferred.
+- Recorded DG Competition as evidence against source-specific ranking/filtering.
+- Recorded ESMA as evidence against source-specific timestamp recovery.
+- Recorded Italian Tech Alliance as evidence that technically clean feeds may still fail product-quality thresholds.
+- Recorded Bocconi Career Services as evidence that valuable professional information may legitimately remain manual/private where the actionable layer is authenticated.
+- Recorded Fintech District as evidence against reverse-engineering hidden application APIs.
+- Recorded Camera di Commercio Milano as evidence against bypassing access-control systems.
+- Reframed Milan/Bocconi architecture as MVP-sufficient but deliberately incomplete.
+- Closed the active Phase 4 source-expansion architecture cycle.
+- Moved richer-report architecture into the next active design gate.
 
 ## 2026-08-18 — Twelve-Source / Ten-Domain Architecture Checkpoint
 
-- Reconciled architecture with the validated twelve-source / ten-domain production state.
-- Added Federal Reserve Board Monetary Policy to the active source architecture.
-- Added MIMIT News to the active source architecture.
-- Added Lavoce.info Imprese to the active source architecture.
-- Added Google DeepMind News to the active source architecture.
+- Added Federal Reserve Board Monetary Policy.
+- Added MIMIT News.
+- Added Lavoce.info Imprese.
+- Added Google DeepMind News.
 - Added Italy as the tenth implemented domain.
 - Recorded Italy as a source-defined empty-keyword domain.
 - Recorded MIMIT and Lavoce.info Italy source defaults.
 - Recorded bilingual deterministic keyword classification as production-validated.
 - Added the intentional uppercase Italian AI acronym `IA`.
-- Recorded Federal Reserve Financial Markets keyword integration.
-- Recorded MIMIT and Lavoce.info keyword regression as examples of the historical-regression architecture.
-- Added generic HTML-to-text feed-description normalization after the MIMIT integration.
-- Recorded that the fix was general rather than source-specific.
+- Added generic HTML-to-text feed-description normalization after MIMIT exposed a general normalization requirement.
 - Recorded Google DeepMind as the second Tier 1 frontier-lab source.
-- Recorded that DeepMind required configuration/test changes only.
-- Removed the stale DeepMind "source audit pending" architecture assumption.
 - Marked Italy Architecture Gate F as passed.
-- Recorded the latest twelve-source production-equivalent validation:
-  - 12 active;
-  - 12 successful;
-  - 0 failed;
-  - 0 invalid;
-  - 0 warnings.
-- Recorded Bruegel as evidence against blindly hardening the parser when useful feeds also expose full-content payloads.
-- Recorded Assolombarda as evidence against source-specific publication-date recovery or retrieval-time substitution.
-- Added metadata-only persistence as an explicit but unapproved future architecture question.
-- Added source-specific date recovery as an explicit but unapproved future architecture question.
-- Reframed the active architecture problem from "validate Italy / diversify AI" to "audit the remaining information-function gaps using the existing architecture."
-- Preserved richer-report architecture as deferred, but moved it closer to explicit comparison against further source expansion.
-- Recorded selective Copilot use as development assistance only, never as a production dependency.
+- Recorded Bruegel as evidence against blindly hardening parsing where useful feeds also expose full-content payloads.
+- Recorded Assolombarda as evidence against source-specific publication-date recovery.
+- Added metadata-only persistence and source-specific date recovery as explicit but unapproved future architecture questions.
+- Preserved selective Copilot use as development assistance only.
 
 ## 2026-08-17 — TEF / Milan-Bocconi and Multilingual Classification Architecture
 
-- Reconciled architecture with the pushed eight-source / nine-domain production checkpoint.
-- Added Tech Europe Foundation as the eighth active RSS source.
-- Added Milan and Bocconi Ecosystem as the ninth implemented domain.
-- Added support for domain configurations with empty keyword lists.
+- Added Tech Europe Foundation.
+- Added Milan and Bocconi Ecosystem.
+- Added support for empty domain keyword lists.
 - Recorded source-defined domains as a supported deterministic architecture.
 - Recorded TEF's Milan/Bocconi source default.
-- Recorded that the TEF implementation reused the standard `ArticleRecord` pipeline and required no scraper, event model, deadline engine or source-specific collector.
-- Recorded full production-equivalent eight-source pipeline validation.
-- Recorded the 8/8 successful-source result.
-- Recorded that TEF correctly contributed no stale records outside the 24-hour publication window.
+- Preserved the standard `ArticleRecord` pipeline.
 - Added deterministic case semantics for configured keywords.
-- Recorded intentional case-sensitive `AI` matching to avoid Italian `ai` false positives.
-- Recorded that historical English AI recall was preserved.
-- Reframed Source/Domain Expansion Gate E as architecturally passed while information-universe expansion remained active.
-- Added Bank of Italy BDS as the strongest validated future statistical-event architecture use case.
-- Added opportunity/deadline state tracking as a future architecture gated by real Milan/Bocconi evidence.
-- Added Italian Tech Alliance as a possible future near-duplicate evidence source without approving clustering.
-- Preserved richer-report architecture as deferred.
+- Recorded case-sensitive `AI` matching to avoid Italian `ai` false positives.
+- Added Bank of Italy BDS as a future statistical-event use case.
+- Added opportunity/deadline state tracking as a future gated architecture question.
+- Kept near-duplicate clustering deferred.
 
 ## 2026-08-17 — Phase 4A Source and Domain Architecture Validation
 
-- Replaced Sifted with Tech.eu in the active source registry.
-- Recorded the controlled Tech.eu/Sifted comparison.
-- Recorded 20/20 Tech.eu descriptions versus 0/24 Sifted descriptions in the tested samples.
-- Recorded that source replacement was driven by product metadata/access quality rather than parser compatibility.
-- Recorded Tech.eu as a broad Tier 2 source with no default domain.
-- Added Financial Markets as the eighth implemented domain.
-- Recorded that Financial Markets required configuration only and no processing-module changes.
-- Added the evidence-backed classification changes `tariffs`, `acquired`, `early-stage fund` and `funding market`.
-- Recorded removal of generic `startup`.
-- Added the architectural warning that near-synonymous keywords may independently increase score.
-- Added the historical regression pattern as a reusable source/taxonomy validation mechanism.
-- Recorded the real 17 August 2026 pipeline validation.
+- Replaced Sifted with Tech.eu.
+- Added Financial Markets.
+- Recorded that Financial Markets required configuration only.
+- Established historical regression as a reusable taxonomy-validation method.
 - Established that classification percentage is not an architectural KPI.
-- Added the narrow Premium Bocconi Exception while preserving the existing authentication prohibition.
-- Upgraded Milan/Bocconi from candidate to validated product requirement.
-- Recorded the preference to reuse the existing `ArticleRecord` pipeline for future Milan/Bocconi inputs before creating new event/opportunity architecture.
-- Preserved ranking weights, report settings and core processing modules unchanged.
+- Added the narrow Premium Bocconi Exception while preserving the authentication prohibition.
+- Upgraded Milan/Bocconi from candidate to fixed product requirement.
+- Preserved ranking weights and core processing modules.
 
 ## 2026-08-14 — Phase 3 Automation Architecture Completed
 
-- Reconciled architecture with completed GitHub Actions production automation.
 - Added `.github/workflows/daily-intelligence.yml`.
 - Recorded manual `workflow_dispatch`.
 - Recorded scheduled execution.
-- Recorded current 06:05 Europe/Rome production schedule.
+- Recorded the 06:05 Europe/Rome schedule.
 - Recorded Python 3.12 hosted execution.
-- Recorded full automated test execution before production processing.
-- Recorded explicit workflow timeout.
-- Recorded `contents: write` production permission.
+- Recorded full automated testing before production processing.
+- Recorded workflow timeout and `contents: write` permission.
 - Recorded output validation before persistence.
 - Recorded automated bot persistence.
 - Recorded no-change commit protection.
 - Recorded critical configuration failure validation.
 - Recorded degraded source publication validation.
 - Recorded concurrency protection.
-- Recorded GitHub scheduler latency.
-- Recorded scheduler-latency/report-window coupling as an open architecture decision.
-- Added richer-report architecture as a validated later design problem.
-- Added automated public / Bocconi premium reading / research-database separation.
+- Recorded GitHub scheduler latency and its coupling with the rolling report window.
+- Added automated-public / Bocconi-premium-reading / research-database separation.
 - Explicitly prohibited authenticated premium-content ingestion.
-- Added source/domain expansion as the next active architectural work.
 
 ## 2026-08-11 — Phase 2 Real-Source Architecture Validated
 
@@ -3138,7 +3554,6 @@ The architecture should remain simple unless actual report usage proves otherwis
 - Kept retry logic absent.
 - Added support for empty source defaults.
 - Recorded narrow-vs-broad source-default policy.
-- Added evidence-based politics keyword refinement.
 - Validated real publication timestamps.
 - Validated partial-source degradation.
 

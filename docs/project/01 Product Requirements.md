@@ -216,7 +216,8 @@ The current production system provides:
 - daily Markdown reports;
 - JSON run summaries;
 - automated GitHub persistence;
-- visible degraded/failure status.
+- visible degraded/failure status;
+- richer bounded source context in report entries.
 
 Current active sources:
 
@@ -251,16 +252,15 @@ All ten strategic macroareas now have an implemented production domain.
 
 The system is operational.
 
-The main remaining limitation is no longer basic automation, missing domain implementation or an obviously incomplete source-discovery cycle.
+The main remaining limitation is no longer basic automation, missing domain implementation, an obviously incomplete source-discovery cycle, or the former 300-character report-context cap.
 
-It is:
+Current residual limitations are primarily:
 
-> **uneven information depth together with insufficient context inside otherwise useful report entries.**
-
-Known residual information gaps remain in:
-
-- global Companies and Corporate Strategy;
-- broader Financial Markets beyond monetary-policy evidence;
+- uneven information depth across some domains;
+- thin or missing source-provided metadata for some publishers;
+- malformed source metadata in isolated feeds;
+- incomplete global Companies and Corporate Strategy coverage;
+- broader Financial Markets coverage beyond monetary-policy evidence;
 - independent AI and technology reporting;
 - independent European economic-policy interpretation;
 - Startups/VC diversification;
@@ -268,9 +268,11 @@ Known residual information gaps remain in:
 
 These gaps should remain visible.
 
-They do not all need to be eliminated before the product can move to richer-report design.
+The latest richer-report design and implementation cycle established that report context can be materially improved without adding article scraping, LLM summaries, new record fields or additional recurring cost.
 
-The latest controlled source-audit cycle demonstrated that several high-value missing roles are constrained by:
+The current product therefore uses bounded source-provided context in the report while preserving existing classification, ranking and storage semantics.
+
+The latest controlled source-audit cycle also demonstrated that several high-value missing information roles remain constrained by:
 
 - absence of suitable narrow public structured feeds;
 - persistence restrictions;
@@ -294,7 +296,7 @@ Current report fields include:
 - relevance score;
 - primary domain;
 - secondary domains when present;
-- source-provided description;
+- explicitly labelled source-provided context;
 - run metadata.
 
 Current report limits:
@@ -302,6 +304,7 @@ Current report limits:
 ```text
 maximum items per domain = 5
 maximum total items      = 30
+maximum source context   = 500 characters
 ```
 
 These are upper bounds, not targets.
@@ -309,6 +312,10 @@ These are upper bounds, not targets.
 A sparse report is acceptable if few genuinely useful items exist.
 
 The system should not fill space with low-value stories simply to reach a quota.
+
+Source context should remain bounded and presentation-focused.
+
+The report should not imply that source-provided context is AI-generated analysis or an independent editorial summary.
 
 ---
 
@@ -1488,17 +1495,7 @@ Future work should be triggered by actual missed-opportunity cost.
 
 # 30. Richer Context Requirement
 
-The current report often provides too little context below the relevance score.
-
-Current description limit:
-
-```text
-300 characters
-```
-
-The validated desired behaviour is:
-
-> **The report should provide enough lawful context to understand the core development without requiring immediate click-through.**
+The report should provide enough lawful source-provided context to understand the core development without requiring immediate click-through when the source metadata permits it.
 
 The target workflow is:
 
@@ -1516,49 +1513,85 @@ read headline
 → discover what happened
 ```
 
-This is a validated product requirement.
+This is a validated and implemented product requirement.
 
-The source/domain universe has now reached the current MVP maturity threshold required to begin richer-context design.
+The accepted report behaviour is:
 
-The next product-design priority is therefore:
+```text
+source-provided description
+→ preserve unchanged when already within the display limit
+→ otherwise prefer a complete sentence before the limit
+→ otherwise fall back to a word boundary
+→ never exceed the configured display limit
+```
 
-> **Define the smallest safe deterministic mechanism that materially increases report context while preserving zero recurring cost, source transparency and public-repository safety.**
+Current display limit:
 
-This does not mean implementation should begin before the design gate is resolved.
+```text
+500 characters
+```
+
+The former 300-character limit was found not to be the main context constraint across most sources, but it unnecessarily truncated useful descriptions from several feeds.
+
+The 500-character limit was selected because it captures materially more context from sources such as Tech Europe Foundation, Lavoce.info and ISPI while keeping report entries bounded.
+
+Minimum Useful Context should allow the reader, where the source provides enough metadata, to identify:
+
+- the core development;
+- the relevant actor or object;
+- at least one material qualifier such as scale, consequence, rationale, next step, constraint or strategic/economic significance.
+
+This is a manual product-quality rubric rather than an automated scoring requirement.
 
 ---
 
 # 31. Richer Context Constraints
 
-Future richer-report design must preserve:
+Richer report context must preserve:
 
 - zero recurring cost;
 - copyright safety;
 - source attribution;
 - provenance;
 - no premium article-body scraping;
-- no production AI dependency unless explicitly justified later;
+- no production AI dependency;
 - manageable total report length;
-- transparent source-specific fallback behaviour.
+- deterministic behaviour;
+- transparent fallback when metadata is thin.
 
-Preferred solution order:
+The accepted production mechanism is deliberately narrow:
 
-1. richer feed metadata;
-2. public structured summaries;
-3. official free APIs;
-4. narrowly permitted deterministic extraction;
-5. more complex mechanisms only if required.
+1. use the existing normalized source description;
+2. label it explicitly as `Source context`;
+3. render up to 500 characters;
+4. prefer complete-sentence truncation;
+5. otherwise truncate at a word boundary;
+6. show an explicit fallback when the description is missing or duplicates the headline.
 
-The design phase should explicitly determine:
+Current fallback text:
 
-- target context length;
-- what counts as sufficient understanding;
-- source-by-source metadata availability;
-- persistence boundaries;
-- fallback behaviour when metadata is thin;
-- report-length consequences;
-- provenance requirements;
-- quality acceptance tests.
+```text
+No additional source-provided context available.
+```
+
+The richer-context design does **not** require:
+
+- a new `context` field in the article model;
+- generic use of RSS `content` fields;
+- article-page scraping;
+- first-paragraph extraction;
+- LLM summarisation;
+- source-specific text repair heuristics;
+- changes to classification or ranking evidence.
+
+Body-like feed `content` fields may contain materially richer text for some sources, but they are not part of the current production solution because they can:
+
+- resemble article bodies rather than bounded metadata;
+- create public-repository persistence concerns;
+- distort deterministic classification/ranking if reused as evidence;
+- introduce unnecessary source-specific complexity.
+
+Malformed source-provided snippets should remain visible as source-quality limitations unless a clean structured alternative is validated.
 
 ---
 
@@ -1635,13 +1668,23 @@ Evaluation should inspect:
 - inaccessible links;
 - source concentration;
 - report length;
-- context quality.
+- context quality;
+- whether context ends cleanly;
+- whether missing context is exposed transparently;
+- whether richer context materially reduces unnecessary click-through;
+- whether source-provided snippets remain readable and bounded.
 
 Primary product question:
 
 > **Would reading this report make the user meaningfully better informed?**
 
-The richer-context phase should preserve this outcome-based evaluation rather than optimise only description length or item count.
+For richer-context evaluation, the product should also ask:
+
+> **Can the reader understand the core development from the report entry alone when the source provides enough metadata?**
+
+The system should not optimise only description length or item count.
+
+A report may be technically correct but still fail product acceptance if it becomes noisy, repetitive, misleading or excessively long.
 
 ---
 
@@ -2042,31 +2085,89 @@ source/domain correction and expansion
 
 Phase 5
 richer-report product design
+→ complete
 
 →
 
 Phase 6
 richer-report implementation and evaluation
+→ implemented and locally validated
 ```
 
 Phase 4 does not imply perfect information coverage.
 
-It has reached its stopping condition because:
+It reached its stopping condition because:
 
 - all ten domains are implemented;
-- the major first-order gaps have been investigated;
+- the major first-order gaps were investigated;
 - several differentiated sources were added;
 - several attractive sources were deliberately rejected or deferred;
 - Milan/Bocconi now has both meaningful automated coverage and a demonstrated public-source/current-architecture ceiling;
 - additional source work increasingly requires disproportionate complexity;
-- richer report context now affects more daily user value than another speculative source addition.
+- richer report context had become a higher-value improvement than another speculative source addition.
+
+Phase 5 is complete because the richer-context design question was resolved through a source-metadata audit and explicit comparison of simpler and more complex options.
+
+The selected design uses:
+
+```text
+existing normalized source description
++ explicit Source context provenance
++ 500-character display bound
++ sentence-aware truncation
++ word-boundary fallback
++ explicit no-context fallback
+```
+
+Phase 6 is implemented and locally validated because:
+
+- report-specific tests pass;
+- the full deterministic test suite passes;
+- a production-equivalent run completed successfully across all thirteen active sources;
+- generated report output was manually inspected;
+- classification/ranking/storage semantics were not expanded;
+- no paid, AI-dependent or scraping-based mechanism was introduced.
 
 Future source expansion remains allowed.
 
-It should now be reopened only when new evidence changes the expected value comparison.
+It should be reopened when real report use demonstrates a meaningful information gap with higher expected value than further report-quality refinement.
 
-The active product question becomes:
+The next product question should therefore come from observed use rather than an assumed feature roadmap.
 
-> **What is the smallest lawful, deterministic and zero-cost way to provide enough context for the user to understand selected developments without immediate click-through?**
+---
 
-Richer-report implementation must not begin until that design question has been resolved and appropriate acceptance tests have been defined.
+# 50. Acceptance Criteria — Richer Report Context
+
+The richer-report requirement is accepted when:
+
+- source-provided context is explicitly labelled;
+- short descriptions are preserved unchanged;
+- longer descriptions remain bounded at 500 characters;
+- truncation prefers a complete sentence when practical;
+- word-boundary truncation prevents mid-word cuts;
+- missing descriptions produce a transparent fallback;
+- title-duplicate descriptions are not repeated as context;
+- report item caps remain unchanged;
+- no article-body scraping is introduced;
+- no generic RSS body-content ingestion is introduced;
+- no production LLM summarisation is introduced;
+- no additional recurring monetary cost is introduced;
+- classification and ranking continue to use the existing article evidence model;
+- generated output remains readable and bounded in real production-equivalent runs.
+
+Current status:
+
+> **The richer-report acceptance threshold is met for the current MVP implementation.**
+
+Known limitations remain source-dependent.
+
+Some feeds provide:
+
+- no description;
+- very short descriptions;
+- descriptions that duplicate the headline;
+- malformed publisher-provided spacing or truncation.
+
+The product should expose those limitations transparently rather than fabricate context or introduce speculative text-repair heuristics.
+
+Future enrichment mechanisms should be reconsidered only if real use demonstrates that these source-level limitations create material decision or awareness costs.
