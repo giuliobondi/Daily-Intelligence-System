@@ -18,6 +18,20 @@ Each report includes the selected developments, original sources, relevance scor
 
 The project is still evolving. If you use the reports, critical feedback is especially useful — including missing sources, weak classifications, ranking issues, information gaps, or changes that would make the system more useful.
 
+## Design Philosophy
+
+This project was built with substantial AI assistance, but it deliberately does not use an AI-heavy production architecture.
+
+The current pipeline relies on deterministic Python logic for filtering, classification, ranking, deduplication and report generation. More complex components such as agents, RAG, embeddings, vector databases or machine-learning ranking are not excluded; they are deferred until real use demonstrates a problem they would meaningfully solve.
+
+The principle is simple:
+
+> **Use AI as leverage, but let the problem earn the complexity.**
+
+For this project, explainability, source transparency, zero recurring monetary cost, maintainability and predictable behaviour currently matter more than architectural sophistication.
+
+The system is therefore intended to evolve from evidence rather than from feature accumulation.
+
 ## README Guide
 
 This README is intentionally divided into two parts.
