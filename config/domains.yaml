@@ -12,6 +12,9 @@ domains:
       - war
       - conflict
       - parliament
+      - trade deal
+      - trade talks
+      - west bank
     active: true
 
   - id: economics_macroeconomics
@@ -26,6 +29,8 @@ domains:
       - public debt
       - economic forecast
       - inflazione
+      - national debt
+      - consumer expectations
     active: true
 
   - id: companies_corporate_strategy
