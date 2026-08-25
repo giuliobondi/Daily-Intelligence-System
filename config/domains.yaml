@@ -15,6 +15,8 @@ domains:
       - trade deal
       - trade talks
       - west bank
+      - state sponsors of terrorism
+      - trade dispute
     active: true
 
   - id: economics_macroeconomics
@@ -31,6 +33,7 @@ domains:
       - inflazione
       - national debt
       - consumer expectations
+      - tax rises
     active: true
 
   - id: companies_corporate_strategy
@@ -90,6 +93,8 @@ domains:
       - portfolio company
       - early-stage
       - scale up
+      - pre-series
+      - funding deals
     active: true
 
   - id: europe_eu

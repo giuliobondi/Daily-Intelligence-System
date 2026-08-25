@@ -76,12 +76,21 @@ def test_load_valid_domain_configuration() -> None:
     assert "early-stage" in startups.keywords
     assert "scale up" in startups.keywords
 
+    economics = next(
+        domain
+        for domain in domains
+        if domain.id == "economics_macroeconomics"
+    )
+    assert "tax rises" in economics.keywords
+
     global_politics = next(
         domain
         for domain in domains
         if domain.id == "global_politics_geopolitics"
     )
     assert "tariffs" in global_politics.keywords
+    assert "state sponsors of terrorism" in global_politics.keywords
+    assert "trade dispute" in global_politics.keywords
 
     startups = next(
         domain
@@ -89,6 +98,8 @@ def test_load_valid_domain_configuration() -> None:
         if domain.id == "startups_venture_capital"
     )
     assert "startup" not in startups.keywords
+    assert "pre-series" in startups.keywords
+    assert "funding deals" in startups.keywords
 
     financial_markets = next(
         domain
