@@ -141,6 +141,7 @@ sources:
     geographic_scope:
       - Global
     active: true
+
   - id: ispi_geoeconomics
     name: ISPI Geoeconomics
     feed_url: https://www.ispionline.it/it/ricerca/geoeconomia/feed
@@ -152,4 +153,15 @@ sources:
       - Global
       - Europe
       - Italy
+    active: true
+
+  - id: european_investment_fund
+    name: European Investment Fund
+    feed_url: https://www.eif.org/press/release/index.rss
+    source_type: rss
+    source_tier: 1
+    default_domains: []
+    language: en
+    geographic_scope:
+      - Europe
     active: true

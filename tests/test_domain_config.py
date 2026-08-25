@@ -73,6 +73,8 @@ def test_load_valid_domain_configuration() -> None:
     )
     assert "early-stage fund" in startups.keywords
     assert "funding market" in startups.keywords
+    assert "early-stage" in startups.keywords
+    assert "scale up" in startups.keywords
 
     global_politics = next(
         domain
@@ -101,6 +103,8 @@ def test_load_valid_domain_configuration() -> None:
     assert "Federal Open Market Committee" in financial_markets.keywords
     assert "discount rate" in financial_markets.keywords
     assert "mercati dei capitali" in financial_markets.keywords
+    assert "securitisation" in financial_markets.keywords
+    assert "sme finance" in financial_markets.keywords
 
     milan_bocconi = next(
         domain

@@ -48,7 +48,7 @@ def test_load_valid_source_configuration() -> None:
 
     sources = load_sources(CONFIG_PATH)
 
-    assert len(sources) == 13
+    assert len(sources) == 14
 
     assert tuple(source.id for source in sources) == (
         "bbc_world",
@@ -64,6 +64,7 @@ def test_load_valid_source_configuration() -> None:
         "lavoce_imprese",
         "google_deepmind_news",
         "ispi_geoeconomics",
+        "european_investment_fund",
     )
 
     openai = next(

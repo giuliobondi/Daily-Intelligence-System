@@ -88,6 +88,8 @@ domains:
       - incubator
       - venture fund
       - portfolio company
+      - early-stage
+      - scale up
     active: true
 
   - id: europe_eu
@@ -122,6 +124,8 @@ domains:
       - Federal Open Market Committee
       - discount rate
       - mercati dei capitali
+      - securitisation
+      - sme finance
     active: true
 
   - id: milan_bocconi_ecosystem
