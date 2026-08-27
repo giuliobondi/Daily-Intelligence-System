@@ -1,0 +1,22 @@
+{
+  "active_sources": 14,
+  "collection_window": [
+    "2026-08-26T15:08:24.217531+00:00",
+    "2026-08-27T15:08:24.217531+00:00"
+  ],
+  "completed_at": "2026-08-27T15:08:24.217531+00:00",
+  "displayed_items": 10,
+  "duplicate_items": 2,
+  "empty_sources": 0,
+  "failed_sources": 1,
+  "invalid_items": 0,
+  "raw_items": 1457,
+  "run_id": "20260827T150824Z",
+  "started_at": "2026-08-27T15:08:24.217531+00:00",
+  "status": "degraded",
+  "successful_sources": 13,
+  "valid_items": 1457,
+  "warnings": [
+    "Source ispi_geoeconomics failed: Remote feed timed out after 10 seconds: https://www.ispionline.it/it/ricerca/geoeconomia/feed"
+  ]
+}
