@@ -1,0 +1,20 @@
+{
+  "active_sources": 14,
+  "collection_window": [
+    "2026-08-28T10:59:51.748529+00:00",
+    "2026-08-29T10:59:51.748529+00:00"
+  ],
+  "completed_at": "2026-08-29T10:59:51.748529+00:00",
+  "displayed_items": 7,
+  "duplicate_items": 1,
+  "empty_sources": 0,
+  "failed_sources": 0,
+  "invalid_items": 0,
+  "raw_items": 1463,
+  "run_id": "20260829T105951Z",
+  "started_at": "2026-08-29T10:59:51.748529+00:00",
+  "status": "success",
+  "successful_sources": 14,
+  "valid_items": 1463,
+  "warnings": []
+}
