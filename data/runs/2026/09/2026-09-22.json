@@ -1,0 +1,23 @@
+{
+  "active_sources": 14,
+  "collection_window": [
+    "2026-09-21T09:27:42.542305+00:00",
+    "2026-09-22T09:27:42.542305+00:00"
+  ],
+  "completed_at": "2026-09-22T09:27:42.542305+00:00",
+  "displayed_items": 13,
+  "duplicate_items": 3,
+  "empty_sources": 0,
+  "failed_sources": 1,
+  "invalid_items": 1,
+  "raw_items": 1535,
+  "run_id": "20260922T092742Z",
+  "started_at": "2026-09-22T09:27:42.542305+00:00",
+  "status": "degraded",
+  "successful_sources": 13,
+  "valid_items": 1534,
+  "warnings": [
+    "Source istat_press_en failed: Remote feed timed out after 10 seconds: https://www.istat.it/en/documents/press-release/feed/",
+    "1 invalid record(s) excluded"
+  ]
+}
