@@ -1,0 +1,22 @@
+{
+  "active_sources": 14,
+  "collection_window": [
+    "2026-10-03T10:44:17.034078+00:00",
+    "2026-10-04T10:44:17.034078+00:00"
+  ],
+  "completed_at": "2026-10-04T10:44:17.034078+00:00",
+  "displayed_items": 1,
+  "duplicate_items": 0,
+  "empty_sources": 0,
+  "failed_sources": 0,
+  "invalid_items": 1,
+  "raw_items": 1561,
+  "run_id": "20261004T104417Z",
+  "started_at": "2026-10-04T10:44:17.034078+00:00",
+  "status": "degraded",
+  "successful_sources": 14,
+  "valid_items": 1560,
+  "warnings": [
+    "1 invalid record(s) excluded"
+  ]
+}
