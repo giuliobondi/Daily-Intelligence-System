@@ -1,0 +1,24 @@
+{
+  "active_sources": 14,
+  "collection_window": [
+    "2026-10-28T11:43:12.376598+00:00",
+    "2026-10-29T11:43:12.376598+00:00"
+  ],
+  "completed_at": "2026-10-29T11:43:12.376598+00:00",
+  "displayed_items": 10,
+  "duplicate_items": 5,
+  "empty_sources": 0,
+  "failed_sources": 3,
+  "invalid_items": 0,
+  "raw_items": 1511,
+  "run_id": "20261029T114312Z",
+  "started_at": "2026-10-29T11:43:12.376598+00:00",
+  "status": "degraded",
+  "successful_sources": 11,
+  "valid_items": 1511,
+  "warnings": [
+    "Source tech_eu failed: Remote feed returned HTTP 403: https://tech.eu/feed/",
+    "Source mimit_news failed: Could not retrieve remote feed 'https://www.mimit.gov.it/index.php/it/notizie-stampa?format=feed&type=rss': timed out",
+    "Source google_deepmind_news failed: Could not parse source 'google_deepmind_news': <unknown>:2:0: not well-formed (invalid token)"
+  ]
+}
