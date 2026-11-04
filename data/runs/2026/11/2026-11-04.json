@@ -1,0 +1,23 @@
+{
+  "active_sources": 14,
+  "collection_window": [
+    "2026-11-03T13:15:01.473137+00:00",
+    "2026-11-04T13:15:01.473137+00:00"
+  ],
+  "completed_at": "2026-11-04T13:15:01.473137+00:00",
+  "displayed_items": 12,
+  "duplicate_items": 0,
+  "empty_sources": 0,
+  "failed_sources": 1,
+  "invalid_items": 2,
+  "raw_items": 1653,
+  "run_id": "20261104T131501Z",
+  "started_at": "2026-11-04T13:15:01.473137+00:00",
+  "status": "degraded",
+  "successful_sources": 13,
+  "valid_items": 1651,
+  "warnings": [
+    "Source mimit_news failed: Could not retrieve remote feed 'https://www.mimit.gov.it/index.php/it/notizie-stampa?format=feed&type=rss': timed out",
+    "2 invalid record(s) excluded"
+  ]
+}
